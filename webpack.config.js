@@ -9,7 +9,7 @@ var config = {
   output: {
     path: BUILD_DIR,
     filename: 'bundle.js',
-    publicpath: '/'
+    publicPath: '/'
   },
   devtool: 'source-map',
   devServer: {
@@ -22,9 +22,9 @@ var config = {
       {
         test: /\.jsx?/,
         include: APP_DIR,
-        loader: 'babel',
+        loader: 'babel-loader',
         query: {
-          presets: ['es2016', 'react']
+          presets: ['env', 'react']
         }
       }
     ]
