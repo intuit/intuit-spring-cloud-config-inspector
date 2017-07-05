@@ -1,0 +1,23 @@
+{
+  "name": "my-first-app",
+  "version": "1.0.0",
+  "description": "My First App",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.intuit.com:ASTEIN/my-first-app.git"
+  },
+  "author": "Alexi Stein",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^15.6.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-loader": "^7.1.1",
+    "webpack": "^3.0.0"
+  }
+}
