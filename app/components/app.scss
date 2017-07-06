@@ -1,0 +1,32 @@
+$text-color: blue;
+
+.custom {
+  color: $text-color;
+}
+
+.app-appear {
+  opacity: 0.01;
+
+  &-active {
+    opacity: 1;
+    transition: opacity .5s ease-in;
+  }
+}
+
+.app-enter {
+  opacity: 0.01;
+
+  &-active {
+    opacity: 1;
+    transition: opacity 1s ease-in;
+  }
+}
+
+.app-leave {
+  opacity: 1;
+
+  &-active {
+    opacity: 0;
+    transition: opacity 500ms ease-out;
+  }
+}

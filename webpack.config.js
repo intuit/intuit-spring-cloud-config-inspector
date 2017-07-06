@@ -4,7 +4,9 @@ var path = require('path');
 var BUILD_DIR = path.resolve(__dirname + '/build');
 var APP_DIR = path.resolve(__dirname + '/app');
 
-var config = {
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+module.exports = {
   entry: APP_DIR + '/index.jsx',
   output: {
     path: BUILD_DIR,
@@ -26,9 +28,18 @@ var config = {
         query: {
           presets: ['env', 'react']
         }
+      },
+      {
+        test:/\.(sass|scss)$/,
+        loader:ExtractTextPlugin.extract(['css-loader','sass-loader'])
+      },
+      {
+        test:/\.css$/,
+        loader:ExtractTextPlugin.extract(['css-loader'])
       }
     ]
-  }
+  },
+  plugins:[
+    new ExtractTextPlugin('app.css')
+  ]
 };
-
-module.exports = config;
