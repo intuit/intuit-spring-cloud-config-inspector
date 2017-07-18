@@ -3,14 +3,16 @@ import _ from 'lodash'
 
 import {Dropdown, Input} from 'semantic-ui-react'
 
-const source = _.times(5, (index) => ({
+const source = _.times(10, (index) => ({
   key: index,
-  text: `title ${index}`,
-  value: `title ${index}`,
+  text: `property ${index}`,
+  value: `property ${index}`,
   description: `description ${index}`
 }))
 
 export default class PropSearch extends React.Component {
+  state = {source}
+
   componentWillMount() {
     this.resetComponent()
   }
@@ -35,16 +37,31 @@ export default class PropSearch extends React.Component {
     }, 500)
   }
 
+  handleAddition = (e, {value}) => {
+    let label = { color:'red', content:'Not found', pointing:'right' }
+    this.setState({
+      source: [{text:value, value, label}, ...this.state.source]
+    })
+  }
+
+  renderLabel = (item, index, props) => {
+    if (item.label) return {color:'red', content:`Not found: ${item.text}`}
+    return {content:item.text}
+  }
+
   render() {
     const { isLoading, value, results } = this.state
 
     return (
       <Dropdown
-        selection search multiple fluid
+        selection search multiple fluid scrolling
         icon='search'
         placeholder='properties...'
-        options={source}
+        options={this.state.source}
         loading={isLoading}
+        allowAdditions additionLabel='Custom: '
+        onAddItem={this.handleAddition}
+        renderLabel={this.renderLabel}
         {...this.props}
       />
     )
