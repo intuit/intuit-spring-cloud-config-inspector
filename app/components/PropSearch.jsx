@@ -38,7 +38,7 @@ export default class PropSearch extends React.Component {
   }
 
   handleAddition = (e, {value}) => {
-    let label = { color:'red', content:'Not found', pointing:'right' }
+    let label = { color:'red', content:'Not found' }
     this.setState({
       source: [{text:value, value, label}, ...this.state.source]
     })

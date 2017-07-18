@@ -1,7 +1,7 @@
 {
-  "name": "my-first-app",
+  "name": "config-inspector",
   "version": "1.0.0",
-  "description": "My First App",
+  "description": "Config Inspector",
   "main": "index.js",
   "scripts": {
     "build": "webpack",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.intuit.com:ASTEIN/my-first-app.git"
+    "url": "git@github.intuit.com:services-config/config-inspector.git"
   },
   "author": "Alexi Stein",
   "license": "ISC",
