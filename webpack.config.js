@@ -26,7 +26,8 @@ module.exports = {
         include: APP_DIR,
         loader: 'babel-loader',
         query: {
-          presets: ['env', 'react']
+          presets: ['env', 'react'],
+          plugins: ['transform-class-properties']
         }
       },
       {
@@ -35,7 +36,55 @@ module.exports = {
       },
       {
         test:/\.css$/,
-        loader:ExtractTextPlugin.extract(['css-loader'])
+        loader:ExtractTextPlugin.extract({fallback: 'style-loader', use: ['css-loader']})
+      },
+      {
+        test:/.svg$/,
+        loader:'url-loader',
+        query:{
+          mimetype:'image/svg+xml',
+          name:'./~/semantic-ui-css/themes/default/assets/fonts/icons.svg'
+         }
+      },
+      {
+        test:/.woff$/,
+        loader:'url-loader',
+        query:{
+          mimetype:'application/font-woff',
+          name:'./~/semantic-ui-css/themes/default/assets/fonts/icons.woff'
+        }
+      },
+      {
+        test:/.woff2$/,
+        loader:'url-loader',
+        query:{
+          mimetype:'application/font-woff2',
+          name:'./~/semantic-ui-css/themes/default/assets/fonts/icons.woff2'
+        }
+      },
+      {
+        test:/.[ot]tf$/,
+        loader:'url-loader',
+        query:{
+          mimetype:'application/octet-stream',
+          name:'./~/semantic-ui-css/themes/default/assets/fonts/icons.ttf'
+        }
+      },
+      {
+        test:/.eot$/,
+        loader:'url-loader',
+        query:{
+          mimetype:'application/vnd.ms-fontobject',
+          name:'./~/semantic-ui-css/themes/default/assets/fonts/icons.eot'
+        }
+      },
+      {
+        test:/.png$/,
+        loader:'url-loader',
+        query:{
+          mimetype:'image/png',
+          name:'./~/semantic-ui-css/themes/default/assets/images/flags.png'
+        }
       }
     ]
   },
