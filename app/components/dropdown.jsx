@@ -2,7 +2,6 @@ import React from 'react'
 import _ from 'lodash'
 
 import {Accordion} from 'semantic-ui-react'
-import 'semantic-ui-css/components/accordion.min.css'
 
 export default class DropDown extends React.Component {
   render() {

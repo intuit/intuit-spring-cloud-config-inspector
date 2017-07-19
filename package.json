@@ -4,6 +4,7 @@
   "description": "Config Inspector",
   "main": "index.js",
   "scripts": {
+    "test": "jest",
     "build": "webpack",
     "dev": "webpack-dev-server"
   },
@@ -13,6 +14,12 @@
   },
   "author": "Alexi Stein",
   "license": "ISC",
+  "jest": {
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/app/__mocks__/fileMock.js",
+      "\\.(css|scss)$": "<rootDir>/app/__mocks__/styleMock.js"
+    }
+  },
   "dependencies": {
     "react": "^15.6.1",
     "react-addons-css-transition-group": "^15.6.0",
@@ -21,18 +28,22 @@
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
+    "babel-core": "^6.25.0",
+    "babel-jest": "^20.0.3",
     "babel-loader": "^7.1.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "babel-preset-es2016": "^6.24.1",
     "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
     "bootstrap": "^3.3.7",
     "css-loader": "^0.28.4",
     "extract-text-webpack-plugin": "^3.0.0",
-    "faker": "^4.1.0",
     "file-loader": "^0.11.2",
+    "jest": "^20.0.4",
     "node-sass": "^4.5.3",
     "react-dom": "^15.6.1",
+    "regenerator-runtime": "^0.10.5",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.18.2",
     "url-loader": "^0.5.9",

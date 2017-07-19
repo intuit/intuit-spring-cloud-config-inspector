@@ -1,15 +1,18 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
+/* component imports */
 import DropDown from './dropdown.jsx';
 import PropSearch from './PropSearch.jsx';
 import UserInputs from './UserInputs.jsx';
 import UserControls from './UserControls.jsx';
 import LabelMenu from './LabelMenu.jsx';
+import Views from './Views.jsx'
+import TopMenu from './TopMenu.jsx'
 
 import './app.scss';
 
-import {Grid, Segment, Header, Divider} from 'semantic-ui-react';
+import {Grid} from 'semantic-ui-react';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -30,6 +33,7 @@ export default class App extends React.Component {
         transitionAppearTimeout={500}
         transitionEnterTimeout={500}
         transitionLeaveTimeout={500}>
+        <TopMenu />
         <div className='custom'>
           <Grid stackable columns='equal'>
             <Grid.Row>
@@ -49,11 +53,7 @@ export default class App extends React.Component {
             </Grid.Row>
             <Grid.Row>
               <Grid.Column stretched>
-                <Segment>
-                  Version: af398de444416bb4cd867768b5a363a79b76f5e2
-                  <Divider />
-                  A bunch of code
-                </Segment>
+                <Views />
               </Grid.Column>
               <LabelMenu />
             </Grid.Row>
