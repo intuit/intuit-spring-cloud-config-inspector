@@ -20,12 +20,6 @@ export default class App extends React.Component {
   }
 
   render() {
-    const list = [
-      'App Name = my_app',
-      'Version = v1.0.0',
-      'Label = label'
-    ]
-
     return (
       <ReactCSSTransitionGroup
         transitionName='app'
