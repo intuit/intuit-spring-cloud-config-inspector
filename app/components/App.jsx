@@ -17,6 +17,19 @@ import {Grid} from 'semantic-ui-react';
 export default class App extends React.Component {
   constructor(props) {
     super(props)
+    this.state = {
+      inputData: {'url': '{url}', 'app': '{app}', 'profiles': 'default', 'label': 'master'}
+    }
+  }
+
+  getInputData = (field, data) => {
+    const inputData = this.state.inputData;
+    // If they clear input set back to template
+    console.log(data)
+    inputData[field] = data == '' ? `{${field}}` : data
+    this.setState({
+      inputData
+    })
   }
 
   render() {
@@ -32,12 +45,12 @@ export default class App extends React.Component {
           <Grid stackable columns='equal'>
             <Grid.Row>
               <Grid.Column>
-                <UserInputs />
+                <UserInputs transferData={this.getInputData} />
               </Grid.Column>
             </Grid.Row>
             <Grid.Row>
               <Grid.Column>
-                <UserControls />
+                <UserControls inputData={this.state.inputData} />
               </Grid.Column>
             </Grid.Row>
             <Grid.Row>

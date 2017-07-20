@@ -14,7 +14,7 @@ export default class App extends React.Component {
   }
 
   render() {
-
+    const {url, app, profiles, label} = this.props.inputData;
     return (
       <Segment>
         <Grid columns='equal' stackable>
@@ -23,7 +23,7 @@ export default class App extends React.Component {
               <p>Metadata URL</p>
             </Grid.Column>
             <Grid.Column width={10}>
-              <p>https://config-qal.api.intuit.net/my_app/default/master</p>
+              <p>{url}/{app}/{profiles.toString()}/{label}</p>
             </Grid.Column>
             <Grid.Column>
               <Button fluid content='Metadata' />
@@ -35,7 +35,7 @@ export default class App extends React.Component {
             </Grid.Column>
             <Grid.Column width={10}>
               <span>
-                https://config-qal.api.intuit.net/master/my_app-default
+                {url}/{label}/{app}-{profiles.toString()}
                 <Dropdown
                   inline options={extOptions}
                   defaultValue={extOptions[0].text}

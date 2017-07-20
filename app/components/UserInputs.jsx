@@ -1,25 +1,27 @@
 import React from 'react';
 
-import {Input, Form, Grid, Header, Dropdown} from 'semantic-ui-react';
+import {Form} from 'semantic-ui-react';
 
 const options = [
-  { key: '1', text: 'P1', value: 'P1' },
-  { key: '2', text: 'P2', value: 'P2' },
-  { key: '3', text: 'P3', value: 'P3' },
+  { key: 'P1', text: 'P1', value: 'P1' },
+  { key: 'P2', text: 'P2', value: 'P2' },
+  { key: 'P3', text: 'P3', value: 'P3' },
 ]
 
 export default class UserInputs extends React.Component {
-  state = {options}
+  state = {options, index: 0}
 
   constructor(props) {
     super(props)
   }
 
   handleAddition = (e, {value}) => {
-    let label = { color:'red', content:'Not found' }
-    this.setState({
-      options: [{text:value, value, label}, ...this.state.options]
-    })
+    if (!this.state.options.find( (option) => option.value === value )) {
+      let label = { color:'red', content:'Not found' }
+      this.setState({
+        options: [{text:value, value, label}, ...this.state.options]
+      })
+    }
   }
 
   renderLabel = (item, index, props) => {
@@ -27,18 +29,35 @@ export default class UserInputs extends React.Component {
     return {content:item.text}
   }
 
+  handleURLChange = (e, {value}) => {
+    this.props.transferData('url', value)
+  }
+
+  handleAppChange = (e, {value}) => {
+    this.props.transferData('app', value)
+  }
+
+  handleLabelChange = (e, {value}) => {
+    this.props.transferData('label', value)
+  }
+
+  handleProfileChange = (e, {value}) => {
+    this.props.transferData('profiles', value)
+  }
+
   render() {
     return (
       <Form>
         <Form.Group widths='equal'>
-          <Form.Field control={Input} label='Config URL' placeholder='config url...' />
-          <Form.Field control={Input} label='App Name' placeholder='app name...' />
-          <Form.Field control={Dropdown} label='Profiles' placeholder='profiles...'
+          <Form.Input onChange={this.handleURLChange} label='Config URL' placeholder='config url...' />
+          <Form.Input onChange={this.handleAppChange} label='App Name' placeholder='app name...' />
+          <Form.Dropdown label='Profiles' placeholder='profiles...'
             fluid multiple search selection scrolling
             options={this.state.options}
             allowAdditions additionLabel='Add: ' onAddItem={this.handleAddition}
-            renderLabel={this.renderLabel} />
-          <Form.Field control={Input} label='Label' placeholder='label...' defaultValue='master' />
+            renderLabel={this.renderLabel}
+            onChange={this.handleProfileChange} />
+          <Form.Input onChange={this.handleLabelChange} label='Label' placeholder='label...' defaultValue='master' />
         </Form.Group>
       </Form>
     )
