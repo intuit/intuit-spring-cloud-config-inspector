@@ -19,7 +19,8 @@ export default class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      inputData: {'url': 'https://config.api.intuit.com/v2', 'app': '{app}', 'profiles': 'default', 'label': 'master'}
+      inputData: {'url': 'https://config.api.intuit.com/v2', 'app': '{app}', 'profiles': 'default', 'label': 'master'},
+      headers: false
     }
   }
 
@@ -32,7 +33,14 @@ export default class App extends React.Component {
     })
   }
 
+  toggleHeaders = () => {
+    this.setState({
+      header: !(this.state.header)
+    })
+  }
+
   render() {
+    const { header } = this.state
     return (
       <div>
         <ReactCSSTransitionGroup
@@ -47,12 +55,14 @@ export default class App extends React.Component {
               <Grid stackable columns='equal'>
                 <Grid.Row>
                   <Grid.Column>
-                    <UserInputs transferData={this.getInputData} />
+                    <UserInputs toggle={header}
+                      transferData={this.getInputData}
+                      toggleHeaders={this.toggleHeaders} />
                   </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
                   <Grid.Column>
-                    <Headers />
+                    <Headers show={header} />
                   </Grid.Column>
                 </Grid.Row>
               </Grid>

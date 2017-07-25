@@ -42,28 +42,30 @@ export default class Header extends React.Component {
 
   render() {
     // get an array of just the rows (no keys)
-    var rows = this.state.rows.map((r) => r.row)
+    if (this.props.show) {
+      var rows = this.state.rows.map((r) => r.row)
+      return (
+        <Table columns={3}>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell width={7}>Keys</Table.HeaderCell>
+              <Table.HeaderCell width={7}>Values</Table.HeaderCell>
+              <Table.HeaderCell />
+            </Table.Row>
+          </Table.Header>
 
-    return (
-      <Table columns={3}>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell width={7}>Keys</Table.HeaderCell>
-            <Table.HeaderCell width={7}>Values</Table.HeaderCell>
-            <Table.HeaderCell />
-          </Table.Row>
-        </Table.Header>
+          <Table.Body>{rows}</Table.Body>
 
-        <Table.Body>{rows}</Table.Body>
+          <Table.Footer>
+            <Table.Row>
+              <Table.HeaderCell colSpan='3'>
+                <Button width={1} onClick={this.handleClick} fluid>Add key-value pair</Button>
+              </Table.HeaderCell>
+            </Table.Row>
+          </Table.Footer>
+        </Table>
+      )
+    } else return null
 
-        <Table.Footer>
-          <Table.Row>
-            <Table.HeaderCell colSpan='3'>
-              <Button width={1} onClick={this.handleClick} fluid>Add key-value pair</Button>
-            </Table.HeaderCell>
-          </Table.Row>
-        </Table.Footer>
-      </Table>
-    )
   }
 }

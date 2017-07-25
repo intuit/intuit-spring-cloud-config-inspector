@@ -10,7 +10,7 @@ const options = [
 ]
 
 export default class UserInputs extends React.Component {
-  state = {options, index: 0}
+  state = {options, index: 0, button: 'Show', toggle: this.props.toggle}
 
   constructor(props) {
     super(props)
@@ -46,7 +46,18 @@ export default class UserInputs extends React.Component {
     this.props.transferData('profiles', value)
   }
 
+  handleClick = () => {
+    const toggle = !this.state.toggle
+    this.setState({
+      active: !this.state.active,
+      button: toggle ? 'Hide' : 'Show',
+      toggle
+    })
+    this.props.toggleHeaders()
+  }
+
   render() {
+    const { active, button } = this.state
     return (
       <Form>
         <Form.Group widths='equal'>
@@ -62,7 +73,7 @@ export default class UserInputs extends React.Component {
             onChange={this.handleProfileChange} />
           <Form.Input onChange={this.handleLabelChange} label='Label'
             placeholder='label...' defaultValue='master' />
-          <Form.Button label='Headers' >Show</Form.Button>
+          <Form.Button width={3} fluid toggle label='Headers' active={active} onClick={this.handleClick}>{button}</Form.Button>
         </Form.Group>
       </Form>
     )
