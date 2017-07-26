@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Form} from 'semantic-ui-react';
+import { Form, Label, Menu } from 'semantic-ui-react';
 
 const options = [
   { key: 'default', text: 'default', value: 'default' },
@@ -58,6 +58,7 @@ export default class UserInputs extends React.Component {
 
   render() {
     const { active, button } = this.state
+    const headerCount=this.props.headerCount
     return (
       <Form>
         <Form.Group widths='equal'>
@@ -73,7 +74,15 @@ export default class UserInputs extends React.Component {
             onChange={this.handleProfileChange} />
           <Form.Input onChange={this.handleLabelChange} label='Label'
             placeholder='label...' defaultValue='master' />
-          <Form.Button width={3} fluid toggle label='Headers' active={active} onClick={this.handleClick}>{button}</Form.Button>
+          <Form.Field width={2}>
+            <label>Headers</label>
+            <Menu color='blue' compact inverted>
+              <Menu.Item style={{width:'75px'}} onClick={this.handleClick} active={active}>
+                {button}
+                <Label color='red' floating>{headerCount}</Label>
+              </Menu.Item>
+            </Menu>
+          </Form.Field>
         </Form.Group>
       </Form>
     )
