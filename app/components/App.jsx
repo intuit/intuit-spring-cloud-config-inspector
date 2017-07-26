@@ -92,7 +92,7 @@ export default class App extends React.Component {
 
   render() {
     const { header, headerCount, inputData, urls } = this.state
-    
+
     return (
       <div>
         <ReactCSSTransitionGroup
@@ -110,7 +110,9 @@ export default class App extends React.Component {
                     <UserInputs toggle={header}
                       transferData={this.getInputData}
                       toggleHeaders={this.toggleHeaders}
-                      headerCount={headerCount} />
+                      headerCount={headerCount}
+                      label={inputData.label}
+                      transferData={this.getInputData} />
                   </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
@@ -134,7 +136,7 @@ export default class App extends React.Component {
                 <Grid.Column stretched>
                   <Views urls={urls} />
                 </Grid.Column>
-                <LabelMenu />
+                <LabelMenu updateLabel={this.getInputData} label={inputData.label}/>
               </Grid.Row>
             </Grid>
           </div>
