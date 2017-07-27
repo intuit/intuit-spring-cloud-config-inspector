@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import {Segment, Grid, Button, Dropdown} from 'semantic-ui-react';
 
@@ -9,6 +10,11 @@ const extOptions = [
 ]
 
 export default class App extends React.Component {
+
+  static propTypes = {
+    inputData: PropTypes.object.isRequired
+  }
+
   render() {
     const {url, app, profiles, label} = this.props.inputData;
     return (

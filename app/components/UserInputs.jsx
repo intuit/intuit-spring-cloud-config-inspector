@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 
 import { Form, Label, Menu } from 'semantic-ui-react';
 
@@ -10,7 +11,23 @@ const options = [
 ]
 
 export default class UserInputs extends React.Component {
-  state = {options, index: 0, button: 'Show', toggle: this.props.toggle}
+
+  static propTypes = {
+    toggle: PropTypes.bool.isRequired,
+    transferData: PropTypes.func.isRequired,
+    toggleHeaders: PropTypes.func.isRequired,
+    headerCount: PropTypes.number.isRequired
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      options,
+      index: 0,
+      button: 'Show',
+      toggle: this.props.toggle
+    }
+  }
 
   /**
    * Called in Profiles Dropdown

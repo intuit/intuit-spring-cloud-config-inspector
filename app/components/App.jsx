@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import PropTypes from 'prop-types';
 
 /* component imports */
 import DropDown from './dropdown.jsx';
@@ -16,6 +17,7 @@ import './app.scss';
 import {Grid} from 'semantic-ui-react';
 
 export default class App extends React.Component {
+  
   /**
    * Sets default values of inputData, headerCount to zero and headers
    * (show) to false.
@@ -29,7 +31,7 @@ export default class App extends React.Component {
         'profiles': 'default',
         'label': 'master'
       },
-      headers: false,
+      header: false,
       headerCount: 0
     }
   }

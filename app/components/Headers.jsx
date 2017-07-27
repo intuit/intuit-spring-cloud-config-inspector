@@ -1,8 +1,24 @@
 import React from 'react'
+import PropTypes from 'prop-types';
 import { Table, Input, Button } from 'semantic-ui-react'
 
 export default class Header extends React.Component {
-  state = { index:0, data:{} }
+
+  static propTypes = {
+    show: PropTypes.bool.isRequired,
+    updateHeaderCount: PropTypes.func.isRequired
+  }
+
+  /**
+   * Sets default values of index to zero and data to empty object.
+   */
+  constructor() {
+    super()
+    this.state = {
+      index:0,
+      data:{}
+    }
+  }
 
   /**
    * Called when user changes input in one of the headers fields.
