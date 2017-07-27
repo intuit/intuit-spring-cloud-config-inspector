@@ -12,10 +12,14 @@ const options = [
 export default class UserInputs extends React.Component {
   state = {options, index: 0, button: 'Show', toggle: this.props.toggle}
 
-  constructor(props) {
-    super(props)
-  }
-
+  /**
+   * Called in Profiles Dropdown
+   * When user adds a profile that does not exist in search
+   * results, add label 'Not found' to new input
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {string} value - taken from dropdown props
+   */
   handleAddition = (e, {value}) => {
     if (!this.state.options.find( (option) => option.value === value )) {
       let label = { color:'red', content:'Not found' }
@@ -25,27 +29,69 @@ export default class UserInputs extends React.Component {
     }
   }
 
+  /**
+   * Called in Profiles Dropdown
+   * item.label returns true if the item (profile input) was
+   * an addition. If true add label to option in Dropdown menu.
+   *
+   * @param {object} item - A currently active dropdown item.
+   * @param {number} index - The current index.
+   * @param {object} props - The default props for an active item Label.
+   * @returns Shorthand for a Label.
+   */
   renderLabel = (item, index, props) => {
     if (item.label) return {color:'red', content:`Not found: ${item.text}`}
     return {content:item.text}
   }
 
+  /**
+   * Change the 'url' in parent App component using
+   * callback function whenever input field changes
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {string} value - current input
+   */
   handleURLChange = (e, {value}) => {
     this.props.transferData('url', value)
   }
 
+  /**
+   * Change the 'app' in parent App component using
+   * callback function whenever input field changes
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {string} value - current input
+   */
   handleAppChange = (e, {value}) => {
     this.props.transferData('app', value)
   }
 
+  /**
+   * Change the label in parent App component using
+   * callback function whenever input field changes
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {string} value - current input
+   */
   handleLabelChange = (e, {value}) => {
     this.props.transferData('label', value)
   }
 
+  /**
+   * Change the profiles array in parent App component
+   * using callback function whenever input field changes
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {string} value - current input array
+   */
   handleProfileChange = (e, {value}) => {
     this.props.transferData('profiles', value)
   }
 
+  /**
+   * Called from Headers button, switches between hide and show
+   * and calls toggleHeaders to update parent.
+   */
   handleClick = () => {
     const toggle = !this.state.toggle
     this.setState({

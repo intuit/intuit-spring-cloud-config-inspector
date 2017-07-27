@@ -4,11 +4,21 @@ import { Table, Input, Button } from 'semantic-ui-react'
 export default class Header extends React.Component {
   state = { index:0, data:{} }
 
+  /**
+   * Called when user changes input in one of the headers fields.
+   * Changes entry in this.state.data accordingly, creates new
+   * entry if new field.
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {object} object - Input object. Classname is formatted
+   * 'key {index}' or 'value {index}'. Value is current string input.
+   */
   handleHeaderChange = (e, object) => {
     const data = this.state.data
     const [label, key] = object.className.split(' ')
-    if (data[key]) data[key][label] = object.value
-    else {
+    if (data[key]) {
+      data[key][label] = object.value
+    } else {
       const obj = {key: object.value}
       data[key] = obj
     }
@@ -17,6 +27,15 @@ export default class Header extends React.Component {
     })
   }
 
+  /**
+   * Called when a delete button is clicked. Finds key-value pair in
+   * data based on className of button and deletes it. Decreases
+   * Header count and calls updateHeaderCount to send update to parent.
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {object} object - Button object. className is index
+   * of associated key-value pair
+   */
   handleDelete = (e, object) => {
     const data = this.state.data
     delete data[object.className]
@@ -28,6 +47,11 @@ export default class Header extends React.Component {
     })
   }
 
+  /**
+   * Called when 'Add new key-value pair' clicked. Adds empty pair to
+   * data and increments count. Calls updateHeaderCount to send update
+   * to parent. Increments index.
+   */
   handleClick = () => {
     const key = this.state.index
     const data = this.state.data

@@ -9,10 +9,6 @@ const extOptions = [
 ]
 
 export default class App extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     const {url, app, profiles, label} = this.props.inputData;
     return (
