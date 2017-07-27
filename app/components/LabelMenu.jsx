@@ -12,6 +12,12 @@ const tags = [
 ]
 
 export default class LabelMenu extends React.Component {
+  /**
+   * Sets initial state, branch to master and activeIndex to
+   * branch tab
+   *
+   * @param {object} props - updateLabel and label
+   */
   constructor(props) {
     super()
     this.state = {
@@ -21,6 +27,14 @@ export default class LabelMenu extends React.Component {
     }
   }
 
+  /**
+   * Update branch and tag values in response to change
+   * in user input label field. Change active tab if
+   * applicable.
+   *
+   * @param {string} label - taken from props, current label
+   * value
+   */
   componentWillReceiveProps({label}) {
     const branchKeys = branches.map(b => b.key)
     const tagKeys = tags.map(t => t.key)
@@ -41,6 +55,12 @@ export default class LabelMenu extends React.Component {
     }
   }
 
+  /**
+   * Creates or repaints the branch dropdown menu. Sets the
+   * value to the current value as defined in the state.
+   *
+   * @returns Tab Pane containing Branches Dropdown
+   */
   createBranches = () => (
     <Tab.Pane>
       <Dropdown compact fluid scrolling onChange={this.handleBranchChange}
@@ -49,6 +69,12 @@ export default class LabelMenu extends React.Component {
     </Tab.Pane>
   )
 
+  /**
+   * Creates or repaints the tag dropdown menu. Sets the
+   * value to the current value as defined in the state.
+   *
+   * @returns Tab Pane containing Tags Dropdown
+   */
   createTags = () => (
     <Tab.Pane>
       <Dropdown compact fluid  scrolling onChange={this.handleTagChange}
@@ -57,6 +83,13 @@ export default class LabelMenu extends React.Component {
     </Tab.Pane>
   )
 
+  /**
+   * Changes the value of the current branch and calls the
+   * callback function to update parent App component
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {string} value - branch selection
+   */
   handleBranchChange = (e, {value}) => {
     this.setState({
       branch: value,
@@ -65,6 +98,13 @@ export default class LabelMenu extends React.Component {
     this.props.updateLabel('label', value)
   }
 
+  /**
+   * Changes the value of the current tag and calls the
+   * callback function to update parent App component
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {string} value - tag selection
+   */
   handleTagChange = (e, {value}) => {
     this.setState({
       branch: null,
@@ -73,6 +113,9 @@ export default class LabelMenu extends React.Component {
     this.props.updateLabel('label', value)
   }
 
+  /**
+   * Changes the active tab.
+   */
   handleTabChange = (e, {activeIndex}) => this.setState({ activeIndex })
 
   render() {
