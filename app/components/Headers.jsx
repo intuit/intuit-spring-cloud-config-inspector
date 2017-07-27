@@ -22,8 +22,7 @@ export default class Header extends React.Component {
 
   /**
    * Called when user changes input in one of the headers fields.
-   * Changes entry in this.state.data accordingly, creates new
-   * entry if new field.
+   * Changes entry in this.state.data accordingly. Turns of negative.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} object - Input object. Classname is formatted
@@ -32,12 +31,9 @@ export default class Header extends React.Component {
   handleHeaderChange = (e, object) => {
     const data = this.state.data
     const [label, key] = object.className.split(' ')
-    if (data[key]) {
-      data[key][label] = object.value
-    } else {
-      const obj = {key: object.value}
-      data[key] = obj
-    }
+
+    data[key][label] = {value: object.value, neg: false}
+
     this.setState({
       data
     })
@@ -64,7 +60,8 @@ export default class Header extends React.Component {
   }
 
   /**
-   * Called when 'Add new key-value pair' clicked. Adds empty pair to
+   * Called when 'Add new key-value pair' clicked. If field is not
+   * filled turns box red and prevents add. Otherwise adds empty pair to
    * data and increments count. Calls updateHeaderCount to send update
    * to parent. Increments index.
    */
@@ -72,16 +69,35 @@ export default class Header extends React.Component {
     const key = this.state.index
     const data = this.state.data
 
-    // Add new empty row with index
-    data[key] = {key: '', value: ''}
+    let empty = false
 
-    const newCount = Object.keys(data).length
-    this.props.updateHeaderCount(newCount)
+    for (var pair in data) {
+      if (!data[pair].key.value) {
+        data[pair].key.neg = true
+        empty = true
+      }
+      if (!data[pair].value.value) {
+        data[pair].value.neg = true
+        empty = true
+      }
+    }
 
-    this.setState({
-      index: key + 1,
-      data
-    })
+    if (empty) {
+      this.setState({
+        data
+      })
+    } else {
+      // Add new empty row with index
+      data[key] = {key: {value: '', neg: false}, value: {value: '', neg: false}}
+
+      const newCount = Object.keys(data).length
+      this.props.updateHeaderCount(newCount)
+
+      this.setState({
+        index: key + 1,
+        data
+      })
+    }
   }
 
   render() {
@@ -100,13 +116,13 @@ export default class Header extends React.Component {
           <Table.Body>
             {Object.keys(data).map(index =>
               <Table.Row key={index}>
-                <Table.Cell width={7}>
-                  <Input defaultValue={data[index].key}
+                <Table.Cell negative={data[index].key.neg} width={7}>
+                  <Input defaultValue={data[index].key.value}
                     className={`key ${index}`} fluid transparent
                     placeholder='key' onChange={this.handleHeaderChange} />
                 </Table.Cell>
-                <Table.Cell width={7}>
-                  <Input defaultValue={data[index].value}
+                <Table.Cell negative={data[index].value.neg} width={7}>
+                  <Input defaultValue={data[index].value.value}
                     className={`value ${index}`} fluid transparent
                     placeholder='value' onChange={this.handleHeaderChange} />
                 </Table.Cell>
@@ -127,7 +143,9 @@ export default class Header extends React.Component {
           </Table.Footer>
         </Table>
       )
-    } else return null
+    } else {
+      return null
+    }
 
   }
 }
