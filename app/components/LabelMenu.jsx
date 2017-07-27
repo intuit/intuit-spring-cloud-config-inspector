@@ -16,17 +16,28 @@ export default class LabelMenu extends React.Component {
     super()
     this.state = {
       branch: props.label,
-      tag: tags[0].value
+      tag: null,
+      activeIndex: 0
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    const keys = branches.map(b => b.key)
-    if (this.props.label != nextProps.label
-      && keys.includes(nextProps.label)) {
-      this.setState({
-        branch: nextProps.label
-      })
+  componentWillReceiveProps({label}) {
+    const branchKeys = branches.map(b => b.key)
+    const tagKeys = tags.map(t => t.key)
+    if (this.props.label != label) {
+      if (branchKeys.includes(label)) {
+        this.setState({
+          branch: label,
+          tag: null,
+          activeIndex: 0
+        })
+      } else if (tagKeys.includes(label)) {
+        this.setState({
+          branch: null,
+          tag: label,
+          activeIndex: 1
+        })
+      }
     }
   }
 
@@ -48,18 +59,24 @@ export default class LabelMenu extends React.Component {
 
   handleBranchChange = (e, {value}) => {
     this.setState({
-      branch: value
+      branch: value,
+      tag: null
     })
     this.props.updateLabel('label', value)
   }
 
   handleTagChange = (e, {value}) => {
     this.setState({
+      branch: null,
       tag: value
     })
+    this.props.updateLabel('label', value)
   }
 
+  handleTabChange = (e, {activeIndex}) => this.setState({ activeIndex })
+
   render() {
+    const {activeIndex} = this.state
     const panes = [
       {menuItem: 'Branches', render: this.createBranches},
       {menuItem: 'Tags', render: this.createTags}
@@ -67,7 +84,7 @@ export default class LabelMenu extends React.Component {
 
     return (
       <Grid.Column width={4}>
-        <Tab panes={panes} />
+        <Tab panes={panes} activeIndex={activeIndex} onTabChange={this.handleTabChange} />
       </Grid.Column>
     )
   }
