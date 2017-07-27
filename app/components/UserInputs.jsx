@@ -57,7 +57,9 @@ export default class UserInputs extends React.Component {
    * @returns Shorthand for a Label.
    */
   renderLabel = (item, index, props) => {
-    if (item.label) return {color:'red', content:`Not found: ${item.text}`}
+    if (item.label) {
+      return {color:'red', content:`Not found: ${item.text}`}
+    }
     return {content:item.text}
   }
 
