@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+
 import { Grid, Menu } from 'semantic-ui-react'
 
 const branches = [
@@ -17,6 +19,12 @@ const tags = [
 ]
 
 export default class LabelMenu extends React.Component {
+
+  static propTypes = {
+    updateLabel: PropTypes.func.isRequired,
+    label: PropTypes.string.isRequired
+  }
+
   /**
    * Sets initial state label to master (branch)
    *
