@@ -1,3 +1,6 @@
+$table-height: 110px;
+$view-height: $table-height * 2 + 50;
+
 .header {
   position: fixed;
   top: 0;
@@ -42,7 +45,16 @@
 .labelmenu {
   overflow-y: auto;
   overflow-x: visible;
-  max-height: 100px;
+  max-height: $table-height;
+}
+
+.view {
+  overflow-y: auto;
+  max-height: $view-height;
+}
+
+pre {
+  white-space: pre-wrap;
 }
 
 .app-appear {

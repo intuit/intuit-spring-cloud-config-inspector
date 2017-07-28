@@ -99,7 +99,7 @@ export default class LabelMenu extends React.Component {
     return (
       <Grid.Column width={4}>
         <h3>Branches</h3>
-        <Menu fluid vertical secondary className='labelmenu'>
+        <Menu fluid vertical borderless className='labelmenu'>
           {
             branches.map(item =>
               <Menu.Item key={item.key} name={item.value}
@@ -109,7 +109,7 @@ export default class LabelMenu extends React.Component {
           }
         </Menu>
         <h3>Tags</h3>
-        <Menu fluid vertical secondary className='labelmenu'>
+        <Menu fluid vertical borderless className='labelmenu'>
           {
             tags.map(item =>
               <Menu.Item key={item.key} name={item.value}
