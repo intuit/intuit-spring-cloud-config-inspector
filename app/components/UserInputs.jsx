@@ -16,7 +16,8 @@ export default class UserInputs extends React.Component {
     toggle: PropTypes.bool.isRequired,
     transferData: PropTypes.func.isRequired,
     toggleHeaders: PropTypes.func.isRequired,
-    headerCount: PropTypes.number.isRequired
+    headerCount: PropTypes.number.isRequired,
+    label: PropTypes.string.isRequired
   }
 
   constructor(props) {
@@ -128,7 +129,8 @@ export default class UserInputs extends React.Component {
 
   render() {
     const { active, button } = this.state
-    const headerCount=this.props.headerCount
+    const { headerCount, label } = this.props
+
     return (
       <Form>
         <Form.Group widths='equal'>
@@ -143,7 +145,7 @@ export default class UserInputs extends React.Component {
             renderLabel={this.renderLabel}
             onChange={this.handleProfileChange} />
           <Form.Input onChange={this.handleLabelChange} label='Label'
-            placeholder='label...' defaultValue='master' />
+            placeholder='label...' value={label} />
           <Form.Field width={2}>
             <label>Headers</label>
             <Menu color='blue' compact inverted>
