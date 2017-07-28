@@ -111,8 +111,7 @@ export default class App extends React.Component {
                       transferData={this.getInputData}
                       toggleHeaders={this.toggleHeaders}
                       headerCount={headerCount}
-                      label={inputData.label}
-                      transferData={this.getInputData} />
+                      label={inputData.label} />
                   </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
