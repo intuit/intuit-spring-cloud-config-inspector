@@ -1,69 +1,151 @@
 import React from 'react'
+import PropTypes from 'prop-types';
 import { Table, Input, Button } from 'semantic-ui-react'
 
 export default class Header extends React.Component {
-  state = { rows:[] }
 
-  newRow = (index) => {
-    return (
-      <Table.Row key={index}>
-        <Table.Cell width={7}>
-          <Input fluid transparent placeholder='key' />
-        </Table.Cell>
-        <Table.Cell width={7}>
-          <Input fluid transparent placeholder='value' />
-        </Table.Cell>
-        <Table.Cell>
-          <Button floated='right' className={index.toString()} onClick={this.handleDelete}>Delete</Button>
-        </Table.Cell>
-      </Table.Row>
-    )
+  static propTypes = {
+    show: PropTypes.bool.isRequired,
+    updateHeaderCount: PropTypes.func.isRequired
   }
 
+  /**
+   * Sets default values of index to zero and data to empty object.
+   */
+  constructor() {
+    super()
+    this.state = {
+      index:0,
+      data:{}
+    }
+  }
+
+  /**
+   * Called when user changes input in one of the headers fields.
+   * Changes entry in this.state.data accordingly. Turns of negative.
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {object} object - Input object. Classname is formatted
+   * 'key {index}' or 'value {index}'. Value is current string input.
+   */
+  handleHeaderChange = (e, object) => {
+    const data = this.state.data
+    const [label, key] = object.className.split(' ')
+
+    data[key][label] = {value: object.value, neg: false}
+
+    this.setState({
+      data
+    })
+  }
+
+  /**
+   * Called when a delete button is clicked. Finds key-value pair in
+   * data based on className of button and deletes it. Decreases
+   * Header count and calls updateHeaderCount to send update to parent.
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {object} object - Button object. className is index
+   * of associated key-value pair
+   */
   handleDelete = (e, object) => {
-    const rows = this.state.rows
-    // getting the location of the row which has a matching key with button
-    var index = rows.map( (r) => r.key ).indexOf(object.className)
-    // remove row at that location
-    rows.splice(index, 1)
+    const data = this.state.data
+    delete data[object.className]
+    const newCount = Object.keys(data).length
+
+    this.props.updateHeaderCount(newCount)
     this.setState({
-      rows
+      data
     })
   }
 
+  /**
+   * Called when 'Add new key-value pair' clicked. If field is not
+   * filled turns box red and prevents add. Otherwise adds empty pair to
+   * data and increments count. Calls updateHeaderCount to send update
+   * to parent. Increments index.
+   */
   handleClick = () => {
-    const rows = this.state.rows
-    // Add new empty row with index
-    rows.push({key:rows.length.toString(), row:this.newRow(rows.length)})
-    this.setState({
-      rows
-    })
+    const key = this.state.index
+    const data = this.state.data
+
+    let empty = false
+
+    for (var pair in data) {
+      if (!data[pair].key.value) {
+        data[pair].key.neg = true
+        empty = true
+      }
+      if (!data[pair].value.value) {
+        data[pair].value.neg = true
+        empty = true
+      }
+    }
+
+    if (empty) {
+      this.setState({
+        data
+      })
+    } else {
+      // Add new empty row with index
+      data[key] = {key: {value: '', neg: false}, value: {value: '', neg: false}}
+
+      const newCount = Object.keys(data).length
+      this.props.updateHeaderCount(newCount)
+
+      this.setState({
+        index: key + 1,
+        data
+      })
+    }
   }
 
   render() {
-    // get an array of just the rows (no keys)
-    var rows = this.state.rows.map((r) => r.row)
+    if (this.props.show) {
+      const {data} = this.state
+      return (
+        <Table columns={3}>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell width={7}>Keys</Table.HeaderCell>
+              <Table.HeaderCell width={7}>data</Table.HeaderCell>
+              <Table.HeaderCell />
+            </Table.Row>
+          </Table.Header>
 
-    return (
-      <Table columns={3}>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell width={7}>Keys</Table.HeaderCell>
-            <Table.HeaderCell width={7}>Values</Table.HeaderCell>
-            <Table.HeaderCell />
-          </Table.Row>
-        </Table.Header>
+          <Table.Body>
+            {Object.keys(data).map(index =>
+              <Table.Row key={index}>
+                <Table.Cell negative={data[index].key.neg} width={7}>
+                  <Input defaultValue={data[index].key.value}
+                    className={`key ${index}`} fluid transparent
+                    placeholder='key' onChange={this.handleHeaderChange} />
+                </Table.Cell>
+                <Table.Cell negative={data[index].value.neg} width={7}>
+                  <Input defaultValue={data[index].value.value}
+                    className={`value ${index}`} fluid transparent
+                    placeholder='value' onChange={this.handleHeaderChange} />
+                </Table.Cell>
+                <Table.Cell>
+                  <Button floated='right' className={index} onClick={this.handleDelete}>Delete</Button>
+                </Table.Cell>
+              </Table.Row>)}
+          </Table.Body>
 
-        <Table.Body>{rows}</Table.Body>
+          <Table.Footer>
+            <Table.Row>
+              <Table.HeaderCell colSpan='3'>
+                <Button width={1} onClick={this.handleClick} fluid>
+                  Add key-value pair
+                </Button>
+              </Table.HeaderCell>
+            </Table.Row>
+          </Table.Footer>
+        </Table>
+      )
+    } else {
+      return null
+    }
 
-        <Table.Footer>
-          <Table.Row>
-            <Table.HeaderCell colSpan='3'>
-              <Button width={1} onClick={this.handleClick} fluid>Add key-value pair</Button>
-            </Table.HeaderCell>
-          </Table.Row>
-        </Table.Footer>
-      </Table>
-    )
   }
 }

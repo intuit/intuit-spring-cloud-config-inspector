@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import PropTypes from 'prop-types';
 
 /* component imports */
 import DropDown from './dropdown.jsx';
@@ -16,13 +17,33 @@ import './app.scss';
 import {Grid} from 'semantic-ui-react';
 
 export default class App extends React.Component {
+  
+  /**
+   * Sets default values of inputData, headerCount to zero and headers
+   * (show) to false.
+   */
   constructor(props) {
     super(props)
     this.state = {
-      inputData: {'url': 'https://config.api.intuit.com/v2', 'app': '{app}', 'profiles': 'default', 'label': 'master'}
+      inputData: {
+        'url': 'https://config.api.intuit.com/v2',
+        'app': '{app}',
+        'profiles': 'default',
+        'label': 'master'
+      },
+      header: false,
+      headerCount: 0
     }
   }
 
+  /**
+   * Callback function passed to UserInputs. Updates inputData which
+   * is used by UserControls to generate URLs. Called when an input
+   * is changed in UserInputs.
+   *
+   * @param {string} field - inputData key (url, app, profiles, label)
+   * @param {string|array} data - input value in field
+   */
   getInputData = (field, data) => {
     const inputData = this.state.inputData;
     // If they clear input set back to template
@@ -32,7 +53,33 @@ export default class App extends React.Component {
     })
   }
 
+  /**
+   * Callback function passed to UserInputs. Updates bool header
+   * which determines whether headers table is visible or not. Called
+   * when button is clicked in UserInputs.
+   */
+  toggleHeaders = () => {
+    this.setState({
+      header: !(this.state.header)
+    })
+  }
+
+  /**
+   * Callback function passed to Headers. Updates number headerCount
+   * which determines the number of headers to be displayed above
+   * Headers button in UserInputs. Called when a header row is added
+   * or removed.
+   *
+   * @param {number} headerCount - number of header rows
+   */
+  updateHeaderCount = (headerCount) => {
+    this.setState({
+      headerCount
+    })
+  }
+
   render() {
+    const { header, headerCount } = this.state
     return (
       <div>
         <ReactCSSTransitionGroup
@@ -47,12 +94,16 @@ export default class App extends React.Component {
               <Grid stackable columns='equal'>
                 <Grid.Row>
                   <Grid.Column>
-                    <UserInputs transferData={this.getInputData} />
+                    <UserInputs toggle={header}
+                      transferData={this.getInputData}
+                      toggleHeaders={this.toggleHeaders}
+                      headerCount={headerCount} />
                   </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
                   <Grid.Column>
-                    <Headers />
+                    <Headers show={header}
+                      updateHeaderCount={this.updateHeaderCount} />
                   </Grid.Column>
                 </Grid.Row>
               </Grid>

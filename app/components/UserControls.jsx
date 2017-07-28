@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import {Segment, Grid, Button, Dropdown} from 'semantic-ui-react';
 
@@ -9,8 +10,9 @@ const extOptions = [
 ]
 
 export default class App extends React.Component {
-  constructor(props) {
-    super(props)
+
+  static propTypes = {
+    inputData: PropTypes.object.isRequired
   }
 
   render() {
