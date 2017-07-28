@@ -3,7 +3,6 @@ import React from 'react';
 import {Form} from 'semantic-ui-react';
 
 const options = [
-  { key: 'default', text: 'default', value: 'default' },
   { key: 'P1', text: 'P1', value: 'P1' },
   { key: 'P2', text: 'P2', value: 'P2' },
   { key: 'P3', text: 'P3', value: 'P3' },
@@ -50,19 +49,15 @@ export default class UserInputs extends React.Component {
     return (
       <Form>
         <Form.Group widths='equal'>
-          <Form.Input onChange={this.handleURLChange} label='Config URL'
-            placeholder='config url...' defaultValue='https://config.api.intuit.com/v2'/>
-          <Form.Input onChange={this.handleAppChange} label='App Name'
-            placeholder='app name...' />
+          <Form.Input onChange={this.handleURLChange} label='Config URL' placeholder='config url...' />
+          <Form.Input onChange={this.handleAppChange} label='App Name' placeholder='app name...' />
           <Form.Dropdown label='Profiles' placeholder='profiles...'
             fluid multiple search selection scrolling
-            options={this.state.options} defaultValue={this.state.options[0].value}
+            options={this.state.options}
             allowAdditions additionLabel='Add: ' onAddItem={this.handleAddition}
             renderLabel={this.renderLabel}
             onChange={this.handleProfileChange} />
-          <Form.Input onChange={this.handleLabelChange} label='Label'
-            placeholder='label...' defaultValue='master' />
-          <Form.Button label='Headers' >Show</Form.Button>
+          <Form.Input onChange={this.handleLabelChange} label='Label' placeholder='label...' defaultValue='master' />
         </Form.Group>
       </Form>
     )
