@@ -39,6 +39,12 @@
   text-overflow: ellipsis;
 }
 
+.labelmenu {
+  overflow-y: auto;
+  overflow-x: visible;
+  max-height: 100px;
+}
+
 .app-appear {
   opacity: 0.01;
 

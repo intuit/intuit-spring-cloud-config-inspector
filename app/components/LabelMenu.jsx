@@ -1,20 +1,24 @@
 import React from 'react'
-import { Grid, Menu, Dropdown, Tab, Select } from 'semantic-ui-react'
+import { Grid, Menu } from 'semantic-ui-react'
 
 const branches = [
   {key:'master', value: 'master', text:'master'},
-  {key:'develop', value: 'develop', text:'develop'}
+  {key:'develop', value: 'develop', text:'develop'},
+  {key:'feature', value: 'feature', text:'feature'}
 ]
 
 const tags = [
-  {key:'p', value: 'p', text:'p'},
-  {key:'o', value: 'o', text:'o'}
+  {key:'v3.4.25', value: 'v3.4.25', text:'v3.4.25'},
+  {key:'v3.4.24', value: 'v3.4.24', text:'v3.4.24'},
+  {key:'v3.4.23', value: 'v3.4.23', text:'v3.4.23'},
+  {key:'v3.4.22', value: 'v3.4.22', text:'v3.4.22'},
+  {key:'v3.4.21', value: 'v3.4.21', text:'v3.4.21'},
+  {key:'v3.4.20', value: 'v3.4.20', text:'v3.4.20'}
 ]
 
 export default class LabelMenu extends React.Component {
   /**
-   * Sets initial state, branch to master and activeIndex to
-   * branch tab
+   * Sets initial state label to master (branch)
    *
    * @param {object} props - updateLabel and label
    */
@@ -22,15 +26,13 @@ export default class LabelMenu extends React.Component {
     super()
     this.state = {
       branch: props.label,
-      tag: null,
-      activeIndex: 0
+      tag: null
     }
   }
 
   /**
    * Update branch and tag values in response to change
-   * in user input label field. Change active tab if
-   * applicable.
+   * in user input label field.
    *
    * @param {string} label - taken from props, current label
    * value
@@ -42,46 +44,16 @@ export default class LabelMenu extends React.Component {
       if (branchKeys.includes(label)) {
         this.setState({
           branch: label,
-          tag: null,
-          activeIndex: 0
+          tag: null
         })
       } else if (tagKeys.includes(label)) {
         this.setState({
           branch: null,
-          tag: label,
-          activeIndex: 1
+          tag: label
         })
       }
     }
   }
-
-  /**
-   * Creates or repaints the branch dropdown menu. Sets the
-   * value to the current value as defined in the state.
-   *
-   * @returns Tab Pane containing Branches Dropdown
-   */
-  createBranches = () => (
-    <Tab.Pane>
-      <Dropdown compact fluid scrolling onChange={this.handleBranchChange}
-        placeholder={'Select branch'} value={this.state.branch}
-        search selection options={branches} />
-    </Tab.Pane>
-  )
-
-  /**
-   * Creates or repaints the tag dropdown menu. Sets the
-   * value to the current value as defined in the state.
-   *
-   * @returns Tab Pane containing Tags Dropdown
-   */
-  createTags = () => (
-    <Tab.Pane>
-      <Dropdown compact fluid  scrolling onChange={this.handleTagChange}
-        placeholder={'Select tab'} value={this.state.tag}
-        search selection options={tags} />
-    </Tab.Pane>
-  )
 
   /**
    * Changes the value of the current branch and calls the
@@ -90,12 +62,12 @@ export default class LabelMenu extends React.Component {
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {string} value - branch selection
    */
-  handleBranchChange = (e, {value}) => {
+  handleBranchChange = (e, {name}) => {
     this.setState({
-      branch: value,
+      branch: name,
       tag: null
     })
-    this.props.updateLabel('label', value)
+    this.props.updateLabel('label', name)
   }
 
   /**
@@ -113,21 +85,31 @@ export default class LabelMenu extends React.Component {
     this.props.updateLabel('label', value)
   }
 
-  /**
-   * Changes the active tab.
-   */
-  handleTabChange = (e, {activeIndex}) => this.setState({ activeIndex })
-
   render() {
-    const {activeIndex} = this.state
-    const panes = [
-      {menuItem: 'Branches', render: this.createBranches},
-      {menuItem: 'Tags', render: this.createTags}
-    ]
+    const {branch, tag} = this.state
 
     return (
       <Grid.Column width={4}>
-        <Tab panes={panes} activeIndex={activeIndex} onTabChange={this.handleTabChange} />
+        <h3>Branches</h3>
+        <Menu fluid vertical secondary className='labelmenu'>
+          {
+            branches.map(item =>
+              <Menu.Item key={item.key} name={item.value}
+                content={item.value} active={branch === item.value}
+                onClick={this.handleBranchChange} />
+            )
+          }
+        </Menu>
+        <h3>Tags</h3>
+        <Menu fluid vertical secondary className='labelmenu'>
+          {
+            tags.map(item =>
+              <Menu.Item key={item.key} name={item.value}
+                content={item.value} active={tag === item.value}
+                onClick={this.handleBranchChange} />
+            )
+          }
+        </Menu>
       </Grid.Column>
     )
   }
