@@ -13,6 +13,14 @@
   margin: 50px;
 }
 
+.view {
+  overflow-y: auto;
+}
+
+pre {
+  white-space: pre-wrap;
+}
+
 .app-appear {
   opacity: 0.01;
 
