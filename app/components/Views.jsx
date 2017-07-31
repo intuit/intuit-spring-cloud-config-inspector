@@ -4,6 +4,7 @@ import {Segment, Divider} from 'semantic-ui-react';
 import JSONPretty from 'react-json-pretty';
 import './json.styl';
 
+import sample from '../sample/payload.js';
 
 export default class App extends React.Component {
   constructor(props) {
