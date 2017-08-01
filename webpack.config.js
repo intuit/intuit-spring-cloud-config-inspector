@@ -39,10 +39,6 @@ module.exports = {
         loader:ExtractTextPlugin.extract({fallback: 'style-loader', use: ['css-loader']})
       },
       {
-        test:/\.styl/,
-        loader:"style-loader!css-loader!stylus-loader"
-      },
-      {
         test:/\.json/,
         loader:"json-loader"
       },
