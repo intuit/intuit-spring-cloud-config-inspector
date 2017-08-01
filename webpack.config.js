@@ -43,6 +43,10 @@ module.exports = {
         loader:"style-loader!css-loader!stylus-loader"
       },
       {
+        test:/\.json/,
+        loader:"json-loader"
+      },
+      {
         test:/.svg$/,
         loader:'url-loader',
         query:{

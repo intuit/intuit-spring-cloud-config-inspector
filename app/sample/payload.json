@@ -1,4 +1,3 @@
-const sample =
 {
   "absoluteZero": "true",
   "app": {
@@ -41,5 +40,3 @@ const sample =
   "shipit": "true",
   "total": "nice"
 }
-
-export default sample
