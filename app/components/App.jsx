@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 
 /* component imports */
 import DropDown from './dropdown.jsx';
-import PropSearch from './PropSearch.jsx';
 import UserInputs from './UserInputs.jsx';
 import UserControls from './UserControls.jsx';
 import LabelMenu from './LabelMenu.jsx';
@@ -123,11 +122,6 @@ export default class App extends React.Component {
                 <Grid.Column>
                   <UserControls inputData={inputData}
                     updateURLs={this.updateURLs} />
-                </Grid.Column>
-              </Grid.Row>
-              <Grid.Row>
-                <Grid.Column>
-                  <PropSearch />
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>

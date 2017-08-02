@@ -13,30 +13,6 @@ const source = _.times(10, (index) => ({
 export default class PropSearch extends React.Component {
   state = {source}
 
-  componentWillMount() {
-    this.resetComponent()
-  }
-
-  resetComponent = () => this.setState({ isLoading: false, results: [], value: '' })
-
-  handleResultSelect = (e, result) => this.setState({ value: result.title })
-
-  handleSearchChange = (e, {value}) => {
-    this.setState({ isLoading: true, value })
-
-    setTimeout(() => {
-      if (this.state.value.length < 1) return this.resetComponent()
-
-      const re = new RegExp(_.escapeRegExp(this.state.value), 'i')
-      const isMatch = (result) => re.test(result.title)
-
-      this.setState({
-        isLoading: false,
-        results: _.filter(source, isMatch),
-      })
-    }, 500)
-  }
-
   handleAddition = (e, {value}) => {
     let label = { color:'red', content:'Not found' }
     this.setState({
@@ -50,19 +26,17 @@ export default class PropSearch extends React.Component {
   }
 
   render() {
-    const { isLoading, value, results } = this.state
+    const { options } = this.props
 
     return (
       <Dropdown
         selection search multiple fluid scrolling
         icon='search'
         placeholder='properties...'
-        options={this.state.source}
-        loading={isLoading}
+        options={options.map(key => ({key:key, text:key, value:key}))}
         allowAdditions additionLabel='Custom: '
         onAddItem={this.handleAddition}
         renderLabel={this.renderLabel}
-        {...this.props}
       />
     )
   }

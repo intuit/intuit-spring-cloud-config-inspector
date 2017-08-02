@@ -1,0 +1,27 @@
+build.branch: ${branch}
+build.commit: ${commit}
+build.timestamp: ${timestamp.format('YYYYMMddHHmmss')}
+build.version: ${version}
+endpoints.enabled: true
+github.cloneBaseDir: /app/spring-cloud-config-publisher/git_basedir
+github.host: github.intuit.com
+github.token: f4d24eed3909ad8766e29fd2500e80cb33d153a8
+jsk.service.info.acronym: CPUB
+jsk.service.info.appId: Intuit.platform.servicesplatform.config-publisher
+jsk.service.info.assetAlias: Intuit.platform.servicesplatform.config-publisher
+jsk.service.info.name: config-publisher
+jsk.servlet.healthcheck.dirToWatch.properties: ./conf/_health
+jsk.servlet.lastmile.audience: https://sp-service-30-qal-qydc.platform.intuit.net
+jsk.servlet.lastmile.enable: true
+jsk.servlet.logging.filter.includeRequestInfo: false
+jsk.servlet.logging.filter.includeResponseInfo: false
+jsk.servlet.logging.filter.typeDefault: "@type":"log:GenericEvent",
+jsk.servlet.logging.utils.filter.typeDefault: '"@type":"log:GenericEvent",'
+jsk.servlet.logging.utils.formatType: NameValue
+jsk.servlet.logging.utils.mdcIntuitTidJsonFormat: ,"intuit_tid":"%s"
+jsk.servlet.logging.utils.stackTraceJsonFormat: ,"exception":[%s]
+jsk.servlet.logging.utils.stackTracePruningEnabled: true
+jsk.servlet.logging.utils.stacktracePruningMaxLines: 5
+publisher.s3.cacheControl: private; max-age: 60; s-max-age: 60
+springfox.documentation.swagger.v2.path: /v1/api-docs
+test.verify: false
