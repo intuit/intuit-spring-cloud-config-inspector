@@ -26,7 +26,7 @@ module.exports = {
         include: APP_DIR,
         loader: 'babel-loader',
         query: {
-          presets: ['env', 'react'],
+          presets: ['env', 'react', 'stage-2'],
           plugins: ['transform-class-properties']
         }
       },
@@ -41,6 +41,18 @@ module.exports = {
       {
         test:/\.json/,
         loader:"json-loader"
+      },
+      {
+        test:/\.properties/,
+        loader:"properties-loader"
+      },
+      {
+        test:/\.(yml|yaml)/,
+        loader:"json-loader!yaml-loader"
+      },
+      {
+        test:/\.txt/,
+        loader:'raw-loader'
       },
       {
         test:/.svg$/,

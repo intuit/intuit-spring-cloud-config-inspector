@@ -17,7 +17,7 @@ import './app.scss';
 import {Grid} from 'semantic-ui-react';
 
 export default class App extends React.Component {
-  
+
   /**
    * Sets default values of inputData, headerCount to zero and headers
    * (show) to false.
@@ -32,7 +32,8 @@ export default class App extends React.Component {
         'label': 'master'
       },
       header: false,
-      headerCount: 0
+      headerCount: 0,
+      urls: {}
     }
   }
 
@@ -45,7 +46,7 @@ export default class App extends React.Component {
    * @param {string|array} data - input value in field
    */
   getInputData = (field, data) => {
-    const inputData = this.state.inputData;
+    const inputData = {...this.state.inputData};
     // If they clear input set back to template
     inputData[field] = data == '' ? `{${field}}` : data
     this.setState({
@@ -78,8 +79,15 @@ export default class App extends React.Component {
     })
   }
 
+  updateURLs = (urls) => {
+    this.setState({
+      urls
+    })
+  }
+
   render() {
-    const { header, headerCount } = this.state
+    const { header, headerCount, inputData, urls } = this.state
+    const inputDataClone = {...inputData}
     return (
       <div>
         <ReactCSSTransitionGroup
@@ -113,7 +121,8 @@ export default class App extends React.Component {
             <Grid stackable columns='equal'>
               <Grid.Row>
                 <Grid.Column>
-                  <UserControls inputData={this.state.inputData} />
+                  <UserControls inputData={inputData}
+                    updateURLs={this.updateURLs} />
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
@@ -123,7 +132,7 @@ export default class App extends React.Component {
               </Grid.Row>
               <Grid.Row>
                 <Grid.Column stretched>
-                  <Views />
+                  <Views urls={urls} />
                 </Grid.Column>
                 <LabelMenu />
               </Grid.Row>

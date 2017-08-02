@@ -12,11 +12,35 @@ const extOptions = [
 export default class App extends React.Component {
 
   static propTypes = {
-    inputData: PropTypes.object.isRequired
+    inputData: PropTypes.object.isRequired,
+    updateURLs: PropTypes.func.isRequired
+  }
+
+  constructor({inputData: {url, app, profiles, label}}) {
+    super()
+    this.state = {
+      urls: {
+        metaURL: `${url}/${app}/${profiles.toString()}/${label}`,
+        confURL: `${url}/${label}/${app}-${profiles.toString()}`
+      }
+    }
+  }
+
+  componentWillReceiveProps({inputData}) {
+    if (this.props.inputData != inputData) {
+      const {url, app, profiles, label} = inputData
+      const urls = {}
+      urls.metaURL = `${url}/${app}/${profiles.toString()}/${label}`
+      urls.confURL = `${url}/${label}/${app}-${profiles.toString()}`
+
+      this.setState({urls})
+      this.props.updateURLs(urls)
+    }
   }
 
   render() {
-    const {url, app, profiles, label} = this.props.inputData;
+    const {urls} = this.state
+
     return (
       <Segment>
         <Grid columns='equal' stackable>
@@ -25,7 +49,7 @@ export default class App extends React.Component {
               <p>Metadata URL</p>
             </Grid.Column>
             <Grid.Column width={10}>
-              <p>{url}/{app}/{profiles.toString()}/{label}</p>
+              <p>{urls.metaURL}</p>
             </Grid.Column>
             <Grid.Column>
               <Button fluid content='Metadata' />
@@ -37,7 +61,7 @@ export default class App extends React.Component {
             </Grid.Column>
             <Grid.Column width={10}>
               <span>
-                {url}/{label}/{app}-{profiles.toString()}
+                {urls.confURL}
                 <Dropdown
                   inline options={extOptions}
                   defaultValue={extOptions[0].text}

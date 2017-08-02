@@ -5,7 +5,7 @@ import { Form, Label, Menu } from 'semantic-ui-react';
 
 const options = [
   { key: 'default', text: 'default', value: 'default' },
-  { key: 'P1', text: 'P1', value: 'P1' },
+  { key: 'qal', text: 'qal', value: 'qal' },
   { key: 'P2', text: 'P2', value: 'P2' },
   { key: 'P3', text: 'P3', value: 'P3' },
 ]

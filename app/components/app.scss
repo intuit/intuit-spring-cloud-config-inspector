@@ -15,10 +15,7 @@
 
 .view {
   overflow-y: auto;
-}
-
-pre {
-  white-space: pre-wrap;
+  white-space: nowrap;
 }
 
 .json-key {
@@ -35,6 +32,11 @@ pre {
 
 .json-val {
   color: #eb42f4;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-appear {

@@ -1,13 +1,14 @@
 import React from 'react';
-import {Segment, List} from 'semantic-ui-react';
+import {Segment, List, Tab} from 'semantic-ui-react';
 
-import sample from '../sample/payload.json';
+import getMockData from './mock.js';
+import PropSearch from './PropSearch.jsx'
 
 export default class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      data: sample,
+      data: {},
       values: {}
     }
   }
@@ -40,17 +41,18 @@ export default class App extends React.Component {
    * @param {object} data - JSON to traverse
    */
   getValuesWrapper(data) {
-    let values = this.state.values
+    let values = data ? this.state.values : {}
     for (var key in data) {
       if (data[key] !== null && typeof(data[key]) == 'object') {
         this.getValues(data[key], key + '.')
       } else {
         values[key] = data[key]
-        this.setState({
-          values
-        })
       }
     }
+
+    this.setState({
+      values
+    })
   }
 
   /**
@@ -72,37 +74,68 @@ export default class App extends React.Component {
 
     return (<List.Item key={key}>
       <List.Content>
-        <h4>
+        <h4 className='ellipsis'>
           <span className='json-key'>{key}</span> = {value}
         </h4>
       </List.Content>
     </List.Item>)
   }
 
-  /**
-   * Calls function to create flattened JSON tree before component mounts
-   */
-  componentWillMount() {
-    this.getValuesWrapper(this.state.data)
+  parseURL(url) {
+    let arr = url.split('/')
+    return {app: arr[arr.length-3], profiles: arr[arr.length-2], label: arr[arr.length-1]}
+  }
+
+  fetchFile(url, ext='json') {
+    let {app, profiles, label} = this.parseURL(url)
+    return getMockData(app, profiles, label, ext)
+  }
+
+  createTab(url, ext) {
+    return (
+      <Tab.Pane>
+        {url ? this.fetchFile(url, ext) : null}
+      </Tab.Pane>
+    )
+  }
+
+  componentWillReceiveProps({urls}) {
+    if (this.props.urls != urls) {
+      const data = JSON.parse(this.fetchFile(urls.metaURL))
+      this.setState({
+        data
+      })
+      this.getValuesWrapper(data)
+    }
   }
 
   render() {
     const { values } = this.state
+    const { metaURL } = this.props.urls
+
+    const panes = [
+      {menuItem: 'Config', render: () =>
+        <Tab.Pane>
+          <Segment attached='top'>
+            Version: af398de444416bb4cd867768b5a363a79b76f5e2
+          </Segment>
+          <Segment attached='bottom' className='view'>
+            <List relaxed divided>
+              {Object.keys(values).map(key =>
+                  this.formatPair(key, values)
+                )
+              }
+            </List>
+          </Segment>
+        </Tab.Pane>
+      },
+      {menuItem: '.json', render: () => this.createTab(metaURL, 'json')},
+      {menuItem: '.yml', render: () => this.createTab(metaURL, 'yml')},
+      {menuItem: '.properties', render: () => this.createTab(metaURL, 'prop')}
+    ]
 
     return (
-      <div>
-        <Segment attached='top'>
-          Version: af398de444416bb4cd867768b5a363a79b76f5e2
-        </Segment>
-        <Segment attached='bottom' className='view'>
-          <List relaxed divided>
-            {Object.keys(values).map(key =>
-                this.formatPair(key, values)
-              )
-            }
-          </List>
-        </Segment>
-      </div>
+      <Tab panes={panes} />
     )
   }
 }
