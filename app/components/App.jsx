@@ -78,6 +78,12 @@ export default class App extends React.Component {
     })
   }
 
+  /**
+   * Callback function passed to UserControls. Updates object urls
+   * which contains metaURL and confURL. urls used in Views.
+   *
+   * @param {object} urls - metaURL and confURL
+   */
   updateURLs = (urls) => {
     this.setState({
       urls

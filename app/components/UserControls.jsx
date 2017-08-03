@@ -12,10 +12,28 @@ const extOptions = [
 export default class App extends React.Component {
 
   static propTypes = {
-    inputData: PropTypes.object.isRequired,
+    inputData: PropTypes.shape({
+      url: PropTypes.string.isRequired,
+      app: PropTypes.string.isRequired,
+      profiles: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.arrayOf(PropTypes.string)
+      ]).isRequired,
+      label: PropTypes.string.isRequired
+    }).isRequired,
     updateURLs: PropTypes.func.isRequired
   }
 
+  /**
+   * Creates initial urls from inputData
+   *
+   * @param {object} props
+   * @param {object} props.inputData - all input data
+   * @param {string} props.inputData.url - initial url
+   * @param {string} props.inputData.app - inital app name
+   * @param {string[]} props.inputData.profiles - inital profiles
+   * @param {string} props.inputData.label - inital label
+   */
   constructor({inputData: {url, app, profiles, label}}) {
     super()
     this.state = {
@@ -26,6 +44,13 @@ export default class App extends React.Component {
     }
   }
 
+  /**
+   * Updates urls when input data changes and calls updateURLs
+   * to make change in parent
+   *
+   * @param {object} nextProps
+   * @param {object} nextProps.inputData - new input data
+   */
   componentWillReceiveProps({inputData}) {
     if (this.props.inputData != inputData) {
       const {url, app, profiles, label} = inputData

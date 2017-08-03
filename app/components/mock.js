@@ -8,8 +8,8 @@ const mockData = {
      master: {
          qal: {
            json: qal_json,
-           prop: qal_properties,
-           yml: qal_yml
+           properties: qal_properties,
+           yaml: qal_yml
          },
          default: {
            json: default_json
@@ -18,9 +18,16 @@ const mockData = {
    }
 }
 
-export default function getMockData(
-  appName='publisher', profiles='qal',
-  label='master', ext='json') {
+/**
+ * Returns contents of mock config files
+ *
+ * @param {string} appName - app name
+ * @param {string} profiles - profiles separated by commas
+ * @param {string} label - branch/tag
+ * @param {string} ext - extension (json, yaml, properties)
+ * @returns {(string|null)} code or null if not found
+ */
+export default function getMockData(appName, profiles, label, ext='json') {
   if (appName in mockData && label in mockData[appName] && profiles in mockData[appName][label]) {
     return mockData[appName][label][profiles][ext]
   } else {

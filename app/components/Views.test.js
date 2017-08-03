@@ -4,5 +4,5 @@ import Views from './Views.jsx';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  ReactDOM.render(<Views />, div);
+  ReactDOM.render(<Views urls={{}} />, div);
 });

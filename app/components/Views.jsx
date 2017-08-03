@@ -1,10 +1,23 @@
 import React from 'react';
 import {Segment, List, Tab} from 'semantic-ui-react';
+import 'prismjs';
+import 'prismjs/components/prism-json';
+import 'prismjs/themes/prism-okaidia.css';
+import {PrismCode} from 'react-prism';
+import PropTypes from 'prop-types'
 
 import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'
 
 export default class App extends React.Component {
+
+  static propTypes = {
+    urls: PropTypes.shape({
+      metaURL: PropTypes.string,
+      confURL: PropTypes.string
+    }).isRequired
+  }
+
   constructor(props) {
     super(props)
     this.state = {
@@ -61,6 +74,7 @@ export default class App extends React.Component {
    *
    * @param {string} key - current key
    * @param {object} values - equivalent to this.state.values
+   * @returns {ReactElement} List Item with key value pairs
    */
   formatPair(key, values) {
     let value = ''
@@ -81,24 +95,55 @@ export default class App extends React.Component {
     </List.Item>)
   }
 
+  /**
+   * Finds the app name, profiles, and label from a metadata url
+   *
+   * @param {string} url - metadata url
+   * @returns {object} app name, profiles, and label from provided
+   * url
+   */
   parseURL(url) {
     let arr = url.split('/')
     return {app: arr[arr.length-3], profiles: arr[arr.length-2], label: arr[arr.length-1]}
   }
 
+  /**
+   * Calls parseURL and then send the fields to getMockData from mock.js
+   *
+   * @param {string} url - metadata url
+   * @param {string} ext - extension (json, yaml, properties)
+   * @returns {(string|null)} code returned from getMockData
+   */
   fetchFile(url, ext='json') {
     let {app, profiles, label} = this.parseURL(url)
     return getMockData(app, profiles, label, ext)
   }
 
+  /**
+   * Creates pretty printed code from mock data using Prism
+   *
+   * @param {string} url - metadata url
+   * @param {string} ext - extension (json, yaml, properties)
+   * @returns {ReactElement} Tab Pane with formatted code
+   */
   createTab(url, ext) {
+    let code = url ? this.fetchFile(url, ext) : null
+    let className = `language-${ext}`
+    let html = code ? <PrismCode component='pre' className={className}>{code}</PrismCode> : null
     return (
       <Tab.Pane>
-        {url ? this.fetchFile(url, ext) : null}
+        {html}
       </Tab.Pane>
     )
   }
 
+  /**
+   * Updates data when url is changed and creates key value pairs
+   * by calling getValuesWrapper
+   *
+   * @param {object} nextProps
+   * @param {object} nextProps.urls - metaURL and confURL from new props
+   */
   componentWillReceiveProps({urls}) {
     if (this.props.urls != urls) {
       const data = JSON.parse(this.fetchFile(urls.metaURL))
@@ -113,6 +158,7 @@ export default class App extends React.Component {
     const { values } = this.state
     const { metaURL } = this.props.urls
 
+    // Config values, json, yaml, properties tab content
     const panes = [
       {menuItem: 'Config', render: () =>
         <Tab.Pane>
@@ -130,8 +176,8 @@ export default class App extends React.Component {
         </Tab.Pane>
       },
       {menuItem: '.json', render: () => this.createTab(metaURL, 'json')},
-      {menuItem: '.yml', render: () => this.createTab(metaURL, 'yml')},
-      {menuItem: '.properties', render: () => this.createTab(metaURL, 'prop')}
+      {menuItem: '.yml', render: () => this.createTab(metaURL, 'yaml')},
+      {menuItem: '.properties', render: () => this.createTab(metaURL, 'properties')}
     ]
 
     return (

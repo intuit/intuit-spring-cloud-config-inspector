@@ -26,8 +26,8 @@ module.exports = {
         include: APP_DIR,
         loader: 'babel-loader',
         query: {
-          presets: ['env', 'react', 'stage-2'],
-          plugins: ['transform-class-properties']
+          babelrc: false,
+          presets: ['es2015', 'react', 'stage-2']
         }
       },
       {

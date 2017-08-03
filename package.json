@@ -16,16 +16,19 @@
   "license": "ISC",
   "jest": {
     "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/app/__mocks__/fileMock.js",
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|txt)$": "<rootDir>/app/__mocks__/fileMock.js",
       "\\.(css|scss)$": "<rootDir>/app/__mocks__/styleMock.js"
     }
   },
   "dependencies": {
+    "babel-preset-stage-0": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
     "json-loader": "^0.5.7",
+    "prismjs": "^1.6.0",
     "prop-types": "^15.5.10",
     "react": "^15.6.1",
     "react-addons-css-transition-group": "^15.6.0",
+    "react-prism": "^4.3.0",
     "semantic-ui-css": "^2.2.10",
     "semantic-ui-react": "^0.71.3"
   },
@@ -36,6 +39,7 @@
     "babel-loader": "^7.1.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.6.0",
+    "babel-preset-es2015": "^6.24.1",
     "babel-preset-es2016": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "bootstrap": "^3.3.7",
