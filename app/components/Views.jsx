@@ -203,7 +203,7 @@ export default class Views extends React.Component {
       {menuItem: '.properties', render: () => this.createTab(metaURL, 'properties')},
       {
         menuItem:
-          <Menu.Item disabled key='menu' position='right' >
+          <Menu.Item fitted disabled key='menu' position='right' >
             <Label color='grey'>f2de868380f695fb553a7fea1b4af8bc8fa489ae</Label>
           </Menu.Item>,
         render: () => {}
