@@ -1,5 +1,5 @@
 import React from 'react';
-import {Segment, List, Tab} from 'semantic-ui-react';
+import {Segment, List, Tab, Menu, Label} from 'semantic-ui-react';
 import 'prismjs';
 import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
@@ -9,7 +9,7 @@ import PropTypes from 'prop-types'
 import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'
 
-export default class App extends React.Component {
+export default class Views extends React.Component {
 
   static propTypes = {
     urls: PropTypes.shape({
@@ -22,7 +22,8 @@ export default class App extends React.Component {
     super(props)
     this.state = {
       data: {},
-      values: {}
+      values: {},
+      activeIndex: 0
     }
   }
 
@@ -104,7 +105,10 @@ export default class App extends React.Component {
    */
   parseURL(url) {
     let arr = url.split('/')
-    return {app: arr[arr.length-3], profiles: arr[arr.length-2], label: arr[arr.length-1]}
+    return {
+      app: arr[arr.length-3], profiles: arr[arr.length-2],
+      label: arr[arr.length-1]
+    }
   }
 
   /**
@@ -129,12 +133,31 @@ export default class App extends React.Component {
   createTab(url, ext) {
     let code = url ? this.fetchFile(url, ext) : null
     let className = `language-${ext}`
-    let html = code ? <PrismCode component='pre' className={className}>{code}</PrismCode> : null
+    let html = code ?
+      <PrismCode component='pre' className={className}>
+        {code}
+      </PrismCode> :
+      null
     return (
       <Tab.Pane>
         {html}
       </Tab.Pane>
     )
+  }
+
+  /**
+   * Sets active index unless user clicked on version tab
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {object} props
+   * @param {number} props.activeIndex - index of clicked on tab
+   */
+  handleTabChange = (e, {activeIndex}) => {
+    if (activeIndex < 4) {
+      this.setState({
+        activeIndex
+      })
+    }
   }
 
   /**
@@ -155,7 +178,7 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { values } = this.state
+    const { values, activeIndex } = this.state
     const { metaURL } = this.props.urls
 
     // Config values, json, yaml, properties tab content
@@ -177,11 +200,18 @@ export default class App extends React.Component {
       },
       {menuItem: '.json', render: () => this.createTab(metaURL, 'json')},
       {menuItem: '.yml', render: () => this.createTab(metaURL, 'yaml')},
-      {menuItem: '.properties', render: () => this.createTab(metaURL, 'properties')}
+      {menuItem: '.properties', render: () => this.createTab(metaURL, 'properties')},
+      {
+        menuItem:
+          <Menu.Item disabled key='menu' position='right' >
+            <Label color='grey'>f2de868380f695fb553a7fea1b4af8bc8fa489ae</Label>
+          </Menu.Item>,
+        render: () => {}
+      }
     ]
 
     return (
-      <Tab panes={panes} />
+      <Tab panes={panes} onTabChange={this.handleTabChange} activeIndex={activeIndex} />
     )
   }
 }
