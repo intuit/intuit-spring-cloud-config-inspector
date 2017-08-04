@@ -92,7 +92,7 @@ export default class App extends React.Component {
 
   render() {
     const { header, headerCount, inputData, urls } = this.state
-    const inputDataClone = {...inputData}
+    
     return (
       <div>
         <ReactCSSTransitionGroup
