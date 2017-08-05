@@ -13,6 +13,32 @@
   margin: 50px;
 }
 
+.view {
+  overflow-y: auto;
+  white-space: nowrap;
+}
+
+.json-key {
+  color: #cc4f22;
+}
+
+.json-string {
+  color: #4286f4;
+}
+
+.json-bool {
+  color: rgba(0,155,0,1);
+}
+
+.json-val {
+  color: #eb42f4;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .app-appear {
   opacity: 0.01;
 

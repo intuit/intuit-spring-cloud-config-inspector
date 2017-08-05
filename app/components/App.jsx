@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 
 /* component imports */
 import DropDown from './dropdown.jsx';
-import PropSearch from './PropSearch.jsx';
 import UserInputs from './UserInputs.jsx';
 import UserControls from './UserControls.jsx';
 import LabelMenu from './LabelMenu.jsx';
@@ -17,7 +16,7 @@ import './app.scss';
 import {Grid} from 'semantic-ui-react';
 
 export default class App extends React.Component {
-  
+
   /**
    * Sets default values of inputData, headerCount to zero and headers
    * (show) to false.
@@ -32,7 +31,8 @@ export default class App extends React.Component {
         'label': 'master'
       },
       header: false,
-      headerCount: 0
+      headerCount: 0,
+      urls: {}
     }
   }
 
@@ -45,7 +45,7 @@ export default class App extends React.Component {
    * @param {string|array} data - input value in field
    */
   getInputData = (field, data) => {
-    const inputData = this.state.inputData;
+    const inputData = {...this.state.inputData};
     // If they clear input set back to template
     inputData[field] = data == '' ? `{${field}}` : data
     this.setState({
@@ -78,8 +78,21 @@ export default class App extends React.Component {
     })
   }
 
+  /**
+   * Callback function passed to UserControls. Updates object urls
+   * which contains metaURL and confURL. urls used in Views.
+   *
+   * @param {object} urls - metaURL and confURL
+   */
+  updateURLs = (urls) => {
+    this.setState({
+      urls
+    })
+  }
+
   render() {
-    const { header, headerCount } = this.state
+    const { header, headerCount, inputData, urls } = this.state
+    
     return (
       <div>
         <ReactCSSTransitionGroup
@@ -113,17 +126,13 @@ export default class App extends React.Component {
             <Grid stackable columns='equal'>
               <Grid.Row>
                 <Grid.Column>
-                  <UserControls inputData={this.state.inputData} />
-                </Grid.Column>
-              </Grid.Row>
-              <Grid.Row>
-                <Grid.Column>
-                  <PropSearch />
+                  <UserControls inputData={inputData}
+                    updateURLs={this.updateURLs} />
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
                 <Grid.Column stretched>
-                  <Views />
+                  <Views urls={urls} />
                 </Grid.Column>
                 <LabelMenu />
               </Grid.Row>
