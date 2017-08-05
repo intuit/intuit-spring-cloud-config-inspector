@@ -3,20 +3,9 @@ import PropTypes from 'prop-types'
 
 import { Grid, Menu } from 'semantic-ui-react'
 
-const branches = [
-  {key:'master', value: 'master', text:'master'},
-  {key:'develop', value: 'develop', text:'develop'},
-  {key:'feature', value: 'feature', text:'feature'}
-]
+const urlHeader = 'https://github.intuit.com/api/v3/repos/ASTEIN/config-publisher-service-config/git/refs?access_token='
+const accessToken = '5a5d4df85870b6d42580cd39b6fae3ce395f0742'
 
-const tags = [
-  {key:'v3.4.25', value: 'v3.4.25', text:'v3.4.25'},
-  {key:'v3.4.24', value: 'v3.4.24', text:'v3.4.24'},
-  {key:'v3.4.23', value: 'v3.4.23', text:'v3.4.23'},
-  {key:'v3.4.22', value: 'v3.4.22', text:'v3.4.22'},
-  {key:'v3.4.21', value: 'v3.4.21', text:'v3.4.21'},
-  {key:'v3.4.20', value: 'v3.4.20', text:'v3.4.20'}
-]
 
 export default class LabelMenu extends React.Component {
 
@@ -33,6 +22,8 @@ export default class LabelMenu extends React.Component {
   constructor(props) {
     super()
     this.state = {
+      branches: [],
+      tags: [],
       branch: props.label,
       tag: null
     }
@@ -41,14 +32,37 @@ export default class LabelMenu extends React.Component {
   /**
    * Update branch and tag values in response to change
    * in user input label field.
+   * @todo fetch url from metadata url
    *
    * @param {string} label - taken from props, current label
    * value
    */
-  componentWillReceiveProps({label}) {
-    const branchKeys = branches.map(b => b.key)
-    const tagKeys = tags.map(t => t.key)
+  componentWillReceiveProps({appName, label}) {
+    let {branches, tags} = this.state
+
+    if (this.props.appName != appName) {
+      fetch(`${urlHeader}${accessToken}`).then(
+        function(response) {
+          if (response.status >= 400) {
+            throw new Error("bad")
+          }
+          return response.json()
+        }
+      ).then((refs) => {
+        const tagRefs = refs.filter((r) => r.ref.startsWith('refs/tags'))
+        tags = tagRefs.map((r) => ({value: r.ref.split('refs/tags/')[1], sha: r.object.sha}))
+        const branchRefs = refs.filter((r) => r.ref.startsWith('refs/heads'))
+        branches = branchRefs.map((r) => ({value: r.ref.split('refs/heads/')[1], sha: r.object.sha}))
+        this.setState({
+          branches,
+          tags
+        })
+      })
+    }
+
     if (this.props.label != label) {
+      const branchKeys = branches.map(b => b.key)
+      const tagKeys = tags.map(t => t.key)
       if (branchKeys.includes(label)) {
         this.setState({
           branch: label,
@@ -94,15 +108,16 @@ export default class LabelMenu extends React.Component {
   }
 
   render() {
-    const {branch, tag} = this.state
+    const {branches, tags, branch, tag} = this.state
 
     return (
       <Grid.Column width={4}>
+        <h1>Labels</h1>
         <h3>Branches</h3>
         <Menu fluid vertical borderless className='labelmenu'>
           {
             branches.map(item =>
-              <Menu.Item key={item.key} name={item.value}
+              <Menu.Item key={item.value} name={item.value}
                 content={item.value} active={branch === item.value}
                 onClick={this.handleBranchChange} />
             )
@@ -112,7 +127,7 @@ export default class LabelMenu extends React.Component {
         <Menu fluid vertical borderless className='labelmenu'>
           {
             tags.map(item =>
-              <Menu.Item key={item.key} name={item.value}
+              <Menu.Item key={item.value} name={item.value}
                 content={item.value} active={tag === item.value}
                 onClick={this.handleBranchChange} />
             )

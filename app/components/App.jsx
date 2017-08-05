@@ -131,11 +131,13 @@ export default class App extends React.Component {
                     updateURLs={this.updateURLs} />
                 </Grid.Column>
               </Grid.Row>
-              <Grid.Row>
+              <Grid.Row columns='equal'>
                 <Grid.Column stretched>
                   <Views urls={urls} />
                 </Grid.Column>
-                <LabelMenu updateLabel={this.getInputData} label={inputData.label}/>
+                <LabelMenu updateLabel={this.getInputData}
+                  label={inputData.label}
+                  appName={inputData.app} />
               </Grid.Row>
             </Grid>
           </div>
