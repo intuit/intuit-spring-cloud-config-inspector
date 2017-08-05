@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "build": "webpack",
-    "dev": "webpack-dev-server"
+    "dev": "webpack-dev-server",
+    "proxy": "node tools/cors-proxy"
   },
   "repository": {
     "type": "git",
