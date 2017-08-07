@@ -1,5 +1,6 @@
-$table-height: 110px;
-$view-height: $table-height * 2 + 112;
+$table-height: 150px;
+$config-height: $table-height * 2 + 22;
+$raw-height: $table-height * 2 + 119;
 
 .header {
   position: fixed;
@@ -14,11 +15,6 @@ $view-height: $table-height * 2 + 112;
 
 .custom {
   margin: 50px;
-}
-
-.view {
-  overflow-y: auto;
-  white-space: nowrap;
 }
 
 .json-key {
@@ -51,7 +47,12 @@ $view-height: $table-height * 2 + 112;
 
 .view {
   overflow-y: auto;
-  max-height: $view-height;
+  max-height: $config-height;
+}
+
+.raw {
+  overflow-y: auto;
+  max-height: $raw-height;
 }
 
 pre {

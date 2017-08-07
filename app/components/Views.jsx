@@ -139,7 +139,7 @@ export default class Views extends React.Component {
       </PrismCode> :
       null
     return (
-      <Tab.Pane>
+      <Tab.Pane className='raw'>
         {html}
       </Tab.Pane>
     )
