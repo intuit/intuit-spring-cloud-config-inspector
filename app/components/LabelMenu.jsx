@@ -89,7 +89,7 @@ export default class LabelMenu extends React.Component {
       branch: name,
       tag: null
     })
-    this.props.updateLabel('label', name)
+    this.props.updateLabel(name)
   }
 
   /**
@@ -104,7 +104,7 @@ export default class LabelMenu extends React.Component {
       branch: null,
       tag: value
     })
-    this.props.updateLabel('label', value)
+    this.props.updateLabel(value)
   }
 
   render() {
