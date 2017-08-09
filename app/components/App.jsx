@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 /* component imports */
 import DropDown from './dropdown.jsx';
 import UserInputs from './UserInputs.jsx';
-import UserControls from './UserControls.jsx';
 import LabelMenu from './LabelMenu.jsx';
 import Views from './Views.jsx'
 import TopMenu from './TopMenu.jsx'
@@ -109,7 +108,7 @@ export default class App extends React.Component {
   }
 
   /**
-   * Callback function passed to UserControls. Updates object urls
+   * Callback function passed to UserInputs. Updates object urls
    * which contains metaURL and confURL. urls used in Views.
    *
    * @param {object} urls - metaURL and confURL
@@ -141,7 +140,8 @@ export default class App extends React.Component {
                       transferData={this.getInputData}
                       toggleHeaders={this.toggleHeaders}
                       headerCount={headerCount}
-                      label={inputData.label} />
+                      label={inputData.label}
+                      updateURLs={this.updateURLs} />
                   </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
@@ -156,20 +156,12 @@ export default class App extends React.Component {
           </div>
           <div className='custom'>
             <Grid stackable columns='equal'>
-              <Grid.Row>
-                <Grid.Column>
-                  <UserControls inputData={inputData}
-                    updateURLs={this.updateURLs} />
-                </Grid.Column>
-              </Grid.Row>
-              <Grid.Row columns='equal'>
                 <Grid.Column stretched>
                   <Views urls={urls} headers={headers} />
                 </Grid.Column>
                 <LabelMenu updateLabel={this.updateLabel}
                   label={inputData.label}
                   appName={inputData.app} />
-              </Grid.Row>
             </Grid>
           </div>
         </ReactCSSTransitionGroup>

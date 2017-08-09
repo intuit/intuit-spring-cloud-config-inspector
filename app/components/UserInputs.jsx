@@ -17,7 +17,8 @@ export default class UserInputs extends React.Component {
     transferData: PropTypes.func.isRequired,
     toggleHeaders: PropTypes.func.isRequired,
     headerCount: PropTypes.number.isRequired,
-    label: PropTypes.string.isRequired
+    label: PropTypes.string.isRequired,
+    updateURLs: PropTypes.func.isRequired
   }
 
   constructor(props) {
@@ -149,17 +150,40 @@ export default class UserInputs extends React.Component {
     this.props.toggleHeaders()
   }
 
+  /**
+   * Called from Sumbit button, updates inputData and URLs in
+   * parent App component.
+   */
   handleGo = () => {
+    const {inputData} = this.state
     this.props.transferData(this.state.inputData)
+    const {url, app, profiles, label} = inputData
+    const urls = {
+      metaURL: `${url}/${app}/${profiles.toString()}/${label}`,
+      confURL: `${url}/${label}/${app}-${profiles.toString()}`
+    }
+    this.props.updateURLs(urls)
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.label != this.props.label) {
+  /**
+   * If the label in labelmenu changes, update inputData and urls.
+   *
+   * @param {object} nextProps
+   * @param {string} nextProps.label - new label from labelmenu
+   */
+  componentWillReceiveProps({label}) {
+    if (label != this.props.label) {
       const inputData = this.state.inputData
-      inputData['label'] = nextProps.label
+      inputData['label'] = label
       this.setState({
         inputData
       })
+      const {url, app, profiles} = inputData
+      const urls = {
+        metaURL: `${url}/${app}/${profiles.toString()}/${label}`,
+        confURL: `${url}/${label}/${app}-${profiles.toString()}`
+      }
+      this.props.updateURLs(urls)
     }
   }
 
