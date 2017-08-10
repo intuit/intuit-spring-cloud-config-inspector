@@ -130,8 +130,7 @@ export default class Views extends React.Component {
         ...this.props.headers
       }
     })
-    .then(
-      (response) => {
+    .then(response => {
         let timestamp = new Date().toString()
         requests.push({
           response,
@@ -141,10 +140,9 @@ export default class Views extends React.Component {
         if (response.ok) {
           return response.text()
         } else {
-          return response.json()
-            .then(err => {
+          return response.json().then(err => {
               throw new Error(err.message)
-            })
+          })
         }
       }
     )
