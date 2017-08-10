@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 /* component imports */
 import DropDown from './dropdown.jsx';
 import UserInputs from './UserInputs.jsx';
-import UserControls from './UserControls.jsx';
 import LabelMenu from './LabelMenu.jsx';
 import Views from './Views.jsx'
 import TopMenu from './TopMenu.jsx'
@@ -25,29 +24,41 @@ export default class App extends React.Component {
     super(props)
     this.state = {
       inputData: {
-        'url': 'https://config.api.intuit.com/v2',
+        'url': 'https://config-e2e.api.intuit.com/v2',
         'app': '{app}',
         'profiles': 'default',
         'label': 'master'
       },
-      header: false,
-      headerCount: 0,
+      headerShow: false,
+      headerCount: 1,
+      headers: {},
       urls: {}
     }
   }
 
   /**
    * Callback function passed to UserInputs. Updates inputData which
-   * is used by UserControls to generate URLs. Called when an input
-   * is changed in UserInputs.
+   * is used by UserControls to generate URLs. Called when an inputs
+   * are submitted.
    *
-   * @param {string} field - inputData key (url, app, profiles, label)
-   * @param {string|array} data - input value in field
+   * @param {array} data - new inputData
    */
-  getInputData = (field, data) => {
-    const inputData = {...this.state.inputData};
-    // If they clear input set back to template
-    inputData[field] = data == '' ? `{${field}}` : data
+  getInputData = (data) => {
+    const inputData = {...data}
+    this.setState({
+      inputData
+    })
+  }
+
+  /**
+   * Callback function passed to LabelMenu. Called when user selects
+   * new label. Updates inputData which updates User Inputs and urls.
+   *
+   * @param {string} label - new label
+   */
+  updateLabel = (label) => {
+    const inputData = {...this.state.inputData}
+    inputData.label = label
     this.setState({
       inputData
     })
@@ -60,7 +71,7 @@ export default class App extends React.Component {
    */
   toggleHeaders = () => {
     this.setState({
-      header: !(this.state.header)
+      headerShow: !(this.state.headerShow)
     })
   }
 
@@ -79,7 +90,25 @@ export default class App extends React.Component {
   }
 
   /**
-   * Callback function passed to UserControls. Updates object urls
+   * Callback function passed to Headers. Updates number headerCount
+   * which determines the number of headers to be displayed above
+   * Headers button in UserInputs. Called when a header row is added
+   * or removed.
+   *
+   * @param {number} data - number of header rows
+   */
+  updateHeaders = (data) => {
+    let headers = {}
+    for (var index in data) {
+      headers[data[index].key.value] = data[index].value.value
+    }
+    this.setState({
+      headers
+    })
+  }
+
+  /**
+   * Callback function passed to UserInputs. Updates object urls
    * which contains metaURL and confURL. urls used in Views.
    *
    * @param {object} urls - metaURL and confURL
@@ -91,7 +120,7 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { header, headerCount, inputData, urls } = this.state
+    const { headerShow, headerCount, inputData, urls, headers } = this.state
 
     return (
       <div>
@@ -107,17 +136,19 @@ export default class App extends React.Component {
               <Grid stackable columns='equal'>
                 <Grid.Row>
                   <Grid.Column>
-                    <UserInputs toggle={header}
+                    <UserInputs toggle={headerShow}
                       transferData={this.getInputData}
                       toggleHeaders={this.toggleHeaders}
                       headerCount={headerCount}
-                      label={inputData.label} />
+                      label={inputData.label}
+                      updateURLs={this.updateURLs} />
                   </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
                   <Grid.Column>
-                    <Headers show={header}
-                      updateHeaderCount={this.updateHeaderCount} />
+                    <Headers show={headerShow}
+                      updateHeaderCount={this.updateHeaderCount}
+                      updateHeaders={this.updateHeaders} />
                   </Grid.Column>
                 </Grid.Row>
               </Grid>
@@ -125,20 +156,12 @@ export default class App extends React.Component {
           </div>
           <div className='custom'>
             <Grid stackable columns='equal'>
-              <Grid.Row>
-                <Grid.Column>
-                  <UserControls inputData={inputData}
-                    updateURLs={this.updateURLs} />
-                </Grid.Column>
-              </Grid.Row>
-              <Grid.Row columns='equal'>
                 <Grid.Column stretched>
-                  <Views urls={urls} />
+                  <Views urls={urls} headers={headers} />
                 </Grid.Column>
-                <LabelMenu updateLabel={this.getInputData}
+                <LabelMenu updateLabel={this.updateLabel}
                   label={inputData.label}
                   appName={inputData.app} />
-              </Grid.Row>
             </Grid>
           </div>
         </ReactCSSTransitionGroup>

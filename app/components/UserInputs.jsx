@@ -17,7 +17,8 @@ export default class UserInputs extends React.Component {
     transferData: PropTypes.func.isRequired,
     toggleHeaders: PropTypes.func.isRequired,
     headerCount: PropTypes.number.isRequired,
-    label: PropTypes.string.isRequired
+    label: PropTypes.string.isRequired,
+    updateURLs: PropTypes.func.isRequired
   }
 
   constructor(props) {
@@ -26,7 +27,13 @@ export default class UserInputs extends React.Component {
       options,
       index: 0,
       button: 'Show',
-      toggle: this.props.toggle
+      toggle: this.props.toggle,
+      inputData: {
+        url: 'https://config-e2e.api.intuit.com/v2',
+        app: '',
+        profiles: 'default',
+        label: 'master'
+      }
     }
   }
 
@@ -74,7 +81,11 @@ export default class UserInputs extends React.Component {
    * @param {string} props.value - current input
    */
   handleURLChange = (e, {value}) => {
-    this.props.transferData('url', value)
+    const inputData = this.state.inputData
+    inputData['url'] = value
+    this.setState({
+      inputData
+    })
   }
 
   /**
@@ -86,7 +97,11 @@ export default class UserInputs extends React.Component {
    * @param {string} props.value - current input
    */
   handleAppChange = (e, {value}) => {
-    this.props.transferData('app', value)
+    const inputData = this.state.inputData
+    inputData['app'] = value
+    this.setState({
+      inputData
+    })
   }
 
   /**
@@ -98,7 +113,11 @@ export default class UserInputs extends React.Component {
    * @param {string} props.value - current input
    */
   handleLabelChange = (e, {value}) => {
-    this.props.transferData('label', value)
+    const inputData = this.state.inputData
+    inputData['label'] = value
+    this.setState({
+      inputData
+    })
   }
 
   /**
@@ -110,7 +129,11 @@ export default class UserInputs extends React.Component {
    * @param {string[]} props.value - current input array
    */
   handleProfileChange = (e, {value}) => {
-    this.props.transferData('profiles', value)
+    const inputData = this.state.inputData
+    inputData['profiles'] = value
+    this.setState({
+      inputData
+    })
   }
 
   /**
@@ -127,17 +150,55 @@ export default class UserInputs extends React.Component {
     this.props.toggleHeaders()
   }
 
+  /**
+   * Called from Sumbit button, updates inputData and URLs in
+   * parent App component.
+   */
+  handleGo = () => {
+    const {inputData} = this.state
+    this.props.transferData(this.state.inputData)
+    const {url, app, profiles, label} = inputData
+    const urls = {
+      metaURL: `${url}/${app}/${profiles}/${label}`,
+      confURL: `${url}/${label}/${app}-${profiles}`
+    }
+    this.props.updateURLs(urls)
+  }
+
+  /**
+   * If the label in labelmenu changes, update inputData and urls.
+   *
+   * @param {object} nextProps
+   * @param {string} nextProps.label - new label from labelmenu
+   */
+  componentWillReceiveProps({label}) {
+    if (label != this.props.label) {
+      const inputData = this.state.inputData
+      inputData['label'] = label
+      this.setState({
+        inputData
+      })
+      const {url, app, profiles} = inputData
+      const urls = {
+        metaURL: `${url}/${app}/${profiles}/${label}`,
+        confURL: `${url}/${label}/${app}-${profiles}`
+      }
+      this.props.updateURLs(urls)
+    }
+  }
+
   render() {
     const { active, button } = this.state
-    const { headerCount, label } = this.props
+    const { url, app, profiles, label } = this.state.inputData
+    const { headerCount} = this.props
 
     return (
       <Form>
         <Form.Group widths='equal'>
           <Form.Input onChange={this.handleURLChange} label='Config URL'
-            placeholder='config url...' defaultValue='https://config.api.intuit.com/v2'/>
+            placeholder='config url...' value={url}/>
           <Form.Input onChange={this.handleAppChange} label='App Name'
-            placeholder='app name...' />
+            placeholder='app name...' value={app} />
           <Form.Dropdown label='Profiles' placeholder='profiles...'
             fluid multiple search selection scrolling
             options={this.state.options} defaultValue={this.state.options[0].value}
@@ -148,13 +209,14 @@ export default class UserInputs extends React.Component {
             placeholder='label...' value={label} />
           <Form.Field width={2}>
             <label>Headers</label>
-            <Menu color='blue' compact inverted>
+            <Menu color='grey' compact inverted>
               <Menu.Item style={{width:'75px'}} onClick={this.handleClick} active={active}>
                 {button}
                 <Label color='red' floating>{headerCount}</Label>
               </Menu.Item>
             </Menu>
           </Form.Field>
+          <Form.Button width={1} label='Submit' onClick={this.handleGo}>Go</Form.Button>
         </Form.Group>
       </Form>
     )

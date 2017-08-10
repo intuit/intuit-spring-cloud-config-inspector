@@ -6,23 +6,35 @@ export default class Header extends React.Component {
 
   static propTypes = {
     show: PropTypes.bool.isRequired,
-    updateHeaderCount: PropTypes.func.isRequired
+    updateHeaderCount: PropTypes.func.isRequired,
+    updateHeaders: PropTypes.func.isRequired
   }
 
   /**
    * Sets default values of index to zero and data to empty object.
    */
-  constructor() {
+  constructor(props) {
     super()
     this.state = {
-      index:0,
-      data:{}
+      index:1,
+      data:{
+        '0': {
+          key: {
+            value: 'authorization',
+            neg: false
+          },
+          value: {
+            value: 'Intuit_IAM_Authentication intuit_appid=Intuit.platform.servicesplatform.config-manager,intuit_app_secret=preprdnsajTffUKBvEEqPVo6x12EhEyRCTTV9lVk',
+            neg: false
+          }
+        }
+      }
     }
   }
 
   /**
    * Called when user changes input in one of the headers fields.
-   * Changes entry in this.state.data accordingly. Turns of negative.
+   * Changes entry in this.state.data accordingly. Turns off negative.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} object - Input object. Classname is formatted
@@ -30,9 +42,10 @@ export default class Header extends React.Component {
    */
   handleHeaderChange = (e, object) => {
     const data = this.state.data
-    const [label, key] = object.className.split(' ')
+    const [label, index] = object.className.split(' ')
 
-    data[key][label] = {value: object.value, neg: false}
+    data[index][label] = {value: object.value, neg: false}
+    this.props.updateHeaders(data)
 
     this.setState({
       data
@@ -100,6 +113,10 @@ export default class Header extends React.Component {
     }
   }
 
+  componentWillMount() {
+    this.props.updateHeaders(this.state.data)
+  }
+
   render() {
     if (this.props.show) {
       const {data} = this.state
@@ -108,7 +125,7 @@ export default class Header extends React.Component {
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell width={7}>Keys</Table.HeaderCell>
-              <Table.HeaderCell width={7}>data</Table.HeaderCell>
+              <Table.HeaderCell width={7}>Values</Table.HeaderCell>
               <Table.HeaderCell />
             </Table.Row>
           </Table.Header>
