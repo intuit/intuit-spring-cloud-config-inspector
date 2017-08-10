@@ -159,8 +159,8 @@ export default class UserInputs extends React.Component {
     this.props.transferData(this.state.inputData)
     const {url, app, profiles, label} = inputData
     const urls = {
-      metaURL: `${url}/${app}/${profiles.toString()}/${label}`,
-      confURL: `${url}/${label}/${app}-${profiles.toString()}`
+      metaURL: `${url}/${app}/${profiles}/${label}`,
+      confURL: `${url}/${label}/${app}-${profiles}`
     }
     this.props.updateURLs(urls)
   }
@@ -180,8 +180,8 @@ export default class UserInputs extends React.Component {
       })
       const {url, app, profiles} = inputData
       const urls = {
-        metaURL: `${url}/${app}/${profiles.toString()}/${label}`,
-        confURL: `${url}/${label}/${app}-${profiles.toString()}`
+        metaURL: `${url}/${app}/${profiles}/${label}`,
+        confURL: `${url}/${label}/${app}-${profiles}`
       }
       this.props.updateURLs(urls)
     }
