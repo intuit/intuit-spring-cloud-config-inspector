@@ -1,5 +1,6 @@
 import React from 'react'
 import _ from 'lodash'
+import PropTypes from 'prop-types'
 
 import {Dropdown, Input} from 'semantic-ui-react'
 
@@ -11,32 +12,24 @@ const source = _.times(10, (index) => ({
 }))
 
 export default class PropSearch extends React.Component {
-  state = {source}
 
-  componentWillMount() {
-    this.resetComponent()
+  static propTypes = {
+    options: PropTypes.arrayOf(PropTypes.string).isRequired
   }
 
-  resetComponent = () => this.setState({ isLoading: false, results: [], value: '' })
-
-  handleResultSelect = (e, result) => this.setState({ value: result.title })
-
-  handleSearchChange = (e, {value}) => {
-    this.setState({ isLoading: true, value })
-
-    setTimeout(() => {
-      if (this.state.value.length < 1) return this.resetComponent()
-
-      const re = new RegExp(_.escapeRegExp(this.state.value), 'i')
-      const isMatch = (result) => re.test(result.title)
-
-      this.setState({
-        isLoading: false,
-        results: _.filter(source, isMatch),
-      })
-    }, 500)
+  constructor(props) {
+    super(props)
+    this.state = {source}
   }
 
+  /**
+   * When user adds a profile that does not exist in search
+   * results, add label 'Not found' to new input
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {object} props
+   * @param {string} props.value - current input
+   */
   handleAddition = (e, {value}) => {
     let label = { color:'red', content:'Not found' }
     this.setState({
@@ -44,25 +37,34 @@ export default class PropSearch extends React.Component {
     })
   }
 
+  /**
+   * item.label returns true if the item (property input) was
+   * an addition. If true add label to option in Dropdown menu.
+   *
+   * @param {object} item - A currently active dropdown item.
+   * @param {number} index - The current index.
+   * @param {object} props - The default props for an active item Label.
+   * @returns Shorthand for a Label.
+   */
   renderLabel = (item, index, props) => {
-    if (item.label) return {color:'red', content:`Not found: ${item.text}`}
+    if (item.label) {
+      return {color:'red', content:`Not found: ${item.text}`}
+    }
     return {content:item.text}
   }
 
   render() {
-    const { isLoading, value, results } = this.state
+    const { options } = this.props
 
     return (
       <Dropdown
         selection search multiple fluid scrolling
         icon='search'
         placeholder='properties...'
-        options={this.state.source}
-        loading={isLoading}
+        options={options.map(key => ({key:key, text:key, value:key}))}
         allowAdditions additionLabel='Custom: '
         onAddItem={this.handleAddition}
         renderLabel={this.renderLabel}
-        {...this.props}
       />
     )
   }

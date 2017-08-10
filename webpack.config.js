@@ -26,8 +26,8 @@ module.exports = {
         include: APP_DIR,
         loader: 'babel-loader',
         query: {
-          presets: ['env', 'react'],
-          plugins: ['transform-class-properties']
+          babelrc: false,
+          presets: ['es2015', 'react', 'stage-2']
         }
       },
       {
@@ -37,6 +37,22 @@ module.exports = {
       {
         test:/\.css$/,
         loader:ExtractTextPlugin.extract({fallback: 'style-loader', use: ['css-loader']})
+      },
+      {
+        test:/\.json/,
+        loader:"json-loader"
+      },
+      {
+        test:/\.properties/,
+        loader:"properties-loader"
+      },
+      {
+        test:/\.(yml|yaml)/,
+        loader:"json-loader!yaml-loader"
+      },
+      {
+        test:/\.txt/,
+        loader:'raw-loader'
       },
       {
         test:/.svg$/,

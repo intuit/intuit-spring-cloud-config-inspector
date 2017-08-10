@@ -1,3 +1,7 @@
+$table-height: 150px;
+$config-height: $table-height * 2 + 22;
+$raw-height: $table-height * 2 + 119;
+
 .header {
   position: fixed;
   top: 0;
@@ -11,6 +15,48 @@
 
 .custom {
   margin: 50px;
+}
+
+.json-key {
+  color: #cc4f22;
+}
+
+.json-string {
+  color: #4286f4;
+}
+
+.json-bool {
+  color: rgba(0,155,0,1);
+}
+
+.json-val {
+  color: #eb42f4;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.labelmenu {
+  overflow-y: auto;
+  overflow-x: visible;
+  overflow-wrap: break-word;
+  max-height: $table-height;
+}
+
+.view {
+  overflow-y: auto;
+  max-height: $config-height;
+}
+
+.raw {
+  overflow-y: auto;
+  max-height: $raw-height;
+}
+
+pre {
+  white-space: pre-wrap;
 }
 
 .app-appear {
