@@ -38,6 +38,10 @@ $raw-height: $table-height * 2 + 119;
   text-overflow: ellipsis;
 }
 
+.location {
+  float: right;
+}
+
 .labelmenu {
   overflow-y: auto;
   overflow-x: visible;
