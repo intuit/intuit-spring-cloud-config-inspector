@@ -9,6 +9,9 @@ import PropTypes from 'prop-types'
 import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'
 
+const proxy = 'http://localhost:3001/'
+const org = 'services-config'
+
 export default class Views extends React.Component {
 
   static propTypes = {
@@ -16,7 +19,8 @@ export default class Views extends React.Component {
       metaURL: PropTypes.string,
       confURL: PropTypes.string
     }).isRequired,
-    headers: PropTypes.object.isRequired
+    headers: PropTypes.object.isRequired,
+    updateUser: PropTypes.func.isRequired
   }
 
   constructor(props) {
@@ -28,7 +32,8 @@ export default class Views extends React.Component {
       json: '',
       yaml: '',
       properties: '',
-      requests: []
+      requests: [],
+      version: ''
     }
   }
 
@@ -100,7 +105,7 @@ export default class Views extends React.Component {
    */
   fetchFile(url, requests) {
     const intuit_tid = this.getTID()
-    const completeURL = `http://localhost:3001/${url}`
+    const completeURL = `${proxy}${url}`
     return fetch(completeURL, {
       headers: {
         intuit_tid,
@@ -194,12 +199,18 @@ export default class Views extends React.Component {
   /**
    * Traverses properties in each file and updates values object. values
    * stores an array of values and file locations for each key found in
-   * the property files in metadata. Updates state.
+   * the property files in metadata. Updates state. Finds user name in first
+   * github url and updates the user in parent App component.
    *
    * @param {array} files - Array of propertyfiles from metadata
    */
   updateValues = (files) => {
     let values = {}
+    let user = files[0].name.substring(
+      files[0].name.indexOf(`${org}/`) + org.length + 1
+    )
+    user = user.substring(0, user.indexOf('/'))
+    this.props.updateUser(user)
     for (let file of files) {
       const name = file.name
       const props = file.source
@@ -219,8 +230,8 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Fetches data for all tabs. Updates requests and all data and creates
-   * key value pairs by calling updateValues. Handles bad requests.
+   * Fetches data for all tabs. Updates requests, version, and all data and
+   * creates key value pairs by calling updateValues. Handles bad requests.
    *
    * @param {object} nextProps
    * @param {object} nextProps.urls - metaURL and confURL from new props
@@ -237,11 +248,15 @@ export default class Views extends React.Component {
         return JSON.parse(response)
       })
       .then(data => {
+        this.setState({
+          version: data.version
+        })
         this.updateValues(data.propertySources)
       })
       .catch(error => {
         this.setState({
           requests,
+          version: '',
           values: error.toString(),
           json: error.toString(),
           yaml: error.toString(),
@@ -252,7 +267,8 @@ export default class Views extends React.Component {
   }
 
   render() {
-    const { activeIndex, json, yaml, properties, requests, values } = this.state
+    const { activeIndex, json, yaml, properties,
+      requests, values, version } = this.state
     const { metaURL, confURL } = this.props.urls
 
     let config = []
@@ -309,7 +325,7 @@ export default class Views extends React.Component {
       {
         menuItem:
           <Menu.Item fitted disabled key='menu' position='right' >
-            <Label color='grey'>f2de868380f695fb553a7fea1b4af8bc8fa489ae</Label>
+            <Label color='grey'>{version}</Label>
           </Menu.Item>,
         render: () => {}
       }

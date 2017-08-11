@@ -32,7 +32,8 @@ export default class App extends React.Component {
       headerShow: false,
       headerCount: 1,
       headers: {},
-      urls: {}
+      urls: {},
+      user: ''
     }
   }
 
@@ -119,8 +120,21 @@ export default class App extends React.Component {
     })
   }
 
+  /**
+   * Callback function passed to Views. Updates user based on github
+   * url found in metadata.
+   *
+   * @param {object} urls - current user
+   */
+  updateUser = (user) => {
+    this.setState({
+      user
+    })
+  }
+
   render() {
-    const { headerShow, headerCount, inputData, urls, headers } = this.state
+    const { headerShow, headerCount, inputData,
+      urls, headers, user } = this.state
 
     return (
       <div>
@@ -141,7 +155,8 @@ export default class App extends React.Component {
                       toggleHeaders={this.toggleHeaders}
                       headerCount={headerCount}
                       label={inputData.label}
-                      updateURLs={this.updateURLs} />
+                      updateURLs={this.updateURLs}
+                      user={user} />
                   </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
@@ -157,11 +172,12 @@ export default class App extends React.Component {
           <div className='custom'>
             <Grid stackable columns='equal'>
                 <Grid.Column stretched>
-                  <Views urls={urls} headers={headers} />
+                  <Views urls={urls} headers={headers}
+                    updateUser={this.updateUser} />
                 </Grid.Column>
                 <LabelMenu updateLabel={this.updateLabel}
                   label={inputData.label}
-                  appName={inputData.app} />
+                  user={user} />
             </Grid>
           </div>
         </ReactCSSTransitionGroup>
