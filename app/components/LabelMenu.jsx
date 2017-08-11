@@ -43,10 +43,10 @@ export default class LabelMenu extends React.Component {
     let {branches, tags} = this.state
 
     if (this.props.user != user) {
-      fetch(`${urlHeader}${user}${urlFooter}`).then(
+      fetch(`${urlHeader}${user}${urlFooter}&per_page=100`).then(
         function(response) {
           if (response.status >= 400) {
-            throw new Error("bad")
+            throw new Error(response.json())
           }
           return response.json()
         }
@@ -59,7 +59,7 @@ export default class LabelMenu extends React.Component {
           branches,
           tags
         })
-      })
+      }).catch(err => console.log(err.message))
     }
 
     if (this.props.label != label) {
