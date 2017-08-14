@@ -3,12 +3,9 @@ import PropTypes from 'prop-types'
 
 import { Form, Label, Menu } from 'semantic-ui-react';
 
-const options = [
-  { key: 'default', text: 'default', value: 'default' },
-  { key: 'qal', text: 'qal', value: 'qal' },
-  { key: 'P2', text: 'P2', value: 'P2' },
-  { key: 'P3', text: 'P3', value: 'P3' },
-]
+const urlHeader = 'https://github.intuit.com/api/v3/repos'
+const urlFooter = 'contents?access_token='
+const token = '726db489b8e34fa7b78540917245031cde359bbc'
 
 export default class UserInputs extends React.Component {
 
@@ -18,20 +15,22 @@ export default class UserInputs extends React.Component {
     toggleHeaders: PropTypes.func.isRequired,
     headerCount: PropTypes.number.isRequired,
     label: PropTypes.string.isRequired,
-    updateURLs: PropTypes.func.isRequired
+    updateURLs: PropTypes.func.isRequired,
+    user: PropTypes.string.isRequired,
+    repo: PropTypes.string.isRequired
   }
 
   constructor(props) {
     super(props)
     this.state = {
-      options,
+      options: [{value: 'default', text: 'default'}],
       index: 0,
-      button: 'Show',
+      button: 'Expand',
       toggle: this.props.toggle,
       inputData: {
         url: 'https://config-e2e.api.intuit.com/v2',
         app: '',
-        profiles: 'default',
+        profiles: ['default'],
         label: 'master'
       }
     }
@@ -121,16 +120,25 @@ export default class UserInputs extends React.Component {
   }
 
   /**
-   * Change the profiles array in parent App component
-   * using callback function whenever input field changes
+   * Change the profiles array in input data. Sets to default if none are
+   * selected and removes default if any are.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} props
    * @param {string[]} props.value - current input array
    */
   handleProfileChange = (e, {value}) => {
+    let profiles = value
+    if (value.length === 0) {
+      profiles = ['default']
+    } else {
+      const index = profiles.indexOf('default')
+      if (index > -1) {
+        profiles.splice(index, 1)
+      }
+    }
     const inputData = this.state.inputData
-    inputData['profiles'] = value
+    inputData['profiles'] = profiles
     this.setState({
       inputData
     })
@@ -144,46 +152,75 @@ export default class UserInputs extends React.Component {
     const toggle = !this.state.toggle
     this.setState({
       active: !this.state.active,
-      button: toggle ? 'Hide' : 'Show',
+      button: toggle ? 'Collapse' : 'Expand',
       toggle
     })
     this.props.toggleHeaders()
   }
 
   /**
-   * Called from Sumbit button, updates inputData and URLs in
-   * parent App component.
+   * Called from Sumbit button, updates inputData and URLs in parent
+   * App component. Replaces forward slashes in label with (_).
    */
   handleGo = () => {
     const {inputData} = this.state
     this.props.transferData(this.state.inputData)
     const {url, app, profiles, label} = inputData
     const urls = {
-      metaURL: `${url}/${app}/${profiles}/${label}`,
-      confURL: `${url}/${label}/${app}-${profiles}`
+      metaURL: `${url}/${app}/${profiles}/${label.replace(/\//g, '(_)')}`,
+      confURL: `${url}/${label.replace(/\//g, '(_)')}/${app}-${profiles}`
     }
     this.props.updateURLs(urls)
   }
 
   /**
-   * If the label in labelmenu changes, update inputData and urls.
+   * If the label in labelmenu changes, update inputData and urls. If
+   * either label, user, or repo changed, fetch list of profiles from
+   * github and update options.
    *
    * @param {object} nextProps
    * @param {string} nextProps.label - new label from labelmenu
+   * @param {string} nextProps.user - current user (i.e. services-config)
+   * @param {string} nextProps.repo - current repo
    */
-  componentWillReceiveProps({label}) {
-    if (label != this.props.label) {
+  componentWillReceiveProps({label, user, repo}) {
+    if (label !== this.props.label ||
+        user !== this.props.user ||
+        repo !== this.props.repo) {
       const inputData = this.state.inputData
-      inputData['label'] = label
-      this.setState({
-        inputData
-      })
-      const {url, app, profiles} = inputData
-      const urls = {
-        metaURL: `${url}/${app}/${profiles}/${label}`,
-        confURL: `${url}/${label}/${app}-${profiles}`
+      if (label !== this.props.label) {
+        inputData['label'] = label
+        const {url, app, profiles} = inputData
+        const urls = {
+          metaURL: `${url}/${app}/${profiles}/${label.replace(/\//g, '(_)')}`,
+          confURL: `${url}/${label.replace(/\//g, '(_)')}/${app}-${profiles}`
+        }
+        this.props.updateURLs(urls)
+        this.setState({
+          inputData
+        })
       }
-      this.props.updateURLs(urls)
+      fetch(`${urlHeader}/${user}/${repo}/${urlFooter}${token}&ref=${label}`).then(
+        response => {
+          if (response.status >= 400) {
+            throw new Error("bad")
+          }
+          return response.json()
+        }
+      ).then(contents => {
+        const { app } = inputData
+        const files = contents.filter(f => f.name.startsWith(app))
+        const options = files.map(f => {
+          let profile = f.name.substring(
+            f.name.indexOf(`${app}-`) + app.length + 1, f.name.lastIndexOf('.')
+          )
+          profile = profile === '' ? 'default' : profile
+          return {key: profile, text: profile, value: profile}
+        })
+        this.setState({
+          options
+        })
+      })
     }
   }
 
@@ -201,7 +238,7 @@ export default class UserInputs extends React.Component {
             placeholder='app name...' value={app} />
           <Form.Dropdown label='Profiles' placeholder='profiles...'
             fluid multiple search selection scrolling
-            options={this.state.options} defaultValue={this.state.options[0].value}
+            options={this.state.options} value={profiles}
             allowAdditions additionLabel='Add: ' onAddItem={this.handleAddition}
             renderLabel={this.renderLabel}
             onChange={this.handleProfileChange} />
@@ -210,7 +247,7 @@ export default class UserInputs extends React.Component {
           <Form.Field width={2}>
             <label>Headers</label>
             <Menu color='grey' compact inverted>
-              <Menu.Item style={{width:'75px'}} onClick={this.handleClick} active={active}>
+              <Menu.Item onClick={this.handleClick} active={active}>
                 {button}
                 <Label color='red' floating>{headerCount}</Label>
               </Menu.Item>

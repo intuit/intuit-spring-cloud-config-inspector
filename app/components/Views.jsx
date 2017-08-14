@@ -1,5 +1,6 @@
 import React from 'react';
-import {Segment, List, Tab, Menu, Label, Popup, Icon, Accordion} from 'semantic-ui-react';
+import {Segment, List, Tab, Menu, Label,
+  Popup, Icon, Accordion, Message} from 'semantic-ui-react';
 import 'prismjs';
 import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
@@ -9,6 +10,9 @@ import PropTypes from 'prop-types'
 import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'
 
+const proxy = 'http://localhost:3001/'
+const org = 'services-config'
+
 export default class Views extends React.Component {
 
   static propTypes = {
@@ -16,7 +20,8 @@ export default class Views extends React.Component {
       metaURL: PropTypes.string,
       confURL: PropTypes.string
     }).isRequired,
-    headers: PropTypes.object.isRequired
+    headers: PropTypes.object.isRequired,
+    updateUserRepo: PropTypes.func.isRequired
   }
 
   constructor(props) {
@@ -28,74 +33,53 @@ export default class Views extends React.Component {
       json: '',
       yaml: '',
       properties: '',
-      requests: []
+      requests: [],
+      version: ''
     }
   }
 
   /**
-   * Traverses nested data object, adds key value pairs to values. If
-   * nested objects present calls getValues on nested object.
+   * Formats value depending on type
    *
-   * @param {object} values - mutable object to update key-value pairs
-   * @param {object} data - object to traverse
-   * @param {string} prefix - path to current object
+   * @param {custom} value - current value
+   * @returns {HTML} formatted value
    */
-  getValues(values, data, prefix) {
-    for (var key in data) {
-      if (data[key] !== null && typeof(data[key]) == 'object') {
-        this.getValues(values, data[key], prefix + key + '.')
-      } else {
-        values[prefix + key] = data[key]
-      }
+  formatValue(value) {
+    if (typeof value == 'string') {
+      return (<span className='json-string'>"{value}"</span>)
+    } else if (typeof value == 'boolean') {
+      return (<span className='json-bool'>{value.toString()}</span>)
+    } else {
+      return (<span className='json-val'>{value.toString()}</span>)
     }
   }
 
   /**
-   * Wrapper for getValues. Traverses JSON file, adds key value pairs to
-   * values. If nested objects present calls getValues on nested object.
-   *
-   * @param {object} data - JSON to traverse
-   */
-  getValuesWrapper(data) {
-    let values = {}
-    for (var key in data) {
-      if (data[key] !== null && typeof(data[key]) == 'object') {
-        this.getValues(values, data[key], key + '.')
-      } else {
-        values[key] = data[key]
-      }
-    }
-
-    this.setState({
-      values
-    })
-  }
-
-  /**
-   * Formats key value pair as '{key} = {value}'. Checks type of value
-   * to use appropriate style. Returns a List Item
+   * Creates a list for each key, title is { key } = { final value },
+   * content is a list of all values for that key and the files those
+   * values come from.
    *
    * @param {string} key - current key
-   * @param {object} values - equivalent to this.state.values
-   * @returns {ReactElement} List Item with key value pairs
+   * @param {object} values - the array of values and locations
+   * @returns {object} A panel for the Config Accordion
    */
-  formatPair(key, values) {
-    let value = ''
-    if (typeof values[key] == 'string') {
-      value = (<span className='json-string'>"{values[key]}"</span>)
-    } else if (typeof values[key] == 'boolean') {
-      value = (<span className='json-bool'>{values[key].toString()}</span>)
-    } else {
-      value = (<span className='json-val'>{values[key].toString()}</span>)
+  formatPair = (key, values) => {
+    return {
+      key,
+      title: <span key={key}>
+          <span className='json-key'>{key}</span> = {this.formatValue(values[0].value)}
+        </span>,
+      content: <List celled key={key}>
+          {
+            values.map((item, index) =>
+              <List.Item key={index}>
+                {this.formatValue(item.value)}
+                <span className='location'>{item.file}</span>
+              </List.Item>
+            )
+          }
+        </List>
     }
-
-    return (<List.Item key={key}>
-      <List.Content>
-        <h4 className='ellipsis'>
-          <span className='json-key'>{key}</span> = {value}
-        </h4>
-      </List.Content>
-    </List.Item>)
   }
 
   /**
@@ -122,7 +106,7 @@ export default class Views extends React.Component {
    */
   fetchFile(url, requests) {
     const intuit_tid = this.getTID()
-    const completeURL = `http://localhost:3001/${url}`
+    const completeURL = `${proxy}${url}`
     return fetch(completeURL, {
       headers: {
         intuit_tid,
@@ -166,19 +150,22 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Fetches raw data from config url if url is not null
-   * and sets state. Not called for json as json requests
-   * is made for config values.
+   * Fetches raw data from config url if url is not null and sets state.
    *
    * @param {string} url - metadata url
-   * @param {string} ext - extension (yaml, properties)
+   * @param {string} ext - extension (json, yaml, properties)
    * @param {array} requests - array of responses and response info
    */
   getRawData(url, ext, requests) {
     if (url) {
       this.fetchFile(url + '.' + ext, requests)
       .then(response => {
-        let code = response
+        let code
+        if (ext === 'json') {
+          code = JSON.stringify(JSON.parse(response), null, 2)
+        } else {
+          code = response
+        }
         this.setState({
           [ext]: code
         })
@@ -211,9 +198,41 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Fetches data for all tabs. Updates requests and all data
-   * and creates key value pairs by calling getValuesWrapper.
-   * Handles bad requests.
+   * Traverses properties in each file and updates values object. values
+   * stores an array of values and file locations for each key found in
+   * the property files in metadata. Updates state. Finds user and repo
+   * name in first github url and updates both in parent App component.
+   *
+   * @param {array} files - Array of propertyfiles from metadata
+   */
+  updateValues = (files) => {
+    let values = {}
+    let params = files[0].name.replace(/^https:\/\/github\.intuit\.com\//, "")
+    let split = params.split('/', 2)
+    let user = split[0]
+    let repo = split[1]
+    this.props.updateUserRepo(user, repo)
+    for (let file of files) {
+      const name = file.name
+      const props = file.source
+      for (let key of Object.keys(props)) {
+        const assoc = {
+          value: props[key],
+          file: name.substring(name.lastIndexOf('/') + 1)
+        }
+        if (typeof values[key] !== 'undefined') {
+          values[key].push(assoc)
+        } else {
+          values[key] = [assoc]
+        }
+      }
+    }
+    this.setState({values})
+  }
+
+  /**
+   * Fetches data for all tabs. Updates requests, version, and all data and
+   * creates key value pairs by calling updateValues. Handles bad requests.
    *
    * @param {object} nextProps
    * @param {object} nextProps.urls - metaURL and confURL from new props
@@ -221,8 +240,9 @@ export default class Views extends React.Component {
   componentWillReceiveProps({urls}) {
     if (this.props.urls != urls) {
       let requests = []
-      this.fetchFile(urls.confURL + '.json', requests)
+      this.fetchFile(urls.metaURL, requests)
       .then(response => {
+        this.getRawData(urls.confURL, 'json', requests)
         this.getRawData(urls.confURL, 'yaml', requests)
         this.getRawData(urls.confURL, 'properties', requests)
         this.setState({requests})
@@ -230,14 +250,14 @@ export default class Views extends React.Component {
       })
       .then(data => {
         this.setState({
-          data,
-          json: JSON.stringify(data, null, 2)
+          version: data.version
         })
-        this.getValuesWrapper(data)
+        this.updateValues(data.propertySources)
       })
       .catch(error => {
         this.setState({
           requests,
+          version: '',
           values: error.toString(),
           json: error.toString(),
           yaml: error.toString(),
@@ -248,17 +268,20 @@ export default class Views extends React.Component {
   }
 
   render() {
-    const { values, activeIndex, json, yaml, properties, requests } = this.state
+    const { activeIndex, json, yaml, properties,
+      requests, values, version } = this.state
     const { metaURL, confURL } = this.props.urls
 
     let config = []
+    let keys = []
     // values is only a string when there has been an error
     if (typeof values === 'string') {
-      config = values
+      config = <Message error>{values}</Message>
     } else {
-      config = Object.keys(values).map(
-        key => this.formatPair(key, values)
-      )
+      keys = Object.keys(values)
+      config =
+        <Accordion exclusive={false} panels={keys.map(key =>
+          this.formatPair(key, values[key]))} />
     }
 
     const panels = requests.map((item, index) => ({
@@ -277,12 +300,10 @@ export default class Views extends React.Component {
       {menuItem: 'Config', render: () =>
         <Tab.Pane>
           <Segment attached='top'>
-            <PropSearch options={Object.keys(values)} />
+            <PropSearch options={keys} />
           </Segment>
           <Segment attached='bottom' className='view'>
-            <List relaxed divided>
-              {config}
-            </List>
+            {config}
           </Segment>
         </Tab.Pane>
       },
@@ -307,7 +328,7 @@ export default class Views extends React.Component {
       {
         menuItem:
           <Menu.Item fitted disabled key='menu' position='right' >
-            <Label color='grey'>f2de868380f695fb553a7fea1b4af8bc8fa489ae</Label>
+            <Label color='grey'>{version}</Label>
           </Menu.Item>,
         render: () => {}
       }

@@ -11,10 +11,10 @@ export default class App extends React.Component {
   render() {
     return (
       <Segment clearing inverted basic>
-        <big>
+        <h3>
           Config Inspector
-        </big>
-        <Image verticalAlign='middle' floated='right' src='/images/configservice.png' size='mini' />
+          <Image verticalAlign='middle' floated='right' src='/images/configservice.png' size='mini' />
+        </h3>
       </Segment>
     )
   }

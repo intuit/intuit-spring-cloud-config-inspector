@@ -32,7 +32,9 @@ export default class App extends React.Component {
       headerShow: false,
       headerCount: 1,
       headers: {},
-      urls: {}
+      urls: {},
+      user: '',
+      repo: ''
     }
   }
 
@@ -119,8 +121,22 @@ export default class App extends React.Component {
     })
   }
 
+  /**
+   * Callback function passed to Views. Updates user based on github
+   * url found in metadata.
+   *
+   * @param {object} urls - current user
+   */
+  updateUserRepo = (user, repo) => {
+    this.setState({
+      user,
+      repo
+    })
+  }
+
   render() {
-    const { headerShow, headerCount, inputData, urls, headers } = this.state
+    const { headerShow, headerCount, inputData,
+      urls, headers, user, repo } = this.state
 
     return (
       <div>
@@ -133,35 +149,28 @@ export default class App extends React.Component {
           <div className='app'>
             <TopMenu />
             <div className='custom'>
-              <Grid stackable columns='equal'>
-                <Grid.Row>
-                  <Grid.Column>
-                    <UserInputs toggle={headerShow}
-                      transferData={this.getInputData}
-                      toggleHeaders={this.toggleHeaders}
-                      headerCount={headerCount}
-                      label={inputData.label}
-                      updateURLs={this.updateURLs} />
-                  </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column>
-                    <Headers show={headerShow}
-                      updateHeaderCount={this.updateHeaderCount}
-                      updateHeaders={this.updateHeaders} />
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
+              <UserInputs toggle={headerShow}
+                transferData={this.getInputData}
+                toggleHeaders={this.toggleHeaders}
+                headerCount={headerCount}
+                label={inputData.label}
+                updateURLs={this.updateURLs}
+                user={user} repo={repo} />
+              <Headers show={headerShow}
+                updateHeaderCount={this.updateHeaderCount}
+                updateHeaders={this.updateHeaders} />
+              <br/>
             </div>
           </div>
           <div className='custom'>
             <Grid stackable columns='equal'>
                 <Grid.Column stretched>
-                  <Views urls={urls} headers={headers} />
+                  <Views urls={urls} headers={headers}
+                    updateUserRepo={this.updateUserRepo} />
                 </Grid.Column>
                 <LabelMenu updateLabel={this.updateLabel}
                   label={inputData.label}
-                  appName={inputData.app} />
+                  user={user} repo={repo} />
             </Grid>
           </div>
         </ReactCSSTransitionGroup>

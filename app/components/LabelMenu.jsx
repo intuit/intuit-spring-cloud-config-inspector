@@ -3,15 +3,18 @@ import PropTypes from 'prop-types'
 
 import { Grid, Menu } from 'semantic-ui-react'
 
-const urlHeader = 'https://github.intuit.com/api/v3/repos/ASTEIN/config-publisher-service-config/git/refs?access_token='
-const accessToken = '5a5d4df85870b6d42580cd39b6fae3ce395f0742'
+const urlHeader = 'https://github.intuit.com/api/v3/repos'
+const urlFooter = 'git/refs?access_token='
+const token = '726db489b8e34fa7b78540917245031cde359bbc'
 
 
 export default class LabelMenu extends React.Component {
 
   static propTypes = {
     updateLabel: PropTypes.func.isRequired,
-    label: PropTypes.string.isRequired
+    label: PropTypes.string.isRequired,
+    user: PropTypes.string.isRequired,
+    repo: PropTypes.string.isRequired
   }
 
   /**
@@ -30,21 +33,23 @@ export default class LabelMenu extends React.Component {
   }
 
   /**
-   * Update branch and tag values in response to change
-   * in user input label field.
-   * @todo fetch url from metadata url
+   * Update branch and tag values in response to change in user input
+   * label field. Fetch branches and tags from github repo associated
+   * with new user or new repo.
    *
-   * @param {string} label - taken from props, current label
-   * value
+   * @param {object} nextProps
+   * @param {string} nextProps.user - current user (i.e. services-config)
+   * @param {string} nextProps.repo - current repo
+   * @param {string} nextProps.label - current label value
    */
-  componentWillReceiveProps({appName, label}) {
+  componentWillReceiveProps({user, repo, label}) {
     let {branches, tags} = this.state
 
-    if (this.props.appName != appName) {
-      fetch(`${urlHeader}${accessToken}`).then(
+    if (this.props.user != user || this.props.repo != repo) {
+      fetch(`${urlHeader}/${user}/${repo}/${urlFooter}${token}&per_page=100`).then(
         function(response) {
           if (response.status >= 400) {
-            throw new Error("bad")
+            throw new Error(response.json())
           }
           return response.json()
         }
@@ -57,7 +62,7 @@ export default class LabelMenu extends React.Component {
           branches,
           tags
         })
-      })
+      }).catch(err => console.log(err.message))
     }
 
     if (this.props.label != label) {
