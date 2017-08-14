@@ -77,3 +77,7 @@ export function getProxyServerUrl() {
   const currentEnv = getCurrentHostEnv();
   return `${SERVICES.proxyServer[currentEnv]}/`;
 }
+
+export function getAuthorizationHeader() {
+  return "Intuit_IAM_Authentication intuit_appid=Intuit.platform.servicesplatform.config-manager,intuit_app_secret=preprdnsajTffUKBvEEqPVo6x12EhEyRCTTV9lVk";
+}
