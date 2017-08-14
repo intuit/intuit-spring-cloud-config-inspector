@@ -5,10 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build": "webpack",
+    "prebuild": "rm -rf deploys && mkdir deploys",
+    "build": "NODE_ENV=production webpack --config ./webpack.config.js --progress --colors",
+    "predeploy-dev": "npm run build",
+    "deploy-dev": "gh-pages -d build --dest dev/standalone",
     "prestart": "npm test",
     "start": "concurrently --kill-others --raw \"npm run proxy\" \"npm run dev\"",
-    "dev": "webpack-dev-server",
+    "dev": "webpack-dev-server --host dev.intuit.com --port 3232",
     "proxy": "node tools/cors-proxy"
   },
   "repository": {
@@ -52,6 +55,7 @@
     "express": "^4.15.3",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^0.11.2",
+    "gh-pages": "^1.0.0",
     "jest": "^20.0.4",
     "node-sass": "^4.5.3",
     "path": "^0.12.7",
