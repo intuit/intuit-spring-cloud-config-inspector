@@ -5,12 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
+    "prebuild": "rm -rf build && mkdir build && cp -R public/* build/",
     "build": "NODE_ENV=production webpack --config ./webpack.config.js --progress --colors",
-    "deploy-dev": "npm run build && NODE_DEBUG=gh-pages gh-pages -d build --dest dev/standalone --message \"Deploying to dev environment\"",
-    "deploy-qal": "npm run build && NODE_DEBUG=gh-pages gh-pages -d build --dest qal/standalone --message \"Deploying to qal environment\"",
-    "deploy-e2e": "npm run build && NODE_DEBUG=gh-pages gh-pages -d build --dest e2e/standalone --message \"Deploying to e2e environment\"",
-    "deploy-prd": "npm run build && NODE_DEBUG=gh-pages gh-pages -d build --dest prd/standalone --message \"Deploying to prd environment\"",
-    "prestart": "npm test",
+    "predeploy": "npm run build && echo Ready to use $npm_config_env",
+    "deploy": "NODE_DEBUG=gh-pages gh-pages -d build --dest $npm_config_env/standalone --message \"Deploying to $npm_config_env environment\"",
+    "prestart": "npm run prebuild && npm test",
     "start": "concurrently --kill-others --raw \"npm run proxy\" \"npm run dev\"",
     "dev": "webpack-dev-server --host dev.intuit.com --port 3232",
     "proxy": "node tools/cors-proxy"
