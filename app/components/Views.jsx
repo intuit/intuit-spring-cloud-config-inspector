@@ -9,8 +9,12 @@ import PropTypes from 'prop-types'
 
 import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'
+import * as config from '../conf';
 
-const proxy = 'http://localhost:3001/'
+const proxy = config.getProxyServerUrl();
+const currentEnv = config.getCurrentHostEnv().toString();
+console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
+
 const org = 'services-config'
 
 export default class Views extends React.Component {
