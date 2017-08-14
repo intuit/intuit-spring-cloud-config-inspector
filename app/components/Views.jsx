@@ -1,5 +1,6 @@
 import React from 'react';
-import {Segment, List, Tab, Menu, Label, Popup, Icon, Accordion} from 'semantic-ui-react';
+import {Segment, List, Tab, Menu, Label,
+  Popup, Icon, Accordion, Message} from 'semantic-ui-react';
 import 'prismjs';
 import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
@@ -20,7 +21,7 @@ export default class Views extends React.Component {
       confURL: PropTypes.string
     }).isRequired,
     headers: PropTypes.object.isRequired,
-    updateUser: PropTypes.func.isRequired
+    updateUserRepo: PropTypes.func.isRequired
   }
 
   constructor(props) {
@@ -199,18 +200,18 @@ export default class Views extends React.Component {
   /**
    * Traverses properties in each file and updates values object. values
    * stores an array of values and file locations for each key found in
-   * the property files in metadata. Updates state. Finds user name in first
-   * github url and updates the user in parent App component.
+   * the property files in metadata. Updates state. Finds user and repo
+   * name in first github url and updates both in parent App component.
    *
    * @param {array} files - Array of propertyfiles from metadata
    */
   updateValues = (files) => {
     let values = {}
-    let user = files[0].name.substring(
-      files[0].name.indexOf(`${org}/`) + org.length + 1
-    )
-    user = user.substring(0, user.indexOf('/'))
-    this.props.updateUser(user)
+    let params = files[0].name.replace(/^https:\/\/github\.intuit\.com\//, "")
+    let split = params.split('/', 2)
+    let user = split[0]
+    let repo = split[1]
+    this.props.updateUserRepo(user, repo)
     for (let file of files) {
       const name = file.name
       const props = file.source
@@ -274,7 +275,7 @@ export default class Views extends React.Component {
     let config = []
     // values is only a string when there has been an error
     if (typeof values === 'string') {
-      config = values
+      config = <Message error>{values}</Message>
     } else {
       config =
         <Accordion exclusive={false} panels={Object.keys(values).map(key =>

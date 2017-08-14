@@ -3,8 +3,9 @@ import PropTypes from 'prop-types'
 
 import { Form, Label, Menu } from 'semantic-ui-react';
 
-const urlHeader = 'https://github.intuit.com/api/v3/repos/services-config/'
-const urlFooter = '/contents?access_token=726db489b8e34fa7b78540917245031cde359bbc'
+const urlHeader = 'https://github.intuit.com/api/v3/repos'
+const urlFooter = 'contents?access_token='
+const token = '726db489b8e34fa7b78540917245031cde359bbc'
 
 export default class UserInputs extends React.Component {
 
@@ -15,7 +16,8 @@ export default class UserInputs extends React.Component {
     headerCount: PropTypes.number.isRequired,
     label: PropTypes.string.isRequired,
     updateURLs: PropTypes.func.isRequired,
-    user: PropTypes.string.isRequired
+    user: PropTypes.string.isRequired,
+    repo: PropTypes.string.isRequired
   }
 
   constructor(props) {
@@ -23,7 +25,7 @@ export default class UserInputs extends React.Component {
     this.state = {
       options: [{value: 'default', text: 'default'}],
       index: 0,
-      button: 'Show',
+      button: 'Expand',
       toggle: this.props.toggle,
       inputData: {
         url: 'https://config-e2e.api.intuit.com/v2',
@@ -150,7 +152,7 @@ export default class UserInputs extends React.Component {
     const toggle = !this.state.toggle
     this.setState({
       active: !this.state.active,
-      button: toggle ? 'Hide' : 'Show',
+      button: toggle ? 'Collapse' : 'Expand',
       toggle
     })
     this.props.toggleHeaders()
@@ -173,15 +175,18 @@ export default class UserInputs extends React.Component {
 
   /**
    * If the label in labelmenu changes, update inputData and urls. If
-   * either label or user changed, fetch list of profiles from github
-   * and update options.
+   * either label, user, or repo changed, fetch list of profiles from
+   * github and update options.
    *
    * @param {object} nextProps
    * @param {string} nextProps.label - new label from labelmenu
-   * @param {string} nextProps.user - new user (app) from github url
+   * @param {string} nextProps.user - current user (i.e. services-config)
+   * @param {string} nextProps.repo - current repo
    */
-  componentWillReceiveProps({label, user}) {
-    if (label !== this.props.label || user !== this.props.user) {
+  componentWillReceiveProps({label, user, repo}) {
+    if (label !== this.props.label ||
+        user !== this.props.user ||
+        repo !== this.props.repo) {
       const inputData = this.state.inputData
       if (label !== this.props.label) {
         inputData['label'] = label
@@ -195,7 +200,7 @@ export default class UserInputs extends React.Component {
           inputData
         })
       }
-      fetch(`${urlHeader}${user}${urlFooter}&ref=${label}`).then(
+      fetch(`${urlHeader}/${user}/${repo}/${urlFooter}${token}&ref=${label}`).then(
         response => {
           if (response.status >= 400) {
             throw new Error("bad")
@@ -242,7 +247,7 @@ export default class UserInputs extends React.Component {
           <Form.Field width={2}>
             <label>Headers</label>
             <Menu color='grey' compact inverted>
-              <Menu.Item style={{width:'75px'}} onClick={this.handleClick} active={active}>
+              <Menu.Item onClick={this.handleClick} active={active}>
                 {button}
                 <Label color='red' floating>{headerCount}</Label>
               </Menu.Item>

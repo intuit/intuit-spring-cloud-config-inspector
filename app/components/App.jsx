@@ -33,7 +33,8 @@ export default class App extends React.Component {
       headerCount: 1,
       headers: {},
       urls: {},
-      user: ''
+      user: '',
+      repo: ''
     }
   }
 
@@ -126,15 +127,16 @@ export default class App extends React.Component {
    *
    * @param {object} urls - current user
    */
-  updateUser = (user) => {
+  updateUserRepo = (user, repo) => {
     this.setState({
-      user
+      user,
+      repo
     })
   }
 
   render() {
     const { headerShow, headerCount, inputData,
-      urls, headers, user } = this.state
+      urls, headers, user, repo } = this.state
 
     return (
       <div>
@@ -147,37 +149,28 @@ export default class App extends React.Component {
           <div className='app'>
             <TopMenu />
             <div className='custom'>
-              <Grid stackable columns='equal'>
-                <Grid.Row>
-                  <Grid.Column>
-                    <UserInputs toggle={headerShow}
-                      transferData={this.getInputData}
-                      toggleHeaders={this.toggleHeaders}
-                      headerCount={headerCount}
-                      label={inputData.label}
-                      updateURLs={this.updateURLs}
-                      user={user} />
-                  </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column>
-                    <Headers show={headerShow}
-                      updateHeaderCount={this.updateHeaderCount}
-                      updateHeaders={this.updateHeaders} />
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
+              <UserInputs toggle={headerShow}
+                transferData={this.getInputData}
+                toggleHeaders={this.toggleHeaders}
+                headerCount={headerCount}
+                label={inputData.label}
+                updateURLs={this.updateURLs}
+                user={user} repo={repo} />
+              <Headers show={headerShow}
+                updateHeaderCount={this.updateHeaderCount}
+                updateHeaders={this.updateHeaders} />
+              <br/>
             </div>
           </div>
           <div className='custom'>
             <Grid stackable columns='equal'>
                 <Grid.Column stretched>
                   <Views urls={urls} headers={headers}
-                    updateUser={this.updateUser} />
+                    updateUserRepo={this.updateUserRepo} />
                 </Grid.Column>
                 <LabelMenu updateLabel={this.updateLabel}
                   label={inputData.label}
-                  user={user} />
+                  user={user} repo={repo} />
             </Grid>
           </div>
         </ReactCSSTransitionGroup>

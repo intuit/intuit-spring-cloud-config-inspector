@@ -14,7 +14,12 @@ $raw-height: $table-height * 2 + 119;
 }
 
 .custom {
-  margin: 50px;
+  margin: 20px 50px;
+}
+
+.submit {
+  position: absolute;
+  bottom: 30px;
 }
 
 .json-key {
