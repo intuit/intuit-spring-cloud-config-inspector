@@ -2,6 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types';
 import { Table, Input, Button } from 'semantic-ui-react'
 
+import * as config from '../conf';
+
 export default class Header extends React.Component {
 
   static propTypes = {
@@ -14,7 +16,8 @@ export default class Header extends React.Component {
    * Sets default values of index to zero and data to empty object.
    */
   constructor(props) {
-    super()
+    super();
+    const authorizationHeader = config.getAuthorizationHeader();
     this.state = {
       index:1,
       data:{
@@ -24,7 +27,7 @@ export default class Header extends React.Component {
             neg: false
           },
           value: {
-            value: 'Intuit_IAM_Authentication intuit_appid=Intuit.platform.servicesplatform.config-manager,intuit_app_secret=preprdnsajTffUKBvEEqPVo6x12EhEyRCTTV9lVk',
+            value: authorizationHeader,
             neg: false
           }
         }

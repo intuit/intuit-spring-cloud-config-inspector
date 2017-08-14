@@ -7,6 +7,8 @@ const urlHeader = 'https://github.intuit.com/api/v3/repos'
 const urlFooter = 'contents?access_token='
 const token = '726db489b8e34fa7b78540917245031cde359bbc'
 
+import * as config from '../conf';
+
 export default class UserInputs extends React.Component {
 
   static propTypes = {
@@ -166,9 +168,14 @@ export default class UserInputs extends React.Component {
     const {inputData} = this.state
     this.props.transferData(this.state.inputData)
     const {url, app, profiles, label} = inputData
+
+    // For localhost, use the url in the app, or else use the configured ones
+    const currentEnv = config.getCurrentHostEnv();
+    const envUrl = currentEnv === config.Env.LOCAL ? `${url}/` : "";
+
     const urls = {
-      metaURL: `${url}/${app}/${profiles}/${label.replace(/\//g, '(_)')}`,
-      confURL: `${url}/${label.replace(/\//g, '(_)')}/${app}-${profiles}`
+      metaURL: `${envUrl}${app}/${profiles}/${label.replace(/\//g, '(_)')}`,
+      confURL: `${envUrl}${label.replace(/\//g, '(_)')}/${app}-${profiles}`
     }
     this.props.updateURLs(urls)
   }
