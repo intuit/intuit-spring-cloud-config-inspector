@@ -2,8 +2,6 @@ import React from 'react';
 
 import {Segment, Header, Image} from 'semantic-ui-react';
 
-import * as config from '../conf';
-
 export default class App extends React.Component {
   constructor(props) {
     super(props)
