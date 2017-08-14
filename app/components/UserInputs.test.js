@@ -7,5 +7,5 @@ it('renders without crashing', () => {
   const div = document.createElement('div');
   ReactDOM.render(<UserInputs toggle headerCount={0}
     transferData={test} toggleHeaders={test}
-    label='' updateURLs={test} user='' />, div);
+    label='' updateURLs={test} user='' repo='' />, div);
 });
