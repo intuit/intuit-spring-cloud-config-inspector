@@ -273,12 +273,14 @@ export default class Views extends React.Component {
     const { metaURL, confURL } = this.props.urls
 
     let config = []
+    let keys = []
     // values is only a string when there has been an error
     if (typeof values === 'string') {
       config = <Message error>{values}</Message>
     } else {
+      keys = Object.keys(values)
       config =
-        <Accordion exclusive={false} panels={Object.keys(values).map(key =>
+        <Accordion exclusive={false} panels={keys.map(key =>
           this.formatPair(key, values[key]))} />
     }
 
@@ -298,7 +300,7 @@ export default class Views extends React.Component {
       {menuItem: 'Config', render: () =>
         <Tab.Pane>
           <Segment attached='top'>
-            <PropSearch options={Object.keys(values)} />
+            <PropSearch options={keys} />
           </Segment>
           <Segment attached='bottom' className='view'>
             {config}
