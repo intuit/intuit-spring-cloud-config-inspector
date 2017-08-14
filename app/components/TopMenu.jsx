@@ -13,8 +13,8 @@ export default class App extends React.Component {
       <Segment clearing inverted basic>
         <h3>
           Config Inspector
+          <Image verticalAlign='middle' floated='right' src={logoImgPath} size='mini' />
         </h3>
-        <Image verticalAlign='middle' floated='right' src={logoImgPath} size='mini' />
       </Segment>
     )
   }
