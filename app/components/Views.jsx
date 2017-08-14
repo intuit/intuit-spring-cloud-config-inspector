@@ -331,7 +331,7 @@ export default class Views extends React.Component {
       },
       {
         menuItem:
-          <Menu.Item fitted disabled key='menu' position='right' >
+          <Menu.Item fitted='horizontally' disabled key='menu' position='right' >
             <Label color='grey'>{version}</Label>
           </Menu.Item>,
         render: () => {}
@@ -339,7 +339,7 @@ export default class Views extends React.Component {
     ]
 
     return (
-      <Tab panes={panes} onTabChange={this.handleTabChange} activeIndex={activeIndex} />
+      <Tab menu={{stackable: true, tabular: true, attached: true}} panes={panes} onTabChange={this.handleTabChange} activeIndex={activeIndex} />
     )
   }
 }

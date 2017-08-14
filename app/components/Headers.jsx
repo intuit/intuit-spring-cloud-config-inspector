@@ -127,8 +127,8 @@ export default class Header extends React.Component {
         <Table columns={3}>
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell width={7}>Keys</Table.HeaderCell>
-              <Table.HeaderCell width={7}>Values</Table.HeaderCell>
+              <Table.HeaderCell width={3}>Keys</Table.HeaderCell>
+              <Table.HeaderCell width={11}>Values</Table.HeaderCell>
               <Table.HeaderCell />
             </Table.Row>
           </Table.Header>
@@ -136,12 +136,12 @@ export default class Header extends React.Component {
           <Table.Body>
             {Object.keys(data).map(index =>
               <Table.Row key={index}>
-                <Table.Cell negative={data[index].key.neg} width={7}>
+                <Table.Cell negative={data[index].key.neg} width={3}>
                   <Input defaultValue={data[index].key.value}
                     className={`key ${index}`} fluid transparent
                     placeholder='key' onChange={this.handleHeaderChange} />
                 </Table.Cell>
-                <Table.Cell negative={data[index].value.neg} width={7}>
+                <Table.Cell negative={data[index].value.neg} width={11}>
                   <Input defaultValue={data[index].value.value}
                     className={`value ${index}`} fluid transparent
                     placeholder='value' onChange={this.handleHeaderChange} />
