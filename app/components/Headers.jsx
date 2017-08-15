@@ -2,6 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types';
 import { Table, Input, Button } from 'semantic-ui-react'
 
+import * as config from '../conf';
+
 export default class Header extends React.Component {
 
   static propTypes = {
@@ -14,7 +16,8 @@ export default class Header extends React.Component {
    * Sets default values of index to zero and data to empty object.
    */
   constructor(props) {
-    super()
+    super();
+    const authorizationHeader = config.getAuthorizationHeader();
     this.state = {
       index:1,
       data:{
@@ -24,7 +27,7 @@ export default class Header extends React.Component {
             neg: false
           },
           value: {
-            value: 'Intuit_IAM_Authentication intuit_appid=Intuit.platform.servicesplatform.config-manager,intuit_app_secret=preprdnsajTffUKBvEEqPVo6x12EhEyRCTTV9lVk',
+            value: authorizationHeader,
             neg: false
           }
         }
@@ -124,8 +127,8 @@ export default class Header extends React.Component {
         <Table columns={3}>
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell width={7}>Keys</Table.HeaderCell>
-              <Table.HeaderCell width={7}>Values</Table.HeaderCell>
+              <Table.HeaderCell width={3}>Keys</Table.HeaderCell>
+              <Table.HeaderCell width={11}>Values</Table.HeaderCell>
               <Table.HeaderCell />
             </Table.Row>
           </Table.Header>
@@ -133,12 +136,12 @@ export default class Header extends React.Component {
           <Table.Body>
             {Object.keys(data).map(index =>
               <Table.Row key={index}>
-                <Table.Cell negative={data[index].key.neg} width={7}>
+                <Table.Cell negative={data[index].key.neg} width={3}>
                   <Input defaultValue={data[index].key.value}
                     className={`key ${index}`} fluid transparent
                     placeholder='key' onChange={this.handleHeaderChange} />
                 </Table.Cell>
-                <Table.Cell negative={data[index].value.neg} width={7}>
+                <Table.Cell negative={data[index].value.neg} width={11}>
                   <Input defaultValue={data[index].value.value}
                     className={`value ${index}`} fluid transparent
                     placeholder='value' onChange={this.handleHeaderChange} />

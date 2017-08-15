@@ -104,12 +104,12 @@ export default class LabelMenu extends React.Component {
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {string} value - tag selection
    */
-  handleTagChange = (e, {value}) => {
+  handleTagChange = (e, {name}) => {
     this.setState({
       branch: null,
-      tag: value
+      tag: name
     })
-    this.props.updateLabel(value)
+    this.props.updateLabel(name)
   }
 
   render() {
@@ -134,7 +134,7 @@ export default class LabelMenu extends React.Component {
             tags.map(item =>
               <Menu.Item key={item.value} name={item.value}
                 content={item.value} active={tag === item.value}
-                onClick={this.handleBranchChange} />
+                onClick={this.handleTagChange} />
             )
           }
         </Menu>

@@ -9,8 +9,12 @@ import PropTypes from 'prop-types'
 
 import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'
+import * as config from '../conf';
 
-const proxy = 'http://localhost:3001/'
+const proxy = config.getProxyServerUrl();
+const currentEnv = config.getCurrentHostEnv().toString();
+console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
+
 const org = 'services-config'
 
 export default class Views extends React.Component {
@@ -34,7 +38,8 @@ export default class Views extends React.Component {
       yaml: '',
       properties: '',
       requests: [],
-      version: ''
+      version: '',
+      filter: []
     }
   }
 
@@ -231,6 +236,18 @@ export default class Views extends React.Component {
   }
 
   /**
+   * Callback function passed to PropSearch. Called when user selects
+   * new properties. Updates array of properties to view.
+   *
+   * @param {array} filter - array of properties to show (keys)
+   */
+  updateFilter = (filter) => {
+    this.setState({
+      filter
+    })
+  }
+
+  /**
    * Fetches data for all tabs. Updates requests, version, and all data and
    * creates key value pairs by calling updateValues. Handles bad requests.
    *
@@ -269,7 +286,7 @@ export default class Views extends React.Component {
 
   render() {
     const { activeIndex, json, yaml, properties,
-      requests, values, version } = this.state
+      requests, values, version, filter } = this.state
     const { metaURL, confURL } = this.props.urls
 
     let config = []
@@ -279,8 +296,11 @@ export default class Views extends React.Component {
       config = <Message error>{values}</Message>
     } else {
       keys = Object.keys(values)
+      const filtered = filter.length > 0 ?
+        keys.filter(key => filter.includes(key)) :
+        keys
       config =
-        <Accordion exclusive={false} panels={keys.map(key =>
+        <Accordion exclusive={false} panels={filtered.map(key =>
           this.formatPair(key, values[key]))} />
     }
 
@@ -300,7 +320,7 @@ export default class Views extends React.Component {
       {menuItem: 'Config', render: () =>
         <Tab.Pane>
           <Segment attached='top'>
-            <PropSearch options={keys} />
+            <PropSearch updateFilter={this.updateFilter} options={keys} />
           </Segment>
           <Segment attached='bottom' className='view'>
             {config}
@@ -327,7 +347,7 @@ export default class Views extends React.Component {
       },
       {
         menuItem:
-          <Menu.Item fitted disabled key='menu' position='right' >
+          <Menu.Item fitted='horizontally' disabled key='menu' position='right' >
             <Label color='grey'>{version}</Label>
           </Menu.Item>,
         render: () => {}
@@ -335,7 +355,7 @@ export default class Views extends React.Component {
     ]
 
     return (
-      <Tab panes={panes} onTabChange={this.handleTabChange} activeIndex={activeIndex} />
+      <Tab menu={{stackable: true, tabular: true, attached: true}} panes={panes} onTabChange={this.handleTabChange} activeIndex={activeIndex} />
     )
   }
 }
