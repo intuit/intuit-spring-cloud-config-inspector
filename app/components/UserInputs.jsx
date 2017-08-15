@@ -22,7 +22,8 @@ export default class UserInputs extends React.Component {
     repo: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
     appName: PropTypes.string.isRequired,
-    profiles: PropTypes.arrayOf(PropTypes.string).isRequired
+    profiles: PropTypes.arrayOf(PropTypes.string).isRequired,
+    portal: PropTypes.bool
   }
 
   constructor(props) {
@@ -227,15 +228,24 @@ export default class UserInputs extends React.Component {
 
   render() {
     const { active, button, url, app, profiles, label } = this.state
-    const { headerCount} = this.props
+    const { headerCount, portal } = this.props
 
+    // Hide url and appName field if in portal view
     return (
       <Form>
         <Form.Group widths='equal'>
-          <Form.Input onChange={this.handleURLChange} label='Config URL'
-            placeholder='config url...' value={url}/>
-          <Form.Input onChange={this.handleAppChange} label='App Name'
-            placeholder='app name...' value={app} />
+          {
+            portal ?
+            null :
+            <Form.Input onChange={this.handleURLChange} label='Config URL'
+              placeholder='config url...' value={url}/>
+          }
+          {
+            portal ?
+            null :
+            <Form.Input onChange={this.handleAppChange} label='App Name'
+              placeholder='app name...' value={app} />
+          }
           <Form.Dropdown label='Profiles' placeholder='profiles...'
             fluid multiple search selection scrolling
             options={this.state.options} value={profiles}

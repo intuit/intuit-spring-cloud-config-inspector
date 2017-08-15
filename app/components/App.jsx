@@ -16,6 +16,14 @@ import {Grid} from 'semantic-ui-react';
 
 export default class App extends React.Component {
 
+  static propTypes = {
+    label: PropTypes.string,
+    url: PropTypes.string,
+    appName: PropTypes.string,
+    profiles: PropTypes.arrayOf(PropTypes.string),
+    portal: PropTypes.bool
+  }
+
   /**
    * Sets default values of label, headerCount to 1 and headers
    * (show) to false.
@@ -117,7 +125,7 @@ export default class App extends React.Component {
     const { headerShow, headerCount, label,
       urls, headers, user, repo } = this.state
 
-    const { url, appName, profiles } = this.props
+    const { url, appName, profiles, portal } = this.props
 
     return (
       <div>
@@ -136,7 +144,8 @@ export default class App extends React.Component {
                 headerCount={headerCount}
                 label={label} updateURLs={this.updateURLs}
                 user={user} repo={repo} url={url}
-                appName={appName} profiles={profiles} />
+                appName={appName} profiles={profiles}
+                portal={portal} />
               <Headers show={headerShow}
                 updateHeaderCount={this.updateHeaderCount}
                 updateHeaders={this.updateHeaders} />
