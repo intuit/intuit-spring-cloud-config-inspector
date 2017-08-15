@@ -13,13 +13,16 @@ export default class UserInputs extends React.Component {
 
   static propTypes = {
     toggle: PropTypes.bool.isRequired,
-    transferData: PropTypes.func.isRequired,
+    updateLabel: PropTypes.func.isRequired,
     toggleHeaders: PropTypes.func.isRequired,
     headerCount: PropTypes.number.isRequired,
     label: PropTypes.string.isRequired,
     updateURLs: PropTypes.func.isRequired,
     user: PropTypes.string.isRequired,
-    repo: PropTypes.string.isRequired
+    repo: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+    appName: PropTypes.string.isRequired,
+    profiles: PropTypes.arrayOf(PropTypes.string).isRequired
   }
 
   constructor(props) {
@@ -28,14 +31,18 @@ export default class UserInputs extends React.Component {
       options: [{value: 'default', text: 'default'}],
       index: 0,
       button: 'Expand',
-      toggle: this.props.toggle,
-      inputData: {
-        url: 'https://config-e2e.api.intuit.com/v2',
-        app: '',
-        profiles: ['default'],
-        label: 'master'
-      }
+      toggle: props.toggle,
+      url: props.url,
+      app: props.appName,
+      profiles: props.profiles,
+      label: props.label
     }
+
+
+  }
+
+  componentWillMount() {
+    if (this.state.app !== '') this.handleGo()
   }
 
   /**
@@ -44,8 +51,8 @@ export default class UserInputs extends React.Component {
    * results, add label 'Not found' to new input
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
-   * @param {object} props
-   * @param {string} props.value - current entered value
+   * @param {object} data - All props and the new item's value.
+   * @param {string} data.value - current entered value
    */
   handleAddition = (e, {value}) => {
     if (!this.state.options.find( (option) => option.value === value )) {
@@ -74,34 +81,28 @@ export default class UserInputs extends React.Component {
   }
 
   /**
-   * Change the 'url' in parent App component using
-   * callback function whenever input field changes
+   * Change the value of 'url' in inputData
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
-   * @param {object} props
-   * @param {string} props.value - current input
+   * @param {object} data - All props and proposed value.
+   * @param {string} data.value - current input
    */
   handleURLChange = (e, {value}) => {
-    const inputData = this.state.inputData
-    inputData['url'] = value
     this.setState({
-      inputData
+      url: value
     })
   }
 
   /**
-   * Change the 'app' in parent App component using
-   * callback function whenever input field changes
+   * Change the value of 'app' in inputData
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
-   * @param {object} props
-   * @param {string} props.value - current input
+   * @param {object} data - All props and proposed value.
+   * @param {string} data.value - current input
    */
   handleAppChange = (e, {value}) => {
-    const inputData = this.state.inputData
-    inputData['app'] = value
     this.setState({
-      inputData
+      app: value
     })
   }
 
@@ -110,14 +111,12 @@ export default class UserInputs extends React.Component {
    * callback function whenever input field changes
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
-   * @param {object} props
-   * @param {string} props.value - current input
+   * @param {object} data - All props and proposed value.
+   * @param {string} data.value - current input
    */
   handleLabelChange = (e, {value}) => {
-    const inputData = this.state.inputData
-    inputData['label'] = value
     this.setState({
-      inputData
+      label: value
     })
   }
 
@@ -126,8 +125,8 @@ export default class UserInputs extends React.Component {
    * selected and removes default if any are.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
-   * @param {object} props
-   * @param {string[]} props.value - current input array
+   * @param {object} data - All props and proposed value.
+   * @param {string[]} data.value - current input array
    */
   handleProfileChange = (e, {value}) => {
     let profiles = value
@@ -139,10 +138,8 @@ export default class UserInputs extends React.Component {
         profiles.splice(index, 1)
       }
     }
-    const inputData = this.state.inputData
-    inputData['profiles'] = profiles
     this.setState({
-      inputData
+      profiles
     })
   }
 
@@ -161,13 +158,12 @@ export default class UserInputs extends React.Component {
   }
 
   /**
-   * Called from Sumbit button, updates inputData and URLs in parent
+   * Called from Sumbit button, updates label and URLs in parent
    * App component. Replaces forward slashes in label with (_).
    */
   handleGo = () => {
-    const {inputData} = this.state
-    this.props.transferData(this.state.inputData)
-    const {url, app, profiles, label} = inputData
+    const {url, app, profiles, label} = this.state
+    this.props.updateLabel(label)
 
     // For localhost, use the url in the app, or else use the configured ones
     const currentEnv = config.getCurrentHostEnv();
@@ -194,17 +190,15 @@ export default class UserInputs extends React.Component {
     if (label !== this.props.label ||
         user !== this.props.user ||
         repo !== this.props.repo) {
-      const inputData = this.state.inputData
       if (label !== this.props.label) {
-        inputData['label'] = label
-        const {url, app, profiles} = inputData
+        const { url, app, profiles } = this.state
         const urls = {
           metaURL: `${url}/${app}/${profiles}/${label.replace(/\//g, '(_)')}`,
           confURL: `${url}/${label.replace(/\//g, '(_)')}/${app}-${profiles}`
         }
         this.props.updateURLs(urls)
         this.setState({
-          inputData
+          label
         })
       }
       fetch(`${urlHeader}/${user}/${repo}/${urlFooter}${token}&ref=${label}`).then(
@@ -215,7 +209,7 @@ export default class UserInputs extends React.Component {
           return response.json()
         }
       ).then(contents => {
-        const { app } = inputData
+        const { app } = this.state
         const files = contents.filter(f => f.name.startsWith(app))
         const options = files.map(f => {
           let profile = f.name.substring(
@@ -232,8 +226,7 @@ export default class UserInputs extends React.Component {
   }
 
   render() {
-    const { active, button } = this.state
-    const { url, app, profiles, label } = this.state.inputData
+    const { active, button, url, app, profiles, label } = this.state
     const { headerCount} = this.props
 
     return (
