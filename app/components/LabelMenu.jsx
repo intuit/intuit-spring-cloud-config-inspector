@@ -66,8 +66,8 @@ export default class LabelMenu extends React.Component {
     }
 
     if (this.props.label != label) {
-      const branchKeys = branches.map(b => b.key)
-      const tagKeys = tags.map(t => t.key)
+      const branchKeys = branches.map(b => b.value)
+      const tagKeys = tags.map(t => t.value)
       if (branchKeys.includes(label)) {
         this.setState({
           branch: label,
@@ -87,7 +87,8 @@ export default class LabelMenu extends React.Component {
    * callback function to update parent App component
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
-   * @param {string} value - branch selection
+   * @param {object} data
+   * @param {string} data.name - branch selection
    */
   handleBranchChange = (e, {name}) => {
     this.setState({
@@ -102,7 +103,8 @@ export default class LabelMenu extends React.Component {
    * callback function to update parent App component
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
-   * @param {string} value - tag selection
+   * @param {object} data
+   * @param {string} data.name - tag selection
    */
   handleTagChange = (e, {name}) => {
     this.setState({
