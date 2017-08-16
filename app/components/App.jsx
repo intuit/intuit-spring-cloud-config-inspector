@@ -16,19 +16,22 @@ import {Grid} from 'semantic-ui-react';
 
 export default class App extends React.Component {
 
+  static propTypes = {
+    label: PropTypes.string,
+    url: PropTypes.string,
+    appName: PropTypes.string,
+    profiles: PropTypes.arrayOf(PropTypes.string),
+    portal: PropTypes.bool
+  }
+
   /**
-   * Sets default values of inputData, headerCount to zero and headers
+   * Sets default values of label, headerCount to 1 and headers
    * (show) to false.
    */
   constructor(props) {
     super(props)
     this.state = {
-      inputData: {
-        'url': 'https://config-e2e.api.intuit.com/v2',
-        'app': '{app}',
-        'profiles': 'default',
-        'label': 'master'
-      },
+      label: props.label,
       headerShow: false,
       headerCount: 1,
       headers: {},
@@ -39,30 +42,14 @@ export default class App extends React.Component {
   }
 
   /**
-   * Callback function passed to UserInputs. Updates inputData which
-   * is used by UserControls to generate URLs. Called when an inputs
-   * are submitted.
-   *
-   * @param {array} data - new inputData
-   */
-  getInputData = (data) => {
-    const inputData = {...data}
-    this.setState({
-      inputData
-    })
-  }
-
-  /**
    * Callback function passed to LabelMenu. Called when user selects
-   * new label. Updates inputData which updates User Inputs and urls.
+   * new label. Updates label which may affect UserInputs or LabelMenu.
    *
    * @param {string} label - new label
    */
   updateLabel = (label) => {
-    const inputData = {...this.state.inputData}
-    inputData.label = label
     this.setState({
-      inputData
+      label
     })
   }
 
@@ -135,8 +122,10 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { headerShow, headerCount, inputData,
+    const { headerShow, headerCount, label,
       urls, headers, user, repo } = this.state
+
+    const { url, appName, profiles, portal } = this.props
 
     return (
       <div>
@@ -150,12 +139,13 @@ export default class App extends React.Component {
             <TopMenu />
             <div className='custom'>
               <UserInputs toggle={headerShow}
-                transferData={this.getInputData}
+                updateLabel={this.updateLabel}
                 toggleHeaders={this.toggleHeaders}
                 headerCount={headerCount}
-                label={inputData.label}
-                updateURLs={this.updateURLs}
-                user={user} repo={repo} />
+                label={label} updateURLs={this.updateURLs}
+                user={user} repo={repo} url={url}
+                appName={appName} profiles={profiles}
+                portal={portal} />
               <Headers show={headerShow}
                 updateHeaderCount={this.updateHeaderCount}
                 updateHeaders={this.updateHeaders} />
@@ -169,7 +159,7 @@ export default class App extends React.Component {
                     updateUserRepo={this.updateUserRepo} />
                 </Grid.Column>
                 <LabelMenu updateLabel={this.updateLabel}
-                  label={inputData.label}
+                  label={label}
                   user={user} repo={repo} />
             </Grid>
           </div>
@@ -177,4 +167,11 @@ export default class App extends React.Component {
       </div>
     )
   }
+}
+
+App.defaultProps = {
+  url: 'https://config-e2e.api.intuit.com/v2',
+  appName: '',
+  profiles: ['default'],
+  label: 'master'
 }

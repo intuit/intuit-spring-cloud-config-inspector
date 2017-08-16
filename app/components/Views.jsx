@@ -65,7 +65,7 @@ export default class Views extends React.Component {
    * values come from.
    *
    * @param {string} key - current key
-   * @param {object} values - the array of values and locations
+   * @param {object[]} values - the array of values and locations
    * @returns {object} A panel for the Config Accordion
    */
   formatPair = (key, values) => {
@@ -106,17 +106,18 @@ export default class Views extends React.Component {
    * to provided array requests. Throws an error if bad request.
    *
    * @param {string} url - url
-   * @param {array} requests - array of responses and response info
+   * @param {object[]} requests - array of responses and response info
+   * @param {object} headers - current headers
    * @returns {Promise} Either text of response or Error to be caught
    */
-  fetchFile(url, requests) {
+  fetchFile(url, requests, headers) {
     const intuit_tid = this.getTID()
     const completeURL = `${proxy}${url}`
     return fetch(completeURL, {
       headers: {
         intuit_tid,
         'X-Application-Name': 'services-config/config-inspector',
-        ...this.props.headers
+        ...headers
       }
     })
     .then(response => {
@@ -138,7 +139,7 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Creates pretty printed code from string of raw data
+   * Creates pretty printed code from string of raw data.
    *
    * @param {string} ext - extension (json, yaml, properties)
    * @returns {ReactElement} Tab Pane with formatted code
@@ -159,11 +160,12 @@ export default class Views extends React.Component {
    *
    * @param {string} url - metadata url
    * @param {string} ext - extension (json, yaml, properties)
-   * @param {array} requests - array of responses and response info
+   * @param {object[]} requests - array of responses and response info
+   * @param {object} headers - current headers
    */
-  getRawData(url, ext, requests) {
+  getRawData(url, ext, requests, headers) {
     if (url) {
-      this.fetchFile(url + '.' + ext, requests)
+      this.fetchFile(url + '.' + ext, requests, headers)
       .then(response => {
         let code
         if (ext === 'json') {
@@ -208,7 +210,7 @@ export default class Views extends React.Component {
    * the property files in metadata. Updates state. Finds user and repo
    * name in first github url and updates both in parent App component.
    *
-   * @param {array} files - Array of propertyfiles from metadata
+   * @param {object[]} files - Array of propertyfiles from metadata
    */
   updateValues = (files) => {
     let values = {}
@@ -239,7 +241,7 @@ export default class Views extends React.Component {
    * Callback function passed to PropSearch. Called when user selects
    * new properties. Updates array of properties to view.
    *
-   * @param {array} filter - array of properties to show (keys)
+   * @param {string[]} filter - array of properties to show (keys)
    */
   updateFilter = (filter) => {
     this.setState({
@@ -253,15 +255,16 @@ export default class Views extends React.Component {
    *
    * @param {object} nextProps
    * @param {object} nextProps.urls - metaURL and confURL from new props
+   * @param {object} nextProps.headers - current headers
    */
-  componentWillReceiveProps({urls}) {
-    if (this.props.urls != urls) {
+  componentWillReceiveProps({urls, headers}) {
+    if (this.props.urls != urls || this.props.headers != headers) {
       let requests = []
-      this.fetchFile(urls.metaURL, requests)
+      this.fetchFile(urls.metaURL, requests, headers)
       .then(response => {
-        this.getRawData(urls.confURL, 'json', requests)
-        this.getRawData(urls.confURL, 'yaml', requests)
-        this.getRawData(urls.confURL, 'properties', requests)
+        this.getRawData(urls.confURL, 'json', requests, headers)
+        this.getRawData(urls.confURL, 'yaml', requests, headers)
+        this.getRawData(urls.confURL, 'properties', requests, headers)
         this.setState({requests})
         return JSON.parse(response)
       })
@@ -348,7 +351,7 @@ export default class Views extends React.Component {
       {
         menuItem:
           <Menu.Item fitted='horizontally' disabled key='menu' position='right' >
-            <Label color='grey'>{version}</Label>
+            <Label color='grey'>{version.substring(0, 7)}</Label>
           </Menu.Item>,
         render: () => {}
       }
