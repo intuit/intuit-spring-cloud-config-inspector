@@ -342,6 +342,7 @@ export default class Views extends React.Component {
           this.formatPair(key, values[key]))} />
     }
 
+    // api logs
     const panels = requests.map((item, index) => ({
       title: item.response.url.replace('http://localhost:3001/', ''),
       content:
@@ -355,7 +356,7 @@ export default class Views extends React.Component {
         </List>
     }))
 
-    // Config values, json, yaml, properties tab content
+    // tab content
     const panes = [
       {menuItem: 'Config', render: () =>
         <Tab.Pane>
