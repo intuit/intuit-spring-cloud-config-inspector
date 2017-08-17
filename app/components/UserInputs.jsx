@@ -269,7 +269,7 @@ export default class UserInputs extends React.Component {
               <Form.Input onChange={this.handleInputChange}
                 label='App Name' name='appName'
                 placeholder='app name...' value={appName} />
-              <Form.Field width={2}>
+              <Form.Field>
                 <label>Headers</label>
                 <Menu color='grey' compact inverted>
                   <Menu.Item onClick={this.handleClick} active={toggle}>
@@ -278,7 +278,9 @@ export default class UserInputs extends React.Component {
                   </Menu.Item>
                 </Menu>
               </Form.Field>
-              <Form.Button width={1} label='Submit'>Go</Form.Button>
+              <Form.Button width={1} floated='right'
+                label={<label style={{visibility: 'hidden'}}>Submit</label>}
+                content='Submit' />
             </Form.Group>
           </Form>
         }
