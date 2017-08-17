@@ -8,7 +8,6 @@ export default class Header extends React.Component {
 
   static propTypes = {
     show: PropTypes.bool.isRequired,
-    updateHeaderCount: PropTypes.func.isRequired,
     updateHeaders: PropTypes.func.isRequired
   }
 
@@ -57,8 +56,8 @@ export default class Header extends React.Component {
 
   /**
    * Called when a delete button is clicked. Finds key-value pair in
-   * data based on className of button and deletes it. Decreases
-   * Header count and calls updateHeaderCount to send update to parent.
+   * data based on className of button and deletes it. Calls updateHeaders
+   * to send update to parent.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} object - Button object. className is index
@@ -67,9 +66,8 @@ export default class Header extends React.Component {
   handleDelete = (e, object) => {
     const data = this.state.data
     delete data[object.className]
-    const newCount = Object.keys(data).length
 
-    this.props.updateHeaderCount(newCount)
+    this.props.updateHeaders(data, Object.keys(data).length)
     this.setState({
       data
     })
@@ -78,8 +76,7 @@ export default class Header extends React.Component {
   /**
    * Called when 'Add new key-value pair' clicked. If field is not
    * filled turns box red and prevents add. Otherwise adds empty pair to
-   * data and increments count. Calls updateHeaderCount to send update
-   * to parent. Increments index.
+   * data. Calls updateHeaders to send update to parent. Increments index.
    */
   handleClick = () => {
     const key = this.state.index
@@ -106,8 +103,7 @@ export default class Header extends React.Component {
       // Add new empty row with index
       data[key] = {key: {value: '', neg: false}, value: {value: '', neg: false}}
 
-      const newCount = Object.keys(data).length
-      this.props.updateHeaderCount(newCount)
+      this.props.updateHeaders(data, Object.keys(data).length)
 
       this.setState({
         index: key + 1,
@@ -116,8 +112,12 @@ export default class Header extends React.Component {
     }
   }
 
+  /**
+   * Call once to render default headers
+   */
   componentWillMount() {
-    this.props.updateHeaders(this.state.data)
+    const {data} = this.state
+    this.props.updateHeaders(data, Object.keys(data).length)
   }
 
   render() {

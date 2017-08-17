@@ -1,9 +1,33 @@
 const packageJson = require("../package.json");
 
+export const GIT_URL = 'https://github.intuit.com/api/v3/repos'
+
 export const API_KEYS = {
-  prod: 'prdakyresqVtieRPwHQpY3BOGTuUmpPHtpIP0967',
-  preProd: 'preprdakyresAHvjVfSRprXTDr5jWdSDX7H68eLC'
+  prod: 'prdakyresk43bOEZ0adQWBF3hRw8vfAOxq3rWPXg',
+  preProd: 'preprdakyresGHM824zIZ1pQ2jdP7VbRsCWGKSzC'
 };
+
+/**
+ * Current Credentials
+ */
+export const PROXY_CREDENTIALS = {
+  manager: {
+    preProd: {
+      appId: "Intuit.platform.servicesplatform.config-manager",
+      appSecret: "preprdnsajTffUKBvEEqPVo6x12EhEyRCTTV9lVk"
+    }
+  },
+  inspector: {
+    preProd: {
+      appId: "Intuit.platform.servicesplatform.config.inspector",
+      appSecret: "preprdakyresGHM824zIZ1pQ2jdP7VbRsCWGKSzC"
+    },
+    prod: {
+      appId: "Intuit.platform.servicesplatform.config.inspector",
+      appSecret: "prdakyresk43bOEZ0adQWBF3hRw8vfAOxq3rWPXg"
+    }
+  }
+}
 
 /**
  * The current environments where the add-on might run
@@ -63,14 +87,6 @@ export function getCurrentHostEnv() {
 }
 
 /**
- * return the current api key to be used in the headers
- */
-export function getAPIKey() {
-  const currentHost = getCurrentHostEnv();
-  return currentHost === Env.PRD ? API_KEYS.prod : API_KEYS.preProd;
-}
-
-/**
  * return the current environment based on the host.
  */
 export function getProxyServerUrl() {
@@ -78,6 +94,33 @@ export function getProxyServerUrl() {
   return `${SERVICES.proxyServer[currentEnv]}/`;
 }
 
+/**
+ * @return the current credentials for the header.
+ */
+export function getProxyCredentials() {
+  const currentEnv = getCurrentHostEnv();
+
+  if (Env.PRD === currentEnv) {
+    return PROXY_CREDENTIALS.inspector.prod;
+  }
+
+  if ([Env.E2E, Env.QAL, Env.DEV, Env.MOCK].includes(currentEnv)) {
+    return PROXY_CREDENTIALS.inspector.preProd;
+  }
+
+  return PROXY_CREDENTIALS.manager.preProd;
+}
+
+/**
+ * @return the Authorization header value.
+ */
 export function getAuthorizationHeader() {
-  return "Intuit_IAM_Authentication intuit_appid=Intuit.platform.servicesplatform.config-manager,intuit_app_secret=preprdnsajTffUKBvEEqPVo6x12EhEyRCTTV9lVk";
+  const currentEnv = getCurrentHostEnv();
+  const credentials = getProxyCredentials();
+  if (Env.LOCAL === currentEnv) {
+    return `Intuit_IAM_Authentication intuit_appid=${credentials.appId},intuit_app_secret=${credentials.appSecret}`;
+
+  } else {
+    return `Intuit_APIKey intuit_appid=${credentials.appId},intuit_apikey=${credentials.appSecret},intuit_apikey_version=1.0`;
+  }
 }

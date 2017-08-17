@@ -5,14 +5,12 @@ import PropTypes from 'prop-types';
 /* component imports */
 import DropDown from './dropdown.jsx';
 import UserInputs from './UserInputs.jsx';
-import LabelMenu from './LabelMenu.jsx';
 import Views from './Views.jsx'
 import TopMenu from './TopMenu.jsx'
-import Headers from './Headers.jsx'
 
 import './app.scss';
 
-import {Grid} from 'semantic-ui-react';
+import * as config from '../conf'
 
 export default class App extends React.Component {
 
@@ -21,29 +19,60 @@ export default class App extends React.Component {
     url: PropTypes.string,
     appName: PropTypes.string,
     profiles: PropTypes.arrayOf(PropTypes.string),
+    headers: PropTypes.object,
     portal: PropTypes.bool
   }
 
-  /**
-   * Sets default values of label, headerCount to 1 and headers
-   * (show) to false.
-   */
   constructor(props) {
     super(props)
     this.state = {
-      label: props.label,
-      headerShow: false,
-      headerCount: 1,
-      headers: {},
+      headers: props.headers,
       urls: {},
       user: '',
-      repo: ''
+      repo: '',
+      appName: props.appName,
+      url: props.url,
+      profiles: props.profiles,
+      label: props.label
     }
   }
 
   /**
-   * Callback function passed to LabelMenu. Called when user selects
-   * new label. Updates label which may affect UserInputs or LabelMenu.
+   * Callback function passed to UserInputs. Updates url, appName,
+   * and headers and updates the urls.
+   *
+   * @param {string} url - new url
+   * @param {string} appName - new appName
+   * @param {object} headers - new headers
+   */
+  updateInfo = (url, appName, headers) => {
+    this.setState({
+      url,
+      appName
+    })
+    if (!this.props.portal) {
+      this.setState({
+        headers
+      })
+    }
+    this.updateURLs(url, appName)
+  }
+
+  /**
+   * Callback function passed to UserInputs. Updates profiles and urls.
+   *
+   * @param {string[]} profiles - new profiles
+   */
+  updateProfiles = (profiles) => {
+    this.setState({
+      profiles
+    })
+    this.updateURLs(this.state.url, this.state.appName,
+      profiles, this.state.label)
+  }
+
+  /**
+   * Callback function passed to UserInputs. Updates label and urls.
    *
    * @param {string} label - new label
    */
@@ -51,58 +80,29 @@ export default class App extends React.Component {
     this.setState({
       label
     })
+    this.updateURLs(this.state.url, this.state.appName,
+      this.state.profiles, label)
   }
 
   /**
-   * Callback function passed to UserInputs. Updates bool header
-   * which determines whether headers table is visible or not. Called
-   * when button is clicked in UserInputs.
-   */
-  toggleHeaders = () => {
-    this.setState({
-      headerShow: !(this.state.headerShow)
-    })
-  }
-
-  /**
-   * Callback function passed to Headers. Updates number headerCount
-   * which determines the number of headers to be displayed above
-   * Headers button in UserInputs. Called when a header row is added
-   * or removed.
+   * Creates new urls based on parameters. Replaces forward slashes in
+   * label with (_). If no profiles or label provided, resets to defaults.
    *
-   * @param {number} headerCount - number of header rows
+   * @param {string} url - server url
+   * @param {string} appName
+   * @param {string[]} profiles - i.e. dev, e2e, qal...
+   * @param {string} label - branch or tag
    */
-  updateHeaderCount = (headerCount) => {
-    this.setState({
-      headerCount
-    })
-  }
+  updateURLs(url, appName, profiles=['default'], label='master') {
+    // For localhost, use the url in the app, or else use the configured ones
+    const currentEnv = config.getCurrentHostEnv();
+    const envUrl = currentEnv === config.Env.LOCAL ? `${url}/` : "";
 
-  /**
-   * Callback function passed to Headers. Updates number headerCount
-   * which determines the number of headers to be displayed above
-   * Headers button in UserInputs. Called when a header row is added
-   * or removed.
-   *
-   * @param {number} data - number of header rows
-   */
-  updateHeaders = (data) => {
-    let headers = {}
-    for (var index in data) {
-      headers[data[index].key.value] = data[index].value.value
+    const urls = {
+      metaURL: `${envUrl}${appName}/${profiles}/${label.replace(/\//g, '(_)')}`,
+      confURL: `${envUrl}${label.replace(/\//g, '(_)')}/${appName}-${profiles}`
     }
-    this.setState({
-      headers
-    })
-  }
 
-  /**
-   * Callback function passed to UserInputs. Updates object urls
-   * which contains metaURL and confURL. urls used in Views.
-   *
-   * @param {object} urls - metaURL and confURL
-   */
-  updateURLs = (urls) => {
     this.setState({
       urls
     })
@@ -122,10 +122,11 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { headerShow, headerCount, label,
-      urls, headers, user, repo } = this.state
+    const { urls, headers, user, repo, url, appName, profiles, label } = this.state
 
-    const { url, appName, profiles, portal } = this.props
+    console.log(headers)
+
+    const { portal } = this.props
 
     return (
       <div>
@@ -137,31 +138,17 @@ export default class App extends React.Component {
           transitionLeaveTimeout={500}>
           <div className='app'>
             <TopMenu />
-            <div className='custom'>
-              <UserInputs toggle={headerShow}
-                updateLabel={this.updateLabel}
-                toggleHeaders={this.toggleHeaders}
-                headerCount={headerCount}
-                label={label} updateURLs={this.updateURLs}
-                user={user} repo={repo} url={url}
-                appName={appName} profiles={profiles}
-                portal={portal} />
-              <Headers show={headerShow}
-                updateHeaderCount={this.updateHeaderCount}
-                updateHeaders={this.updateHeaders} />
-              <br/>
-            </div>
+            <UserInputs user={user} repo={repo} url={url}
+              appName={appName} profiles={profiles}
+              label={label} portal={portal}
+              updateInfo={this.updateInfo}
+              updateLabel={this.updateLabel}
+              updateProfiles={this.updateProfiles} />
+            <br/>
           </div>
           <div className='custom'>
-            <Grid stackable columns='equal'>
-                <Grid.Column stretched>
-                  <Views urls={urls} headers={headers}
-                    updateUserRepo={this.updateUserRepo} />
-                </Grid.Column>
-                <LabelMenu updateLabel={this.updateLabel}
-                  label={label}
-                  user={user} repo={repo} />
-            </Grid>
+            <Views urls={urls} headers={headers}
+              updateUserRepo={this.updateUserRepo} />
           </div>
         </ReactCSSTransitionGroup>
       </div>
@@ -173,5 +160,6 @@ App.defaultProps = {
   url: 'https://config-e2e.api.intuit.com/v2',
   appName: '',
   profiles: ['default'],
-  label: 'master'
+  label: 'master',
+  headers: {}
 }

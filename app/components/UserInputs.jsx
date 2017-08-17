@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 
+import Headers from './Headers.jsx'
+
 import { Form, Label, Menu } from 'semantic-ui-react';
 
-const urlHeader = 'https://github.intuit.com/api/v3/repos'
-const urlFooter = 'contents?access_token='
 const token = '726db489b8e34fa7b78540917245031cde359bbc'
 
 import * as config from '../conf';
@@ -12,38 +12,40 @@ import * as config from '../conf';
 export default class UserInputs extends React.Component {
 
   static propTypes = {
-    toggle: PropTypes.bool.isRequired,
-    updateLabel: PropTypes.func.isRequired,
-    toggleHeaders: PropTypes.func.isRequired,
-    headerCount: PropTypes.number.isRequired,
-    label: PropTypes.string.isRequired,
-    updateURLs: PropTypes.func.isRequired,
     user: PropTypes.string.isRequired,
     repo: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
     appName: PropTypes.string.isRequired,
     profiles: PropTypes.arrayOf(PropTypes.string).isRequired,
-    portal: PropTypes.bool
+    label: PropTypes.string.isRequired,
+    portal: PropTypes.bool,
+    updateInfo: PropTypes.func.isRequired,
+    updateLabel: PropTypes.func.isRequired,
+    updateProfiles: PropTypes.func.isRequired
   }
 
   constructor(props) {
     super(props)
     this.state = {
-      options: [{value: 'default', text: 'default'}],
+      profOptions: [{value: 'default', text: 'default'}],
+      labelOptions: [{value: 'master', text: 'master', icon: 'fork'}],
       index: 0,
-      button: 'Expand',
-      toggle: props.toggle,
+      toggle: false,
       url: props.url,
-      app: props.appName,
+      appName: props.appName,
       profiles: props.profiles,
-      label: props.label
+      label: props.label,
+      headerCount: 1,
+      headers: {}
     }
 
 
   }
 
   componentWillMount() {
-    if (this.state.app !== '') this.handleGo()
+    if (this.props.portal) {
+      this.handleSubmit()
+    }
   }
 
   /**
@@ -56,10 +58,10 @@ export default class UserInputs extends React.Component {
    * @param {string} data.value - current entered value
    */
   handleAddition = (e, {value}) => {
-    if (!this.state.options.find( (option) => option.value === value )) {
+    if (!this.state.profOptions.find( (option) => option.value === value )) {
       let label = { color:'red', content:'Not found' }
       this.setState({
-        options: [{text:value, value, label}, ...this.state.options]
+        profOptions: [{text:value, value, label}, ...this.state.profOptions]
       })
     }
   }
@@ -82,28 +84,16 @@ export default class UserInputs extends React.Component {
   }
 
   /**
-   * Change the value of 'url' in inputData
+   * Update the value of input field
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} data - All props and proposed value.
+   * @param {string} data.name - name of input field (url, appName)
    * @param {string} data.value - current input
    */
-  handleURLChange = (e, {value}) => {
+  handleInputChange = (e, {name, value}) => {
     this.setState({
-      url: value
-    })
-  }
-
-  /**
-   * Change the value of 'app' in inputData
-   *
-   * @param {SyntheticEvent} e - React's original SyntheticEvent.
-   * @param {object} data - All props and proposed value.
-   * @param {string} data.value - current input
-   */
-  handleAppChange = (e, {value}) => {
-    this.setState({
-      app: value
+      [name]: value
     })
   }
 
@@ -115,10 +105,11 @@ export default class UserInputs extends React.Component {
    * @param {object} data - All props and proposed value.
    * @param {string} data.value - current input
    */
-  handleLabelChange = (e, {value}) => {
+  handleLabelChange = (e, data) => {
     this.setState({
-      label: value
+      label: data.value
     })
+    this.props.updateLabel(data.value)
   }
 
   /**
@@ -131,7 +122,7 @@ export default class UserInputs extends React.Component {
    */
   handleProfileChange = (e, {value}) => {
     let profiles = value
-    if (value.length === 0) {
+    if (value.length === 0 || value[value.length - 1] === 'default') {
       profiles = ['default']
     } else {
       const index = profiles.indexOf('default')
@@ -142,67 +133,72 @@ export default class UserInputs extends React.Component {
     this.setState({
       profiles
     })
+    this.props.updateProfiles(profiles)
   }
 
   /**
-   * Called from Headers button, switches between hide and show
-   * and calls toggleHeaders to update parent.
+   * Called from Headers button, switches between Collapse
+   * and Expand, showing/revealing headers.
    */
   handleClick = () => {
-    const toggle = !this.state.toggle
     this.setState({
-      active: !this.state.active,
-      button: toggle ? 'Collapse' : 'Expand',
-      toggle
+      toggle: !this.state.toggle
     })
-    this.props.toggleHeaders()
   }
 
   /**
-   * Called from Sumbit button, updates label and URLs in parent
-   * App component. Replaces forward slashes in label with (_).
+   * Called from Sumbit button, updates url, appName, and headers in
+   * parent App component. Resets label and profiles to defaults.
    */
-  handleGo = () => {
-    const {url, app, profiles, label} = this.state
-    this.props.updateLabel(label)
+  handleSubmit = () => {
+    const {url, appName, headers} = this.state
 
-    // For localhost, use the url in the app, or else use the configured ones
-    const currentEnv = config.getCurrentHostEnv();
-    const envUrl = currentEnv === config.Env.LOCAL ? `${url}/` : "";
+    this.setState({
+      label: 'master',
+      profiles: ['default']
+    })
+    this.props.updateInfo(url, appName, headers)
 
-    const urls = {
-      metaURL: `${envUrl}${app}/${profiles}/${label.replace(/\//g, '(_)')}`,
-      confURL: `${envUrl}${label.replace(/\//g, '(_)')}/${app}-${profiles}`
+  }
+
+  /**
+   * Callback function passed to Headers. Creates a dict containint
+   * headers key-value pairs
+   *
+   * @param {object[]} data - maps index to an object containing a key
+   * and value object, each of which have a value and a bool 'neg'
+   * @param {number} [headerCount] - number of headers
+   */
+  updateHeaders = (data, headerCount) => {
+    let headers = {}
+    for (var index in data) {
+      headers[data[index].key.value] = data[index].value.value
     }
-    this.props.updateURLs(urls)
+    this.setState({
+      headers
+    })
+    if (headerCount !== undefined) {
+      this.setState({
+        headerCount
+      })
+    }
   }
 
   /**
    * If the label in labelmenu changes, update inputData and urls. If
    * either label, user, or repo changed, fetch list of profiles from
-   * github and update options.
+   * github and update profOptions.
    *
    * @param {object} nextProps
    * @param {string} nextProps.label - new label from labelmenu
    * @param {string} nextProps.user - current user (i.e. services-config)
    * @param {string} nextProps.repo - current repo
    */
-  componentWillReceiveProps({label, user, repo}) {
-    if (label !== this.props.label ||
-        user !== this.props.user ||
-        repo !== this.props.repo) {
-      if (label !== this.props.label) {
-        const { url, app, profiles } = this.state
-        const urls = {
-          metaURL: `${url}/${app}/${profiles}/${label.replace(/\//g, '(_)')}`,
-          confURL: `${url}/${label.replace(/\//g, '(_)')}/${app}-${profiles}`
-        }
-        this.props.updateURLs(urls)
-        this.setState({
-          label
-        })
-      }
-      fetch(`${urlHeader}/${user}/${repo}/${urlFooter}${token}&ref=${label}`).then(
+  componentWillReceiveProps({user, repo}) {
+    if (user !== this.props.user || repo !== this.props.repo) {
+      fetch(
+        `${config.GIT_URL}/${user}/${repo}/contents?access_token=${token}`
+      ).then(
         response => {
           if (response.status >= 400) {
             throw new Error("bad")
@@ -210,62 +206,88 @@ export default class UserInputs extends React.Component {
           return response.json()
         }
       ).then(contents => {
-        const { app } = this.state
-        const files = contents.filter(f => f.name.startsWith(app))
-        const options = files.map(f => {
+        const { appName } = this.state
+        const files = contents.filter(f => f.name.startsWith(appName))
+        const profOptions = files.map(f => {
           let profile = f.name.substring(
-            f.name.indexOf(`${app}-`) + app.length + 1, f.name.lastIndexOf('.')
+            f.name.indexOf(`${appName}-`) + appName.length + 1, f.name.lastIndexOf('.')
           )
           profile = profile === '' ? 'default' : profile
-          return {key: profile, text: profile, value: profile}
+          return {text: profile, value: profile}
         })
         this.setState({
-          options
+          profOptions
         })
-      })
+      }).catch(err => console.log(err.message))
+      fetch(
+        `${config.GIT_URL}/${user}/${repo}/git/refs?access_token=${token}&per_page=100`
+      ).then(response => {
+        if (response.status >= 400) {
+          throw new Error(response.json())
+        }
+        return response.json()
+      }).then(refs => {
+        const tagRefs = refs.filter((r) => r.ref.startsWith('refs/tags'))
+        const tags = tagRefs.map((r) => ({value: r.ref.split('refs/tags/')[1], text: r.ref.split('refs/tags/')[1], icon: 'tag'}))
+        const branchRefs = refs.filter((r) => r.ref.startsWith('refs/heads'))
+        const branches = branchRefs.map((r) => ({value: r.ref.split('refs/heads/')[1], text: r.ref.split('refs/heads/')[1], icon: 'fork'}))
+        this.setState({
+          labelOptions: branches.concat(tags)
+        })
+      }).catch(err => console.log(err.message))
     }
   }
 
   render() {
-    const { active, button, url, app, profiles, label } = this.state
-    const { headerCount, portal } = this.props
+    const { button, url, appName, profiles,
+      label, profOptions, labelOptions,
+      toggle, headerCount } = this.state
+    const { portal } = this.props
 
     // Hide url and appName field if in portal view
     return (
-      <Form>
-        <Form.Group widths='equal'>
-          {
-            portal ?
-            null :
-            <Form.Input onChange={this.handleURLChange} label='Config URL'
-              placeholder='config url...' value={url}/>
-          }
-          {
-            portal ?
-            null :
-            <Form.Input onChange={this.handleAppChange} label='App Name'
-              placeholder='app name...' value={app} />
-          }
-          <Form.Dropdown label='Profiles' placeholder='profiles...'
-            fluid multiple search selection scrolling
-            options={this.state.options} value={profiles}
-            allowAdditions additionLabel='Add: ' onAddItem={this.handleAddition}
-            renderLabel={this.renderLabel}
-            onChange={this.handleProfileChange} />
-          <Form.Input onChange={this.handleLabelChange} label='Label'
-            placeholder='label...' value={label} />
-          <Form.Field width={2}>
-            <label>Headers</label>
-            <Menu color='grey' compact inverted>
-              <Menu.Item onClick={this.handleClick} active={active}>
-                {button}
-                <Label color='red' floating>{headerCount}</Label>
-              </Menu.Item>
-            </Menu>
-          </Form.Field>
-          <Form.Button width={1} label='Submit' onClick={this.handleGo}>Go</Form.Button>
-        </Form.Group>
-      </Form>
+      <div className='custom'>
+        {
+          portal ?
+          null :
+          <Form onSubmit={this.handleSubmit}>
+            <Form.Group widths='equal'>
+              <Form.Input onChange={this.handleInputChange} label='Config URL'
+                name='url' placeholder='config url...' value={url}/>
+              <Form.Input onChange={this.handleInputChange} label='App Name'
+                name='appName' placeholder='app name...' value={appName} />
+              <Form.Field width={2}>
+                <label>Headers</label>
+                <Menu color='grey' compact inverted>
+                  <Menu.Item onClick={this.handleClick} active={toggle}>
+                    {toggle ? 'Collapse' : 'Expand'}
+                    <Label color='red' floating>{headerCount}</Label>
+                  </Menu.Item>
+                </Menu>
+              </Form.Field>
+              <Form.Button width={1} label='Submit'>Go</Form.Button>
+            </Form.Group>
+          </Form>
+        }
+        {
+          portal ?
+          null :
+          <Headers show={toggle} updateHeaders={this.updateHeaders} />
+        }
+        <Form>
+          <Form.Group widths='equal'>
+            <Form.Dropdown label='Profiles'
+              fluid multiple search selection scrolling
+              options={profOptions} value={profiles}
+              allowAdditions additionLabel='Add: ' onAddItem={this.handleAddition}
+              renderLabel={this.renderLabel}
+              onChange={this.handleProfileChange} />
+            <Form.Dropdown label='Label' fluid search selection scrolling
+              options={labelOptions} value={label}
+              onChange={this.handleLabelChange} />
+          </Form.Group>
+        </Form>
+      </div>
     )
   }
 }
