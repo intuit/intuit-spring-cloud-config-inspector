@@ -1,6 +1,6 @@
 import React from 'react';
-import {Segment, List, Tab, Menu, Label,
-  Popup, Icon, Accordion, Message} from 'semantic-ui-react';
+import {Segment, List, Tab, Menu, Label, Grid,
+  Popup, Icon, Accordion, Message, Button} from 'semantic-ui-react';
 import 'prismjs';
 import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
@@ -34,23 +34,31 @@ export default class Views extends React.Component {
       data: {},
       values: {},
       activeIndex: 0,
+      metadata: '',
       json: '',
       yaml: '',
       properties: '',
       requests: [],
       version: '',
-      filter: []
+      filter: [],
+      secrets: false
     }
   }
 
   /**
-   * Formats value depending on type
+   * Formats value depending on type. If the value contains a secret
+   * and is not the first value, create a link to idps.
    *
    * @param {custom} value - current value
+   * @param {boolean} [first] - true if this is the first value
    * @returns {HTML} formatted value
    */
-  formatValue(value) {
+  formatValue(value, first=false) {
     if (typeof value == 'string') {
+      if (!first && value.startsWith('{secret}')) {
+        return <a href='https://github.intuit.com/pages/idps/key-viewer'
+          target='_blank' className='json-string'>"{value}"</a>
+      }
       return (<span className='json-string'>"{value}"</span>)
     } else if (typeof value == 'boolean') {
       return (<span className='json-bool'>{value.toString()}</span>)
@@ -72,7 +80,9 @@ export default class Views extends React.Component {
     return {
       key,
       title: <span key={key}>
-          <span className='json-key'>{key}</span> = {this.formatValue(values[0].value)}
+          <span className='json-key'>
+            {key}
+          </span> = {this.formatValue(values[0].value, true)}
         </span>,
       content: <List celled key={key}>
           {
@@ -139,13 +149,14 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Creates pretty printed code from string of raw data.
+   * Creates pretty printed code from string of raw data. If metadata,
+   * format as json.
    *
-   * @param {string} ext - extension (json, yaml, properties)
+   * @param {string} ext - extension (json, yaml, properties, metadata)
    * @returns {ReactElement} Tab Pane with formatted code
    */
   createTab(ext) {
-    let className = `language-${ext}`
+    let className = ext === 'metadata' ? `language-json` : `language-${ext}`
     return (
       <Tab.Pane className='raw'>
         <PrismCode component='pre' className={className}>
@@ -190,14 +201,15 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Sets active index unless user clicked on version tab
+   * Sets active index unless user clicked on version tab. Version tab
+   * is disabled, 6 other tabs.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} props
    * @param {number} props.activeIndex - index of clicked on tab
    */
   handleTabChange = (e, {activeIndex}) => {
-    if (activeIndex < 5) {
+    if (activeIndex < 6) {
       this.setState({
         activeIndex
       })
@@ -250,6 +262,15 @@ export default class Views extends React.Component {
   }
 
   /**
+   * Toggle secrets boolean.
+   */
+  handleSecretsClick = () => {
+    this.setState({
+      secrets: !this.state.secrets
+    })
+  }
+
+  /**
    * Fetches data for all tabs. Updates requests, version, and all data and
    * creates key value pairs by calling updateValues. Handles bad requests.
    *
@@ -270,7 +291,8 @@ export default class Views extends React.Component {
       })
       .then(data => {
         this.setState({
-          version: data.version
+          version: data.version,
+          metadata: JSON.stringify(data, null, 2)
         })
         this.updateValues(data.propertySources)
       })
@@ -281,15 +303,16 @@ export default class Views extends React.Component {
           values: error.toString(),
           json: error.toString(),
           yaml: error.toString(),
-          properties: error.toString()
+          properties: error.toString(),
+          metadata: error.toString()
         })
       })
     }
   }
 
   render() {
-    const { activeIndex, json, yaml, properties,
-      requests, values, version, filter } = this.state
+    const { activeIndex, json, yaml, properties, requests,
+      values, version, filter, secrets } = this.state
     const { metaURL, confURL } = this.props.urls
 
     let config = []
@@ -299,6 +322,18 @@ export default class Views extends React.Component {
       config = <Message error>{values}</Message>
     } else {
       keys = Object.keys(values)
+      if (secrets) {
+        // show only values that start with {secret} or {cipher}
+        keys = keys.filter(key => {
+          const value = values[key][0].value
+          if (typeof value === 'string') {
+            return value.startsWith('{secret}') || value.startsWith('{cipher}')
+          } else {
+            return false
+          }
+        })
+      }
+      // if user has selected keys in the search, show only those pairs
       const filtered = filter.length > 0 ?
         keys.filter(key => filter.includes(key)) :
         keys
@@ -307,23 +342,38 @@ export default class Views extends React.Component {
           this.formatPair(key, values[key]))} />
     }
 
+    // api logs
     const panels = requests.map((item, index) => ({
       title: item.response.url.replace('http://localhost:3001/', ''),
       content:
         <List celled>
           <List.Item>type: {item.response.type}</List.Item>
-          <List.Item>status: {item.response.status} {item.response.statusText}</List.Item>
+          <List.Item>
+            status: {item.response.status} {item.response.statusText}
+          </List.Item>
           <List.Item>timestamp: {item.timestamp}</List.Item>
           <List.Item>Intuit TID: {item.intuit_tid}</List.Item>
         </List>
     }))
 
-    // Config values, json, yaml, properties tab content
+    // tab content
     const panes = [
       {menuItem: 'Config', render: () =>
         <Tab.Pane>
           <Segment attached='top'>
-            <PropSearch updateFilter={this.updateFilter} options={keys} />
+            <Grid columns='equal'>
+              <Grid.Column verticalAlign='middle' width={15}>
+                <PropSearch updateFilter={this.updateFilter} options={keys} />
+              </Grid.Column>
+              <Grid.Column verticalAlign='middle'>
+                <Popup inverted content='Display only secret values'
+                  trigger={
+                    <Button icon='key' toggle active={secrets}
+                      onClick={this.handleSecretsClick} compact
+                      floated='right' circular/>
+                  } position='top right' />
+              </Grid.Column>
+            </Grid>
           </Segment>
           <Segment attached='bottom' className='view'>
             {config}
@@ -333,6 +383,7 @@ export default class Views extends React.Component {
       {menuItem: '.json', render: () => this.createTab('json')},
       {menuItem: '.yml', render: () => this.createTab('yaml')},
       {menuItem: '.properties', render: () => this.createTab('properties')},
+      {menuItem: 'Metadata', render: () => this.createTab('metadata')},
       {
         menuItem:
           <Menu.Item key='API'>
@@ -351,7 +402,11 @@ export default class Views extends React.Component {
       {
         menuItem:
           <Menu.Item fitted='horizontally' disabled key='menu' position='right' >
-            <Label color='grey'>{version.substring(0, 7)}</Label>
+            {
+              version.length > 0 ?
+              <Label color='grey'>{version.substring(0, 7)}</Label> :
+              null
+            }
           </Menu.Item>,
         render: () => {}
       }

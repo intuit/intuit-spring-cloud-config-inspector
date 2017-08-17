@@ -1,6 +1,6 @@
 const packageJson = require("../package.json");
 
-export const GIT_URL = 'https://github.intuit.com/api/v3/repos'
+export const GIT_REPOS_API = 'https://github.intuit.com/api/v3/repos'
 
 export const API_KEYS = {
   prod: 'prdakyresk43bOEZ0adQWBF3hRw8vfAOxq3rWPXg',
