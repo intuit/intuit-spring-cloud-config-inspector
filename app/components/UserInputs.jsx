@@ -269,8 +269,11 @@ export default class UserInputs extends React.Component {
             </Form.Group>
           </Form>
         }
-        <Headers show={toggle}
-          updateHeaders={this.updateHeaders} />
+        {
+          portal ?
+          null :
+          <Headers show={toggle} updateHeaders={this.updateHeaders} />
+        }
         <Form>
           <Form.Group widths='equal'>
             <Form.Dropdown label='Profiles'

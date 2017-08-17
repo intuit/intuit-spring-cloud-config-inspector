@@ -48,9 +48,13 @@ export default class App extends React.Component {
   updateInfo = (url, appName, headers) => {
     this.setState({
       url,
-      appName,
-      headers
+      appName
     })
+    if (!this.props.portal) {
+      this.setState({
+        headers
+      })
+    }
     this.updateURLs(url, appName)
   }
 
@@ -119,6 +123,8 @@ export default class App extends React.Component {
 
   render() {
     const { urls, headers, user, repo, url, appName, profiles, label } = this.state
+
+    console.log(headers)
 
     const { portal } = this.props
 
