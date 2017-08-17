@@ -1,8 +1,8 @@
 {
-  "name": "config-inspector",
+  "name": "@intuit/spring-cloud-config-inspector",
   "version": "0.7.5",
-  "description": "Config Inspector",
-  "main": "index.js",
+  "description": "The inspection tool for Spring Cloud Config repositories",
+  "main": "./dist/intuit-spring-cloud-config-inspector.js",
   "scripts": {
     "test": "jest",
     "prebuild": "rm -rf build && mkdir build && cp -R public/* build/",
