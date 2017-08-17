@@ -2,13 +2,6 @@ $table-height: 150px;
 $config-height: $table-height * 2 + 22;
 $raw-height: $table-height * 2 + 119;
 
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-}
-
 .app {
   background-color: #35818F;
 }
