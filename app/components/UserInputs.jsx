@@ -197,7 +197,8 @@ export default class UserInputs extends React.Component {
   componentWillReceiveProps({user, repo}) {
     if (user !== this.props.user || repo !== this.props.repo) {
       fetch(
-        `${config.GIT_URL}/${user}/${repo}/contents?access_token=${token}`
+        `${config.GIT_REPOS_API}/${user}/${repo}/contents` +
+        `?access_token=${token}`
       ).then(
         response => {
           if (response.status >= 400) {
@@ -210,7 +211,8 @@ export default class UserInputs extends React.Component {
         const files = contents.filter(f => f.name.startsWith(appName))
         const profOptions = files.map(f => {
           let profile = f.name.substring(
-            f.name.indexOf(`${appName}-`) + appName.length + 1, f.name.lastIndexOf('.')
+            f.name.indexOf(`${appName}-`) + appName.length + 1,
+            f.name.lastIndexOf('.')
           )
           profile = profile === '' ? 'default' : profile
           return {text: profile, value: profile}
@@ -220,17 +222,26 @@ export default class UserInputs extends React.Component {
         })
       }).catch(err => console.log(err.message))
       fetch(
-        `${config.GIT_URL}/${user}/${repo}/git/refs?access_token=${token}&per_page=100`
+        `${config.GIT_REPOS_API}/${user}/${repo}/git/refs` +
+        `?access_token=${token}&per_page=100`
       ).then(response => {
         if (response.status >= 400) {
           throw new Error(response.json())
         }
         return response.json()
       }).then(refs => {
-        const tagRefs = refs.filter((r) => r.ref.startsWith('refs/tags'))
-        const tags = tagRefs.map((r) => ({value: r.ref.split('refs/tags/')[1], text: r.ref.split('refs/tags/')[1], icon: 'tag'}))
-        const branchRefs = refs.filter((r) => r.ref.startsWith('refs/heads'))
-        const branches = branchRefs.map((r) => ({value: r.ref.split('refs/heads/')[1], text: r.ref.split('refs/heads/')[1], icon: 'fork'}))
+        const tagRefs = refs.filter(r => r.ref.startsWith('refs/tags'))
+        const tags = tagRefs.map(r => ({
+          value: r.ref.split('refs/tags/')[1],
+          text: r.ref.split('refs/tags/')[1],
+          icon: 'tag'
+        }))
+        const branchRefs = refs.filter(r => r.ref.startsWith('refs/heads'))
+        const branches = branchRefs.map(r => ({
+          value: r.ref.split('refs/heads/')[1],
+          text: r.ref.split('refs/heads/')[1],
+          icon: 'fork'
+        }))
         this.setState({
           labelOptions: branches.concat(tags)
         })
@@ -252,10 +263,12 @@ export default class UserInputs extends React.Component {
           null :
           <Form onSubmit={this.handleSubmit}>
             <Form.Group widths='equal'>
-              <Form.Input onChange={this.handleInputChange} label='Config URL'
-                name='url' placeholder='config url...' value={url}/>
-              <Form.Input onChange={this.handleInputChange} label='App Name'
-                name='appName' placeholder='app name...' value={appName} />
+              <Form.Input onChange={this.handleInputChange}
+                label='Config URL' name='url'
+                placeholder='config url...' value={url}/>
+              <Form.Input onChange={this.handleInputChange}
+                label='App Name' name='appName'
+                placeholder='app name...' value={appName} />
               <Form.Field width={2}>
                 <label>Headers</label>
                 <Menu color='grey' compact inverted>
@@ -279,11 +292,12 @@ export default class UserInputs extends React.Component {
             <Form.Dropdown label='Profiles'
               fluid multiple search selection scrolling
               options={profOptions} value={profiles}
-              allowAdditions additionLabel='Add: ' onAddItem={this.handleAddition}
+              allowAdditions additionLabel='Add: '
+              onAddItem={this.handleAddition}
               renderLabel={this.renderLabel}
               onChange={this.handleProfileChange} />
-            <Form.Dropdown label='Label' fluid search selection scrolling
-              options={labelOptions} value={label}
+            <Form.Dropdown label='Label' fluid search selection
+              scrolling options={labelOptions} value={label}
               onChange={this.handleLabelChange} />
           </Form.Group>
         </Form>

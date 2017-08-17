@@ -93,7 +93,7 @@ export default class App extends React.Component {
    * @param {string[]} profiles - i.e. dev, e2e, qal...
    * @param {string} label - branch or tag
    */
-  updateURLs(url, appName, profiles=['default'], label='master') {
+  updateURLs = (url, appName, profiles=['default'], label='master') => {
     // For localhost, use the url in the app, or else use the configured ones
     const currentEnv = config.getCurrentHostEnv();
     const envUrl = currentEnv === config.Env.LOCAL ? `${url}/` : "";
