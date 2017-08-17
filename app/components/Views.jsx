@@ -34,6 +34,7 @@ export default class Views extends React.Component {
       data: {},
       values: {},
       activeIndex: 0,
+      metadata: '',
       json: '',
       yaml: '',
       properties: '',
@@ -145,7 +146,7 @@ export default class Views extends React.Component {
    * @returns {ReactElement} Tab Pane with formatted code
    */
   createTab(ext) {
-    let className = `language-${ext}`
+    let className = ext === 'metadata' ? `language-json` : `language-${ext}`
     return (
       <Tab.Pane className='raw'>
         <PrismCode component='pre' className={className}>
@@ -270,7 +271,8 @@ export default class Views extends React.Component {
       })
       .then(data => {
         this.setState({
-          version: data.version
+          version: data.version,
+          metadata: JSON.stringify(data, null, 2)
         })
         this.updateValues(data.propertySources)
       })
@@ -333,6 +335,7 @@ export default class Views extends React.Component {
       {menuItem: '.json', render: () => this.createTab('json')},
       {menuItem: '.yml', render: () => this.createTab('yaml')},
       {menuItem: '.properties', render: () => this.createTab('properties')},
+      {menuItem: 'Metadata', render: () => this.createTab('metadata')},
       {
         menuItem:
           <Menu.Item key='API'>
