@@ -1,6 +1,6 @@
 import React from 'react';
-import {Segment, List, Tab, Menu, Label,
-  Popup, Icon, Accordion, Message} from 'semantic-ui-react';
+import {Segment, List, Tab, Menu, Label, Grid,
+  Popup, Icon, Accordion, Message, Button} from 'semantic-ui-react';
 import 'prismjs';
 import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
@@ -40,18 +40,25 @@ export default class Views extends React.Component {
       properties: '',
       requests: [],
       version: '',
-      filter: []
+      filter: [],
+      secrets: false
     }
   }
 
   /**
-   * Formats value depending on type
+   * Formats value depending on type. If the value contains a secret
+   * and is not the first value, create a link to idps.
    *
    * @param {custom} value - current value
+   * @param {boolean} [first] - true if this is the first value
    * @returns {HTML} formatted value
    */
-  formatValue(value) {
+  formatValue(value, first=false) {
     if (typeof value == 'string') {
+      if (!first && value.startsWith('{secret}')) {
+        return <a href='https://github.intuit.com/pages/idps/key-viewer'
+          target='_blank' className='json-string'>"{value}"</a>
+      }
       return (<span className='json-string'>"{value}"</span>)
     } else if (typeof value == 'boolean') {
       return (<span className='json-bool'>{value.toString()}</span>)
@@ -73,7 +80,9 @@ export default class Views extends React.Component {
     return {
       key,
       title: <span key={key}>
-          <span className='json-key'>{key}</span> = {this.formatValue(values[0].value)}
+          <span className='json-key'>
+            {key}
+          </span> = {this.formatValue(values[0].value, true)}
         </span>,
       content: <List celled key={key}>
           {
@@ -253,6 +262,15 @@ export default class Views extends React.Component {
   }
 
   /**
+   * Toggle secrets boolean.
+   */
+  handleSecretsClick = () => {
+    this.setState({
+      secrets: !this.state.secrets
+    })
+  }
+
+  /**
    * Fetches data for all tabs. Updates requests, version, and all data and
    * creates key value pairs by calling updateValues. Handles bad requests.
    *
@@ -293,8 +311,8 @@ export default class Views extends React.Component {
   }
 
   render() {
-    const { activeIndex, json, yaml, properties,
-      requests, values, version, filter } = this.state
+    const { activeIndex, json, yaml, properties, requests,
+      values, version, filter, secrets } = this.state
     const { metaURL, confURL } = this.props.urls
 
     let config = []
@@ -304,6 +322,18 @@ export default class Views extends React.Component {
       config = <Message error>{values}</Message>
     } else {
       keys = Object.keys(values)
+      if (secrets) {
+        // show only values that start with {secret} or {cipher}
+        keys = keys.filter(key => {
+          const value = values[key][0].value
+          if (typeof value === 'string') {
+            return value.startsWith('{secret}') || value.startsWith('{cipher}')
+          } else {
+            return false
+          }
+        })
+      }
+      // if user has selected keys in the search, show only those pairs
       const filtered = filter.length > 0 ?
         keys.filter(key => filter.includes(key)) :
         keys
@@ -317,7 +347,9 @@ export default class Views extends React.Component {
       content:
         <List celled>
           <List.Item>type: {item.response.type}</List.Item>
-          <List.Item>status: {item.response.status} {item.response.statusText}</List.Item>
+          <List.Item>
+            status: {item.response.status} {item.response.statusText}
+          </List.Item>
           <List.Item>timestamp: {item.timestamp}</List.Item>
           <List.Item>Intuit TID: {item.intuit_tid}</List.Item>
         </List>
@@ -328,7 +360,19 @@ export default class Views extends React.Component {
       {menuItem: 'Config', render: () =>
         <Tab.Pane>
           <Segment attached='top'>
-            <PropSearch updateFilter={this.updateFilter} options={keys} />
+            <Grid columns='equal'>
+              <Grid.Column verticalAlign='middle' width={15}>
+                <PropSearch updateFilter={this.updateFilter} options={keys} />
+              </Grid.Column>
+              <Grid.Column verticalAlign='middle'>
+                <Popup inverted content='Display only secret values'
+                  trigger={
+                    <Button icon='key' toggle active={secrets}
+                      onClick={this.handleSecretsClick} compact
+                      floated='right' circular/>
+                  } position='top right' />
+              </Grid.Column>
+            </Grid>
           </Segment>
           <Segment attached='bottom' className='view'>
             {config}
@@ -357,7 +401,11 @@ export default class Views extends React.Component {
       {
         menuItem:
           <Menu.Item fitted='horizontally' disabled key='menu' position='right' >
-            <Label color='grey'>{version.substring(0, 7)}</Label>
+            {
+              version.length > 0 ?
+              <Label color='grey'>{version.substring(0, 7)}</Label> :
+              null
+            }
           </Menu.Item>,
         render: () => {}
       }
