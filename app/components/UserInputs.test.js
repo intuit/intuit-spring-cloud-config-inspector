@@ -5,7 +5,7 @@ import UserInputs from './UserInputs.jsx';
 it('renders without crashing', () => {
   test = () => {};
   const div = document.createElement('div');
-  ReactDOM.render(<UserInputs toggle headerCount={0}
-    updateLabel={test} toggleHeaders={test} url='' appName='' label=''
-    profiles={['default']} updateURLs={test} user='' repo='' />, div);
+  ReactDOM.render(<UserInputs user='' repo='' url='' appName=''
+    profiles={['default']} label='' portal={false} updateInfo={test}
+    updateLabel={test} updateProfiles={test} />, div);
 });
