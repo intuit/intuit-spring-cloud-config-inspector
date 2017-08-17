@@ -283,7 +283,8 @@ export default class Views extends React.Component {
           values: error.toString(),
           json: error.toString(),
           yaml: error.toString(),
-          properties: error.toString()
+          properties: error.toString(),
+          metadata: error.toString()
         })
       })
     }
