@@ -140,9 +140,10 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Creates pretty printed code from string of raw data.
+   * Creates pretty printed code from string of raw data. If metadata,
+   * format as json.
    *
-   * @param {string} ext - extension (json, yaml, properties)
+   * @param {string} ext - extension (json, yaml, properties, metadata)
    * @returns {ReactElement} Tab Pane with formatted code
    */
   createTab(ext) {
@@ -191,14 +192,15 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Sets active index unless user clicked on version tab
+   * Sets active index unless user clicked on version tab. Version tab
+   * is disabled, 6 other tabs.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} props
    * @param {number} props.activeIndex - index of clicked on tab
    */
   handleTabChange = (e, {activeIndex}) => {
-    if (activeIndex < 5) {
+    if (activeIndex < 6) {
       this.setState({
         activeIndex
       })
