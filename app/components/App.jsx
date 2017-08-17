@@ -122,9 +122,8 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { urls, headers, user, repo, url, appName, profiles, label } = this.state
-
-    console.log(headers)
+    const { urls, headers, user, repo, url,
+      appName, profiles, label } = this.state
 
     const { portal } = this.props
 
