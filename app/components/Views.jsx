@@ -33,7 +33,7 @@ export default class Views extends React.Component {
     this.state = {
       data: {},
       values: {},
-      activeIndex: 0,
+      activeTab: 'config',
       metadata: '',
       json: '',
       yaml: '',
@@ -41,7 +41,10 @@ export default class Views extends React.Component {
       requests: [],
       version: '',
       filter: [],
-      secrets: false
+      secrets: false,
+      label: '',
+      repoURL: '',
+      propertyFiles: []
     }
   }
 
@@ -201,16 +204,20 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Sets active index unless user clicked on version tab. Version tab
-   * is disabled, 6 other tabs.
+   * Sets active index and tab unless user clicked on disabled version tab.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} props
    * @param {number} props.activeIndex - index of clicked on tab
+   * @param {object} props.panes - the tab panes
+   * @param {object} props.panes[activeIndex].menuItem.key - name of active tab
    */
-  handleTabChange = (e, {activeIndex}) => {
-    if (activeIndex < 6) {
+  handleTabChange = (e, {activeIndex, panes}) => {
+    console.log(typeof panes)
+    const activeTab = panes[activeIndex].menuItem.key
+    if (panes[activeIndex].menuItem.key !== 'version') {
       this.setState({
+        activeTab,
         activeIndex
       })
     }
@@ -221,23 +228,27 @@ export default class Views extends React.Component {
    * stores an array of values and file locations for each key found in
    * the property files in metadata. Updates state. Finds user and repo
    * name in first github url and updates both in parent App component.
+   * Also updates repoURL and list of propertyFiles for github tab.
    *
    * @param {object[]} files - Array of propertyfiles from metadata
    */
   updateValues = (files) => {
     let values = {}
-    let params = files[0].name.replace(/^https:\/\/github\.intuit\.com\//, "")
+    const repoURL = files[0].name.substring(0, files[0].name.lastIndexOf('/'))
+    const params = repoURL.replace(/^https:\/\/github\.intuit\.com\//, "")
     let split = params.split('/', 2)
-    let user = split[0]
-    let repo = split[1]
+    const user = split[0]
+    const repo = split[1]
     this.props.updateUserRepo(user, repo)
+    let propertyFiles = []
     for (let file of files) {
-      const name = file.name
+      const name = file.name.substring(file.name.lastIndexOf('/') + 1)
+      propertyFiles.push(name)
       const props = file.source
       for (let key of Object.keys(props)) {
         const assoc = {
           value: props[key],
-          file: name.substring(name.lastIndexOf('/') + 1)
+          file: name
         }
         if (typeof values[key] !== 'undefined') {
           values[key].push(assoc)
@@ -246,7 +257,11 @@ export default class Views extends React.Component {
         }
       }
     }
-    this.setState({values})
+    this.setState({
+      values,
+      repoURL,
+      propertyFiles
+    })
   }
 
   /**
@@ -271,6 +286,41 @@ export default class Views extends React.Component {
   }
 
   /**
+    * Creates list of github info: label, repo url, and property files urls.
+    * Urls link to github.
+    *
+    * @returns {ReactElement} List of info
+    */
+  createGithubTab = () => {
+    const { repoURL, propertyFiles, label } = this.state
+    return (
+      <List>
+        <List.Item>
+          <List.Header>Current Label</List.Header>
+          <List.Content>{label}</List.Content>
+        </List.Item>
+        <List.Item>
+          <List.Header>Github Repo URL</List.Header>
+          <List.Content as='a' href={`${repoURL}/tree/${label}`} target='_blank'>
+            {repoURL ? `${repoURL}` : null}
+          </List.Content>
+        </List.Item>
+        <List.Item>
+          <List.Header>Property Files</List.Header>
+            {propertyFiles.map(file =>
+              <List.Item key={file} as='li' value='-'>
+                <List.Content as='a' href={`${repoURL}/blob/${label}/${file}`}
+                  target='_blank'>
+                  {repoURL ? `${repoURL}/${file}` : null}
+                </List.Content>
+              </List.Item>
+            )}
+        </List.Item>
+      </List>
+    )
+  }
+
+  /**
    * Fetches data for all tabs. Updates requests, version, and all data and
    * creates key value pairs by calling updateValues. Handles bad requests.
    *
@@ -292,7 +342,8 @@ export default class Views extends React.Component {
       .then(data => {
         this.setState({
           version: data.version,
-          metadata: JSON.stringify(data, null, 2)
+          metadata: JSON.stringify(data, null, 2),
+          label: data.label
         })
         this.updateValues(data.propertySources)
       })
@@ -304,22 +355,25 @@ export default class Views extends React.Component {
           json: error.toString(),
           yaml: error.toString(),
           properties: error.toString(),
-          metadata: error.toString()
+          metadata: error.toString(),
+          label: null,
+          repoURL: null,
+          propertyFiles: []
         })
       })
     }
   }
 
   render() {
-    const { activeIndex, json, yaml, properties, requests,
-      values, version, filter, secrets } = this.state
+    const { activeTab, activeIndex, json, yaml, properties, requests, values,
+      version, filter, secrets, repoURL, propertyFiles, label } = this.state
     const { metaURL, confURL } = this.props.urls
 
     let config = []
     let keys = []
     // values is only a string when there has been an error
     if (typeof values === 'string') {
-      config = <Message error>{values}</Message>
+      config = <Message error header={values} />
     } else {
       keys = Object.keys(values)
       if (secrets) {
@@ -358,7 +412,7 @@ export default class Views extends React.Component {
 
     // tab content
     const panes = [
-      {menuItem: 'Config', render: () =>
+      {menuItem: { key: 'config', content: 'Config' }, render: () =>
         <Tab.Pane>
           <Segment attached='top'>
             <Grid columns='equal'>
@@ -380,16 +434,36 @@ export default class Views extends React.Component {
           </Segment>
         </Tab.Pane>
       },
-      {menuItem: '.json', render: () => this.createTab('json')},
-      {menuItem: '.yml', render: () => this.createTab('yaml')},
-      {menuItem: '.properties', render: () => this.createTab('properties')},
-      {menuItem: 'Metadata', render: () => this.createTab('metadata')},
+      {
+        menuItem: {key: '.json', content: '.json'},
+        render: () => this.createTab('json')
+      },
+      {
+        menuItem: {key: '.yml', content: '.yml'},
+        render: () => this.createTab('yaml')
+      },
+      {
+        menuItem: {key: '.properties', content: '.properties'},
+        render: () => this.createTab('properties')
+      },
+      {
+        menuItem: {key: 'metadata', content: 'Metadata'},
+        render: () => this.createTab('metadata')
+      },
       {
         menuItem:
-          <Menu.Item key='API'>
+        <Menu.Item key='github'>
+          <Icon disabled={activeTab !== 'github'} size='large' name='github' />
+          GitHub
+        </Menu.Item>,
+        render: () => <Tab.Pane>{this.createGithubTab()}</Tab.Pane>
+      },
+      {
+        menuItem:
+          <Menu.Item key='api'>
             <Popup
               inverted
-              trigger={<Icon name='cloud' />}
+              trigger={<Icon disabled={activeTab !== 'api'} name='cloud' />}
               content='API Requests'
               position='top center'
             />
@@ -401,7 +475,7 @@ export default class Views extends React.Component {
       },
       {
         menuItem:
-          <Menu.Item fitted='horizontally' disabled key='menu' position='right' >
+          <Menu.Item fitted='horizontally' disabled key='version' position='right' >
             {
               version.length > 0 ?
               <Label color='grey'>{version.substring(0, 7)}</Label> :
