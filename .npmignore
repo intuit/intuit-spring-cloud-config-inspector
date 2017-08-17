@@ -1,0 +1,40 @@
+node_modules
+coverage
+target
+examples
+scripts
+
+*.log*
+
+# IDEA corp files
+.idea
+*.iml
+
+
+# Apple files
+*.DS_STORE
+
+# Extra
+*.swp
+
+.vscode
+.editorconfig
+.jsbeautifyrc
+
+*.tgz
+*.lock
+
+# Clean up pack
+
+webpack*
+.eslint*
+build
+public
+src
+lib
+.babelrc
+
+# Current source
+app/
+tools/
+package-lock.json
