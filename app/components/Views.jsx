@@ -34,6 +34,7 @@ export default class Views extends React.Component {
       data: {},
       values: {},
       activeIndex: 0,
+      metadata: '',
       json: '',
       yaml: '',
       properties: '',
@@ -139,13 +140,14 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Creates pretty printed code from string of raw data.
+   * Creates pretty printed code from string of raw data. If metadata,
+   * format as json.
    *
-   * @param {string} ext - extension (json, yaml, properties)
+   * @param {string} ext - extension (json, yaml, properties, metadata)
    * @returns {ReactElement} Tab Pane with formatted code
    */
   createTab(ext) {
-    let className = `language-${ext}`
+    let className = ext === 'metadata' ? `language-json` : `language-${ext}`
     return (
       <Tab.Pane className='raw'>
         <PrismCode component='pre' className={className}>
@@ -190,14 +192,15 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Sets active index unless user clicked on version tab
+   * Sets active index unless user clicked on version tab. Version tab
+   * is disabled, 6 other tabs.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} props
    * @param {number} props.activeIndex - index of clicked on tab
    */
   handleTabChange = (e, {activeIndex}) => {
-    if (activeIndex < 5) {
+    if (activeIndex < 6) {
       this.setState({
         activeIndex
       })
@@ -270,7 +273,8 @@ export default class Views extends React.Component {
       })
       .then(data => {
         this.setState({
-          version: data.version
+          version: data.version,
+          metadata: JSON.stringify(data, null, 2)
         })
         this.updateValues(data.propertySources)
       })
@@ -281,7 +285,8 @@ export default class Views extends React.Component {
           values: error.toString(),
           json: error.toString(),
           yaml: error.toString(),
-          properties: error.toString()
+          properties: error.toString(),
+          metadata: error.toString()
         })
       })
     }
@@ -333,6 +338,7 @@ export default class Views extends React.Component {
       {menuItem: '.json', render: () => this.createTab('json')},
       {menuItem: '.yml', render: () => this.createTab('yaml')},
       {menuItem: '.properties', render: () => this.createTab('properties')},
+      {menuItem: 'Metadata', render: () => this.createTab('metadata')},
       {
         menuItem:
           <Menu.Item key='API'>
