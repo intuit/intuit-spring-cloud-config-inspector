@@ -382,7 +382,7 @@ export default class Views extends React.Component {
       config = <Message error header={values} />
     } else {
       keys = Object.keys(values)
-      total = keys.length
+
       if (secrets) {
         // show only values that start with {secret} or {cipher}
         keys = keys.filter(key => {
@@ -398,6 +398,7 @@ export default class Views extends React.Component {
       const filtered = filter.length > 0 ?
         keys.filter(key => filter.includes(key)) :
         keys
+      total = filtered.length
       config =
         <Accordion exclusive={false} panels={filtered.map(key =>
           this.formatPair(key, values[key]))} />
@@ -440,7 +441,7 @@ export default class Views extends React.Component {
                     trigger={
                       <Button icon='key' toggle active={secrets}
                         onClick={this.handleSecretsClick} compact
-                        floated='right' circular/>
+                        floated='right' circular />
                     } position='top right' size='small' />
                 </Grid.Column>
               </Grid>
