@@ -1,6 +1,3 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import App from './components/App.jsx';
 
-import ConfigInspector from './components/App.jsx'
-
-export default ConfigInspector;
+export default App;
