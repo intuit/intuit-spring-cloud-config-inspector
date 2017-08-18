@@ -10,7 +10,7 @@ export default class App extends React.Component {
   render() {
     const logoImgPath = `${window.location.href}/images/configservice.png`;
     return (
-      <div className='app'>
+      <div className='top'>
         <h2 style={{color: 'white'}}>
           <Image verticalAlign='middle' src={logoImgPath} size='mini' spaced />
           {'  '}Config Inspector

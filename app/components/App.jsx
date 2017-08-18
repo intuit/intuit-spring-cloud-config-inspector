@@ -144,7 +144,7 @@ export default class App extends React.Component {
             updateInfo={this.updateInfo}
             updateLabel={this.updateLabel}
             updateProfiles={this.updateProfiles} />
-          <div className='custom'>
+          <div className='views'>
             <Views urls={urls} headers={headers}
               updateUserRepo={this.updateUserRepo} />
           </div>
