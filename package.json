@@ -16,9 +16,9 @@
     "proxy": "node tools/cors-proxy",
     "pretranspile": "rm -rf lib/ && mkdir -p lib",
     "transpile": "babel app -d lib",
-    "buildportal": "git checkout -- app/index.jsx && npm-run-all -s transpile build",
+    "buildportal": "git checkout -- app/index.jsx && npm-run-all -s transpile && webpack --config webpack.dist.config.js",
     "cleandirs": "rm -rf *.tgz && rm -rf dist",
-    "setupbundle": "cp -R build dist && rm -f dist/index.html && mv dist/bundle.js dist/intuit-spring-cloud-config-inspector.js && rm -f dist/favicon.ico",
+    "setupbundle": "cp -R build dist && rm -f dist/index.html && rm -f dist/favicon.ico && mv dist/main.js dist/intuit-spring-cloud-config-inspector.js",
     "prepublish": "npm-run-all -s cleandirs buildportal setupbundle"
   },
   "repository": {
