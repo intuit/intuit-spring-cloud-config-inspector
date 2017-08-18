@@ -3,11 +3,18 @@ $config-height: $table-height * 2 + 22;
 $raw-height: $table-height * 2 + 119;
 
 .app {
-  background-color: #35818F;
+  padding: 10px 30px;
+  background-color: rgb(42, 44, 46);
+}
+
+.inputs {
+  padding: 10px 30px;
+  background-color: rgb(53, 129, 143);
 }
 
 .custom {
-  margin: 10px 30px;
+  padding: 10px 30px;
+  background-color: rgb(250, 250, 250);
 }
 
 .submit {
