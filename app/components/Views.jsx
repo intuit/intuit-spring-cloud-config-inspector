@@ -34,6 +34,7 @@ export default class Views extends React.Component {
       data: {},
       values: {},
       activeTab: 'config',
+      activeIndex: 0,
       metadata: '',
       json: '',
       yaml: '',
@@ -214,7 +215,7 @@ export default class Views extends React.Component {
    */
   handleTabChange = (e, {activeIndex, panes}) => {
     const activeTab = panes[activeIndex].menuItem.key
-    if (panes[activeIndex].menuItem.key !== 'version') {
+    if (activeTab !== 'version') {
       this.setState({
         activeTab,
         activeIndex
@@ -371,7 +372,7 @@ export default class Views extends React.Component {
 
   render() {
     const { activeTab, activeIndex, json, yaml, properties, requests, values,
-      version, filter, secrets, repoURL, propertyFiles, label } = this.state
+      version, filter, secrets, repoURL, propertyFiles } = this.state
     const { metaURL, confURL } = this.props.urls
 
     let config = []
@@ -495,11 +496,15 @@ export default class Views extends React.Component {
       },
       {
         menuItem:
-          <Menu.Item fitted='horizontally' disabled key='version' position='right' >
+          <Menu.Item as='p' fitted='horizontally' disabled
+            key='version' position='right' >
             {
               version.length > 0 ?
               <Popup inverted size='small'
-                trigger={<Label color='grey'>{version.substring(0, 7)}</Label>}
+                trigger={
+                  <Label href={`${repoURL}/commit/${version}`}
+                    target='_blank' color='grey'>{version.substring(0, 7)}</Label>
+                }
                 content='Commit ID' position='top right' /> :
               null
             }
