@@ -24,6 +24,7 @@ module.exports = {
       {
         test: /\.jsx?/,
         include: APP_DIR,
+        exclude: /node_modules/,
         loader: 'babel-loader',
         query: {
           babelrc: false,
@@ -55,52 +56,8 @@ module.exports = {
         loader:'raw-loader'
       },
       {
-        test:/.svg$/,
-        loader:'url-loader',
-        query:{
-          mimetype:'image/svg+xml',
-          name:'./~/semantic-ui-css/themes/default/assets/fonts/icons.svg'
-         }
-      },
-      {
-        test:/.woff$/,
-        loader:'url-loader',
-        query:{
-          mimetype:'application/font-woff',
-          name:'./~/semantic-ui-css/themes/default/assets/fonts/icons.woff'
-        }
-      },
-      {
-        test:/.woff2$/,
-        loader:'url-loader',
-        query:{
-          mimetype:'application/font-woff2',
-          name:'./~/semantic-ui-css/themes/default/assets/fonts/icons.woff2'
-        }
-      },
-      {
-        test:/.[ot]tf$/,
-        loader:'url-loader',
-        query:{
-          mimetype:'application/octet-stream',
-          name:'./~/semantic-ui-css/themes/default/assets/fonts/icons.ttf'
-        }
-      },
-      {
-        test:/.eot$/,
-        loader:'url-loader',
-        query:{
-          mimetype:'application/vnd.ms-fontobject',
-          name:'./~/semantic-ui-css/themes/default/assets/fonts/icons.eot'
-        }
-      },
-      {
-        test:/.png$/,
-        loader:'url-loader',
-        query:{
-          mimetype:'image/png',
-          name:'./~/semantic-ui-css/themes/default/assets/images/flags.png'
-        }
+        test: /\.(jpe?g|png|gif|svg|eot|ttf|woff|woff2)$/i,
+        loader: 'url-loader'
       }
     ]
   },
