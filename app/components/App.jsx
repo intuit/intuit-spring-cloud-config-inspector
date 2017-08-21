@@ -48,7 +48,9 @@ export default class App extends React.Component {
   updateInfo = (url, appName, headers) => {
     this.setState({
       url,
-      appName
+      appName,
+      label: 'master',
+      profiles: ['default']
     })
     if (!this.props.portal) {
       this.setState({
@@ -135,17 +137,14 @@ export default class App extends React.Component {
           transitionAppearTimeout={500}
           transitionEnterTimeout={500}
           transitionLeaveTimeout={500}>
-          <div className='app'>
-            <TopMenu />
-            <UserInputs user={user} repo={repo} url={url}
-              appName={appName} profiles={profiles}
-              label={label} portal={portal}
-              updateInfo={this.updateInfo}
-              updateLabel={this.updateLabel}
-              updateProfiles={this.updateProfiles} />
-            <br/>
-          </div>
-          <div className='custom'>
+          {portal ? null : <TopMenu />}
+          <UserInputs user={user} repo={repo} url={url}
+            appName={appName} profiles={profiles}
+            label={label} portal={portal}
+            updateInfo={this.updateInfo}
+            updateLabel={this.updateLabel}
+            updateProfiles={this.updateProfiles} />
+          <div className='views'>
             <Views urls={urls} headers={headers}
               updateUserRepo={this.updateUserRepo} />
           </div>

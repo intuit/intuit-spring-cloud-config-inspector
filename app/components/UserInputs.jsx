@@ -257,7 +257,7 @@ export default class UserInputs extends React.Component {
 
     // Hide url and appName field if in portal view
     return (
-      <div className='custom'>
+      <div className='inputs'>
         {
           portal ?
           null :

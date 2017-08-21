@@ -34,6 +34,7 @@ export default class Views extends React.Component {
       data: {},
       values: {},
       activeTab: 'config',
+      activeIndex: 0,
       metadata: '',
       json: '',
       yaml: '',
@@ -213,9 +214,8 @@ export default class Views extends React.Component {
    * @param {object} props.panes[activeIndex].menuItem.key - name of active tab
    */
   handleTabChange = (e, {activeIndex, panes}) => {
-    console.log(typeof panes)
     const activeTab = panes[activeIndex].menuItem.key
-    if (panes[activeIndex].menuItem.key !== 'version') {
+    if (activeTab !== 'version') {
       this.setState({
         activeTab,
         activeIndex
@@ -316,6 +316,12 @@ export default class Views extends React.Component {
               </List.Item>
             )}
         </List.Item>
+        <List.Item>
+          <List.Header>Commit History</List.Header>
+          <List.Content as='a' href={`${repoURL}/commits/${label}`} target='_blank'>
+            {repoURL ? `${repoURL}/commits/${label}` : null}
+          </List.Content>
+        </List.Item>
       </List>
     )
   }
@@ -366,16 +372,18 @@ export default class Views extends React.Component {
 
   render() {
     const { activeTab, activeIndex, json, yaml, properties, requests, values,
-      version, filter, secrets, repoURL, propertyFiles, label } = this.state
+      version, filter, secrets, repoURL, propertyFiles } = this.state
     const { metaURL, confURL } = this.props.urls
 
     let config = []
     let keys = []
+    let total = 0
     // values is only a string when there has been an error
     if (typeof values === 'string') {
       config = <Message error header={values} />
     } else {
       keys = Object.keys(values)
+
       if (secrets) {
         // show only values that start with {secret} or {cipher}
         keys = keys.filter(key => {
@@ -391,6 +399,7 @@ export default class Views extends React.Component {
       const filtered = filter.length > 0 ?
         keys.filter(key => filter.includes(key)) :
         keys
+      total = filtered.length
       config =
         <Accordion exclusive={false} panels={filtered.map(key =>
           this.formatPair(key, values[key]))} />
@@ -412,27 +421,36 @@ export default class Views extends React.Component {
 
     // tab content
     const panes = [
-      {menuItem: { key: 'config', content: 'Config' }, render: () =>
-        <Tab.Pane>
-          <Segment attached='top'>
-            <Grid columns='equal'>
-              <Grid.Column verticalAlign='middle' width={15}>
-                <PropSearch updateFilter={this.updateFilter} options={keys} />
-              </Grid.Column>
-              <Grid.Column verticalAlign='middle'>
-                <Popup inverted content='Display only secret values'
-                  trigger={
-                    <Button icon='key' toggle active={secrets}
-                      onClick={this.handleSecretsClick} compact
-                      floated='right' circular/>
-                  } position='top right' />
-              </Grid.Column>
-            </Grid>
-          </Segment>
-          <Segment attached='bottom' className='view'>
-            {config}
-          </Segment>
-        </Tab.Pane>
+      {
+        menuItem:
+          <Menu.Item key='config'>
+            Config
+            <Popup inverted size='small'
+              trigger={<Label size='tiny' circular content={total} />}
+              content='Property Count' position='top center' />
+          </Menu.Item>,
+        render: () =>
+          <Tab.Pane>
+            <Segment attached='top'>
+              <Grid columns='equal'>
+                <Grid.Column verticalAlign='middle' width={15}>
+                  <PropSearch updateFilter={this.updateFilter}
+                    options={keys} />
+                </Grid.Column>
+                <Grid.Column verticalAlign='middle'>
+                  <Popup inverted content='Display only secret values'
+                    trigger={
+                      <Button icon='key' toggle active={secrets}
+                        onClick={this.handleSecretsClick} compact
+                        floated='right' circular />
+                    } position='top right' size='small' />
+                </Grid.Column>
+              </Grid>
+            </Segment>
+            <Segment attached='bottom' className='view'>
+              {config}
+            </Segment>
+          </Tab.Pane>
       },
       {
         menuItem: {key: '.json', content: '.json'},
@@ -453,17 +471,20 @@ export default class Views extends React.Component {
       {
         menuItem:
         <Menu.Item key='github'>
-          <Icon disabled={activeTab !== 'github'} size='large' name='github' />
+          <Icon disabled={activeTab !== 'github'} size='large' name='github' fitted />
           GitHub
+          <Popup inverted size='small'
+            trigger={<Label size='tiny' circular content={propertyFiles.length} />}
+            content='Property Files' position='top center' />
         </Menu.Item>,
         render: () => <Tab.Pane>{this.createGithubTab()}</Tab.Pane>
       },
       {
         menuItem:
           <Menu.Item key='api'>
-            <Popup
+            <Popup size='small'
               inverted
-              trigger={<Icon disabled={activeTab !== 'api'} name='cloud' />}
+              trigger={<Icon fitted disabled={activeTab !== 'api'} name='cloud' />}
               content='API Requests'
               position='top center'
             />
@@ -475,10 +496,16 @@ export default class Views extends React.Component {
       },
       {
         menuItem:
-          <Menu.Item fitted='horizontally' disabled key='version' position='right' >
+          <Menu.Item as='p' fitted='horizontally' disabled
+            key='version' position='right' >
             {
               version.length > 0 ?
-              <Label color='grey'>{version.substring(0, 7)}</Label> :
+              <Popup inverted size='small'
+                trigger={
+                  <Label href={`${repoURL}/commit/${version}`}
+                    target='_blank' color='grey'>{version.substring(0, 7)}</Label>
+                }
+                content='Commit ID' position='top right' /> :
               null
             }
           </Menu.Item>,
