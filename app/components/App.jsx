@@ -36,7 +36,6 @@ export default class App extends React.Component {
         headers[key] = value
       }
     }
-    urlParams.set('appName', 'github_pages_reference')
     this.state = {
       headers: headers || props.headers,
       urls: {},

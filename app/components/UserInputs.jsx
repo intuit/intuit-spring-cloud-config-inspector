@@ -161,7 +161,6 @@ export default class UserInputs extends React.Component {
       profiles: ['default']
     })
     this.props.updateInfo(url, appName, headers)
-
   }
 
   /**
