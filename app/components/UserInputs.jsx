@@ -144,7 +144,7 @@ export default class UserInputs extends React.Component {
    * Called from Headers button, switches between Collapse
    * and Expand, showing/revealing headers.
    */
-  handleClick = () => {
+  handleHeadersClick = () => {
     this.setState({
       toggle: !this.state.toggle
     })
@@ -169,7 +169,7 @@ export default class UserInputs extends React.Component {
    *
    * @param {object[]} data - maps index to an object containing a key
    * and value object, each of which have a value and a bool 'neg'
-   * @param {number} [headerCount] - number of headers
+   * @param {number} [headerCount] - number of headers if different
    */
   updateHeaders = (data, headerCount) => {
     let headers = {}
@@ -188,7 +188,8 @@ export default class UserInputs extends React.Component {
 
   /**
    * Fetch list of profiles from github based on given user, repo, and
-   * label. Update options in profiles dropdown.
+   * label. Update options in profiles dropdown. If a profile in state
+   * does not exist, add with warning label.
    *
    * @param {string} user - current user (i.e. services-config)
    * @param {string} repo - current repo
@@ -206,10 +207,10 @@ export default class UserInputs extends React.Component {
         return response.json()
       }
     ).then(contents => {
-      const { appName } = this.state
+      const { appName, profiles } = this.state
       const files = contents.filter(f => f.name.startsWith(`${appName}-`) ||
         f.name.startsWith('application-'))
-      const profiles = files.map(f => {
+      const profileNames = files.map(f => {
         let profile = f.name.substring(
           f.name.indexOf(`-`) + 1,
           f.name.lastIndexOf('.')
@@ -217,12 +218,19 @@ export default class UserInputs extends React.Component {
         return profile
       })
       const profOptions = []
-      profiles.forEach((p, index) => {
-        if (profiles.indexOf(p) === index) {
+      profileNames.forEach((p, index) => {
+        if (profileNames.indexOf(p) === index) {
           profOptions.push({text: p, value: p})
         }
       })
       profOptions.push({text: 'default', value: 'default'})
+      let label = { color:'red', content:'Not found' }
+      profiles.forEach(profile => {
+        if (!profileNames.includes(profile)) {
+          profOptions.push({text:profile, value:profile, label})
+        }
+      })
+
       this.setState({
         profOptions
       })
@@ -301,7 +309,7 @@ export default class UserInputs extends React.Component {
               <Form.Field>
                 <label>Headers</label>
                 <Menu color='grey' compact inverted>
-                  <Menu.Item onClick={this.handleClick} active={toggle}>
+                  <Menu.Item onClick={this.handleHeadersClick} active={toggle}>
                     {toggle ? 'Collapse' : 'Expand'}
                     <Label color='red' floating>{headerCount}</Label>
                   </Menu.Item>
