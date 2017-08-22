@@ -8,7 +8,10 @@ export default class App extends React.Component {
   }
 
   render() {
-    const logoImgPath = `${window.location.href}/images/configservice.png`;
+    const location = window.location
+    const logoImgPath =
+      `${location.protocol}//${location.host}${location.pathname}` +
+      `/images/configservice.png`;
     return (
       <div className='top'>
         <h2 style={{color: 'white'}}>

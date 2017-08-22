@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import PropTypes from 'prop-types';
+import URLSearchParams from 'url-search-params';
 
 /* component imports */
 import DropDown from './dropdown.jsx';
@@ -18,22 +19,33 @@ export default class App extends React.Component {
     label: PropTypes.string,
     url: PropTypes.string,
     appName: PropTypes.string,
-    profiles: PropTypes.arrayOf(PropTypes.string),
+    profiles: PropTypes.string,
     headers: PropTypes.object,
     portal: PropTypes.bool
   }
 
   constructor(props) {
     super(props)
+    let urlParams = new URLSearchParams(window.location.search)
+    let headers
+    if (urlParams.has('headers[]')) {
+      headers = {}
+      const headersArr = urlParams.getAll('headers[]')
+      for (var i = 0; i < headersArr.length; i++) {
+        const [key, value] = headersArr[i].split('(_)', 2)
+        headers[key] = value
+      }
+    }
+    urlParams.set('appName', 'github_pages_reference')
     this.state = {
-      headers: props.headers,
+      headers: headers || props.headers,
       urls: {},
       user: '',
       repo: '',
-      appName: props.appName,
-      url: props.url,
-      profiles: props.profiles,
-      label: props.label
+      appName: urlParams.get('appName') || props.appName,
+      url: urlParams.get('url') || props.url,
+      profiles: urlParams.get('profiles') || props.profiles,
+      label: urlParams.get('label') || props.label
     }
   }
 
@@ -45,19 +57,19 @@ export default class App extends React.Component {
    * @param {string} appName - new appName
    * @param {object} headers - new headers
    */
-  updateInfo = (url, appName, headers) => {
+  updateInfo = (url, appName, headers, profiles=['default'], label='master') => {
     this.setState({
       url,
       appName,
-      label: 'master',
-      profiles: ['default']
+      label,
+      profiles: profiles.toString()
     })
     if (!this.props.portal) {
       this.setState({
         headers
       })
     }
-    this.updateURLs(url, appName)
+    this.updateURLs(url, appName, profiles, label)
   }
 
   /**
@@ -67,7 +79,7 @@ export default class App extends React.Component {
    */
   updateProfiles = (profiles) => {
     this.setState({
-      profiles
+      profiles: profiles.toString()
     })
     this.updateURLs(this.state.url, this.state.appName,
       profiles, this.state.label)
@@ -140,7 +152,7 @@ export default class App extends React.Component {
           {portal ? null : <TopMenu />}
           <UserInputs user={user} repo={repo} url={url}
             appName={appName} profiles={profiles}
-            label={label} portal={portal}
+            label={label} headers={headers} portal={portal}
             updateInfo={this.updateInfo}
             updateLabel={this.updateLabel}
             updateProfiles={this.updateProfiles} />
@@ -154,10 +166,11 @@ export default class App extends React.Component {
   }
 }
 
+// @TODO remove inital headers when open source
 App.defaultProps = {
   url: 'https://config-e2e.api.intuit.com/v2',
   appName: '',
-  profiles: ['default'],
+  profiles: 'default',
   label: 'master',
-  headers: {}
+  headers: {authorization: config.getAuthorizationHeader()}
 }

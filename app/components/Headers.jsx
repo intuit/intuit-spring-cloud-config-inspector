@@ -17,20 +17,24 @@ export default class Header extends React.Component {
   constructor(props) {
     super();
     const authorizationHeader = config.getAuthorizationHeader();
-    this.state = {
-      index:1,
-      data:{
-        '0': {
-          key: {
-            value: 'authorization',
-            neg: false
-          },
-          value: {
-            value: authorizationHeader,
-            neg: false
-          }
+    let data = {}
+    let index = 0
+    for (let header in props.headers) {
+      data[index] = {
+        key: {
+          value: header,
+          neg: false
+        },
+        value: {
+          value: props.headers[header],
+          neg: false
         }
       }
+      index++
+    }
+    this.state = {
+      index,
+      data
     }
   }
 
