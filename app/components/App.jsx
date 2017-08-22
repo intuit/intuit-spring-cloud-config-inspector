@@ -68,7 +68,7 @@ export default class App extends React.Component {
         headers
       })
     }
-    this.updateURLs(url, appName, profiles, label)
+    this.updateURLs(url, appName, profiles, label, headers)
   }
 
   /**
@@ -106,7 +106,8 @@ export default class App extends React.Component {
    * @param {string[]} profiles - i.e. dev, e2e, qal...
    * @param {string} label - branch or tag
    */
-  updateURLs = (url, appName, profiles=['default'], label='master') => {
+  updateURLs = (url, appName, profiles=['default'],
+                label='master', headers=this.state.headers) => {
     // For localhost, use the url in the app, or else use the configured ones
     const currentEnv = config.getCurrentHostEnv();
     const envUrl = currentEnv === config.Env.LOCAL ? `${url}/` : "";
@@ -119,6 +120,13 @@ export default class App extends React.Component {
     this.setState({
       urls
     })
+
+    const headersStrings = Object.keys(headers).map(
+      key => `&headers[]=${key}(_)${headers[key]}`
+    )
+    window.history.pushState(null, null,
+      `?url=${url}&appName=${appName}&profiles=${profiles}&label=${label}`
+      + headersStrings.join(''))
   }
 
   /**

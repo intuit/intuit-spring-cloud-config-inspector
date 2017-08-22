@@ -209,12 +209,18 @@ export default class UserInputs extends React.Component {
       const { appName } = this.state
       const files = contents.filter(f => f.name.startsWith(`${appName}-`) ||
         f.name.startsWith('application-'))
-      const profOptions = files.map(f => {
+      const profiles = files.map(f => {
         let profile = f.name.substring(
           f.name.indexOf(`-`) + 1,
           f.name.lastIndexOf('.')
         )
-        return {text: profile, value: profile}
+        return profile
+      })
+      const profOptions = []
+      profiles.forEach((p, index) => {
+        if (profiles.indexOf(p) === index) {
+          profOptions.push({text: p, value: p})
+        }
       })
       profOptions.push({text: 'default', value: 'default'})
       this.setState({
