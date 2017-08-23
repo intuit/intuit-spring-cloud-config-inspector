@@ -23,7 +23,9 @@ export default class Views extends React.Component {
       confURL: PropTypes.string
     }).isRequired,
     headers: PropTypes.object.isRequired,
-    updateUserRepo: PropTypes.func.isRequired
+    updateUserRepo: PropTypes.func.isRequired,
+    filter: PropTypes.arrayOf(PropTypes.string).isRequired,
+    updateFilter: PropTypes.func.isRequired
   }
 
   constructor(props) {
@@ -39,7 +41,7 @@ export default class Views extends React.Component {
       properties: '',
       requests: [],
       version: '',
-      filter: [],
+      filter: props.filter,
       secrets: false,
       label: '',
       repoURL: '',
@@ -276,18 +278,6 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Callback function passed to PropSearch. Called when user selects
-   * new properties. Updates array of properties to view.
-   *
-   * @param {string[]} filter - array of properties to show (keys)
-   */
-  updateFilter = (filter) => {
-    this.setState({
-      filter
-    })
-  }
-
-  /**
    * Toggle secrets boolean.
    */
   handleSecretsClick = () => {
@@ -383,8 +373,9 @@ export default class Views extends React.Component {
 
   render() {
     const { activeTab, activeIndex, json, yaml, properties, requests, values,
-      version, filter, secrets, repoURL, propertyFiles } = this.state
+      version, secrets, repoURL, propertyFiles } = this.state
     const { metaURL, confURL } = this.props.urls
+    const { updateFilter, filter } = this.props
 
     let config = []
     let keys = []
@@ -445,8 +436,8 @@ export default class Views extends React.Component {
             <Segment attached='top'>
               <Grid columns='equal'>
                 <Grid.Column verticalAlign='middle' width={15}>
-                  <PropSearch updateFilter={this.updateFilter}
-                    options={keys} />
+                  <PropSearch updateFilter={updateFilter}
+                    options={keys} filter={filter} />
                 </Grid.Column>
                 <Grid.Column verticalAlign='middle'>
                   <Popup inverted content='Display only secret values'

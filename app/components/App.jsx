@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import URLSearchParams from 'url-search-params';
 
 /* component imports */
-import DropDown from './dropdown.jsx';
 import UserInputs from './UserInputs.jsx';
 import Views from './Views.jsx'
 import TopMenu from './TopMenu.jsx'
@@ -26,7 +25,7 @@ export default class App extends React.Component {
 
   constructor(props) {
     super(props)
-    let urlParams = new URLSearchParams(location.search)
+    const urlParams = new URLSearchParams(location.search)
     let headers
     // Construct headers object
     if (urlParams.has('headers[]')) {
@@ -46,6 +45,7 @@ export default class App extends React.Component {
       url: urlParams.get('url') || props.url,
       profiles: urlParams.get('profiles') || props.profiles,
       label: urlParams.get('label') || props.label,
+      filter: urlParams.get('filter') ? urlParams.get('filter').split(',') : []
       transactionId: props.transactionId || config.getTID()
     }
   }
@@ -112,8 +112,8 @@ export default class App extends React.Component {
    * @param {string} label - branch or tag
    * @param {object} [headers] - headers object
    */
-  updateURLs = (url, appName, profiles,
-                label, headers=this.state.headers) => {
+  updateURLs = (url, appName, profiles, label,
+    headers=this.state.headers) => {
     // For localhost, use the url in the app, or else use the configured ones
     const currentEnv = config.getCurrentHostEnv();
 
@@ -126,12 +126,33 @@ export default class App extends React.Component {
       urls
     })
 
-    const headersStrings = Object.keys(headers).map(
-      key => `&headers[]=${key}(_)${headers[key]}`
+    const urlParams = new URLSearchParams(location.search)
+    urlParams.set('url', url)
+    urlParams.set('appName', appName)
+    urlParams.set('profiles', profiles)
+    urlParams.set('label', label)
+
+    urlParams.delete('headers[]')
+    Object.keys(headers).forEach(
+      key => urlParams.append('headers[]', `${key}(_)${headers[key]}`)
     )
-    history.pushState(null, null,
-      `?url=${url}&appName=${appName}&profiles=${profiles}&label=${label}`
-      + headersStrings.join(''))
+
+    history.pushState(null, null, `?${decodeURIComponent(urlParams)}`)
+  }
+
+  /**
+   * Callback function passed to PropSearch through Views. Called when
+   * user selects new properties. Updates array of properties to view.
+   *
+   * @param {string[]} filter - array of properties to show (keys)
+   */
+  updateFilter = (filter) => {
+    this.setState({
+      filter
+    })
+    const urlParams = new URLSearchParams(location.search)
+    urlParams.set('filter', filter)
+    history.pushState(null, null, `?${decodeURIComponent(urlParams)}`)
   }
 
   /**
@@ -149,7 +170,7 @@ export default class App extends React.Component {
 
   render() {
     const { urls, headers, user, repo, url,
-      appName, profiles, label, transactionId } = this.state
+      appName, profiles, label, filter, transactionId } = this.state
 
     const { portal } = this.props
 
@@ -169,8 +190,10 @@ export default class App extends React.Component {
             updateLabel={this.updateLabel}
             updateProfiles={this.updateProfiles} />
           <div className='views'>
-            <Views urls={urls} headers={headers} portal={portal} transactionId={transactionId}
-              updateUserRepo={this.updateUserRepo} />
+            <Views urls={urls} headers={headers} portal={portal}
+              transactionId={transactionId}
+              updateUserRepo={this.updateUserRepo}
+              filter={filter} updateFilter={this.updateFilter} />
           </div>
         </ReactCSSTransitionGroup>
       </div>

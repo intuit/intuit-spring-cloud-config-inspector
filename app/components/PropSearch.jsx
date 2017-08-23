@@ -3,19 +3,19 @@ import _ from 'lodash'
 import PropTypes from 'prop-types'
 
 import {Dropdown, Input} from 'semantic-ui-react'
+import { FaSearch } from 'react-icons/lib/fa'
 
 export default class PropSearch extends React.Component {
 
   static propTypes = {
-    options: PropTypes.arrayOf(PropTypes.string).isRequired
-  }
-
-  constructor(props) {
-    super(props)
+    options: PropTypes.arrayOf(PropTypes.string).isRequired,
+    updateFilter: PropTypes.func.isRequired,
+    filter: PropTypes.arrayOf(PropTypes.string).isRequired
   }
 
   /**
-   * When the user adds or removes a property, update parent Views component.
+   * When the user adds or removes a property, update the filter used by
+   * Views. This in turn will change props.filter which is used as value.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} props
@@ -26,15 +26,15 @@ export default class PropSearch extends React.Component {
   }
 
   render() {
-    const { options } = this.props
+    const { options, filter } = this.props
 
     return (
       <Dropdown
         selection search multiple fluid scrolling
-        icon='search'
+        icon={<FaSearch className='searchIcon' />}
         placeholder='properties...'
         options={options.map(key => ({key:key, text:key, value:key}))}
-        onChange={this.handleChange}
+        onChange={this.handleChange} value={filter}
       />
     )
   }

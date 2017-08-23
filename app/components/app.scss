@@ -65,6 +65,20 @@ body {
   text-overflow: ellipsis;
 }
 
+.searchIcon {
+  position: absolute;
+  cursor: pointer;
+  width: auto;
+  height: auto;
+  top: .78571429em;
+  right: 1em;
+  z-index: 3;
+  margin: -.78571429em;
+  padding: .91666667em;
+  opacity: .8;
+  -webkit-transition: opacity .1s ease;
+}
+
 .location {
   float: right;
 }
