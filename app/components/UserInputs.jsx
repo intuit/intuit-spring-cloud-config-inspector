@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import Headers from './Headers.jsx'
 
 import { Form, Label, Menu } from 'semantic-ui-react';
+import { FaCodeFork, FaTag } from 'react-icons/lib/fa'
 
 const token = '726db489b8e34fa7b78540917245031cde359bbc'
 
@@ -28,7 +29,8 @@ export default class UserInputs extends React.Component {
     super(props)
     this.state = {
       profOptions: [{value: 'default', text: 'default'}],
-      labelOptions: [{value: 'master', text: 'master', icon: 'fork'}],
+      labelOptions: [{value: 'master', text: 'master',
+        icon: <FaCodeFork className='enabled' />}],
       index: 0,
       toggle: false,
       url: props.url,
@@ -317,7 +319,7 @@ export default class UserInputs extends React.Component {
         key: r.ref.split('refs/tags/')[1],
         value: r.ref.split('refs/tags/')[1],
         text: r.ref.split('refs/tags/')[1],
-        icon: 'tag',
+        icon: <FaTag className='enabled' />
       }))
       console.log(`Loaded the tags ${JSON.stringify(tags.map(t => t.text))}`)
 
@@ -326,7 +328,7 @@ export default class UserInputs extends React.Component {
         key: r.ref.split('refs/heads/')[1],
         value: r.ref.split('refs/heads/')[1],
         text: r.ref.split('refs/heads/')[1],
-        icon: 'fork'
+        icon: <FaCodeFork className='enabled' />
       }))
       console.log(`Loaded the branches ${JSON.stringify(branches.map(b => b.text))}`)
 

@@ -41,6 +41,25 @@ body {
   color: #eb42f4;
 }
 
+.counter {
+  margin-left: 3px!important;
+  padding: 0.2em 0.5em!important;
+  border-radius: 500rem!important;
+  background-color: #dcdcdc!important;
+  color: rgba(0,0,0,.6)!important;
+  text-align: center;
+}
+
+.disabled {
+  color: rgb(149, 149, 149);
+  margin-right: 3px;
+}
+
+.enabled {
+  color: rgb(13, 13, 13);
+  margin-right: 3px;
+}
+
 .ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;

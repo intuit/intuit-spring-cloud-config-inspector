@@ -1,11 +1,13 @@
 import React from 'react';
 import {Segment, List, Tab, Menu, Label, Grid,
-  Popup, Icon, Accordion, Message, Button} from 'semantic-ui-react';
+  Popup, Accordion, Message, Button} from 'semantic-ui-react';
 import 'prismjs';
 import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
 import {PrismCode} from 'react-prism';
 import PropTypes from 'prop-types'
+import { FaKey, FaGithub, FaCloud } from 'react-icons/lib/fa'
+import { GoMarkGithub } from 'react-icons/lib/go'
 
 import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'
@@ -435,7 +437,7 @@ export default class Views extends React.Component {
           <Menu.Item key='config'>
             Config
             <Popup inverted size='small'
-              trigger={<Label size='tiny' circular content={total} />}
+              trigger={<Label size='small' className='counter' content={total} />}
               content='Property Count' position='top center' />
           </Menu.Item>,
         render: () =>
@@ -449,7 +451,7 @@ export default class Views extends React.Component {
                 <Grid.Column verticalAlign='middle'>
                   <Popup inverted content='Display only secret values'
                     trigger={
-                      <Button icon='key' toggle active={secrets}
+                      <Button icon={<FaKey />} toggle active={secrets}
                         onClick={this.handleSecretsClick} compact
                         floated='right' circular />
                     } position='top right' size='small' />
@@ -479,11 +481,15 @@ export default class Views extends React.Component {
       },
       {
         menuItem:
-        <Menu.Item key='github'>
-          <Icon disabled={activeTab !== 'github'} size='large' name='github' fitted />
-          GitHub
+        <Menu.Item key='github' >
+          <GoMarkGithub
+            className={activeTab === 'github' ? 'enabled' : 'disabled'} />
+          {'  '}GitHub
           <Popup inverted size='small'
-            trigger={<Label size='tiny' circular content={propertyFiles.length} />}
+            trigger={
+              <Label size='small' content={propertyFiles.length}
+                className='counter'/>
+            }
             content='Property Files' position='top center' />
         </Menu.Item>,
         render: () => <Tab.Pane>{this.createGithubTab()}</Tab.Pane>
@@ -493,7 +499,9 @@ export default class Views extends React.Component {
           <Menu.Item key='api'>
             <Popup size='small'
               inverted
-              trigger={<Icon fitted disabled={activeTab !== 'api'} name='cloud' />}
+              trigger={<FaCloud
+                className={activeTab === 'api' ? 'enabled' : 'disabled'} />
+              }
               content='API Requests'
               position='top center'
             />
