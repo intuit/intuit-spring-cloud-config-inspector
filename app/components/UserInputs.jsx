@@ -16,7 +16,7 @@ export default class UserInputs extends React.Component {
     repo: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
     appName: PropTypes.string.isRequired,
-    profiles: PropTypes.arrayOf(PropTypes.string).isRequired,
+    profiles: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
     portal: PropTypes.bool,
     updateInfo: PropTypes.func.isRequired,
@@ -33,18 +33,21 @@ export default class UserInputs extends React.Component {
       toggle: false,
       url: props.url,
       appName: props.appName,
-      profiles: props.profiles,
+      profiles: props.profiles.split(','),
       label: props.label,
       headerCount: 1,
-      headers: {}
+      headers: props.headers
     }
-
-
   }
 
+  /**
+   * If appName and url already exist (props or query parameters),
+   * update info without making the user press submit.
+   */
   componentWillMount() {
-    if (this.props.portal) {
-      this.handleSubmit()
+    const { url, appName, headers, profiles, label } = this.state
+    if (appName && url) {
+      this.props.updateInfo(url, appName, headers, profiles, label)
     }
   }
 
@@ -110,6 +113,7 @@ export default class UserInputs extends React.Component {
       label: data.value
     })
     this.props.updateLabel(data.value)
+    this.loadProfiles(this.props.user, this.props.repo, data.value)
   }
 
   /**
@@ -140,7 +144,7 @@ export default class UserInputs extends React.Component {
    * Called from Headers button, switches between Collapse
    * and Expand, showing/revealing headers.
    */
-  handleClick = () => {
+  handleHeadersClick = () => {
     this.setState({
       toggle: !this.state.toggle
     })
@@ -152,13 +156,11 @@ export default class UserInputs extends React.Component {
    */
   handleSubmit = () => {
     const {url, appName, headers} = this.state
-
     this.setState({
       label: 'master',
       profiles: ['default']
     })
     this.props.updateInfo(url, appName, headers)
-
   }
 
   /**
@@ -167,7 +169,7 @@ export default class UserInputs extends React.Component {
    *
    * @param {object[]} data - maps index to an object containing a key
    * and value object, each of which have a value and a bool 'neg'
-   * @param {number} [headerCount] - number of headers
+   * @param {number} [headerCount] - number of headers if different
    */
   updateHeaders = (data, headerCount) => {
     let headers = {}
@@ -185,74 +187,109 @@ export default class UserInputs extends React.Component {
   }
 
   /**
-   * If the label in labelmenu changes, update inputData and urls. If
-   * either label, user, or repo changed, fetch list of profiles from
-   * github and update profOptions.
+   * Fetch list of profiles from github based on given user, repo, and
+   * label. Update options in profiles dropdown. If a profile in state
+   * does not exist, add with warning label.
+   *
+   * @param {string} user - current user (i.e. services-config)
+   * @param {string} repo - current repo
+   * @param {string} [label] - current label or 'master'
+   */
+  loadProfiles = (user, repo, label='master') => {
+    fetch(
+      `${config.GIT_REPOS_API}/${user}/${repo}/contents` +
+      `?access_token=${token}&ref=${label}`
+    ).then(
+      response => {
+        if (response.status >= 400) {
+          throw new Error("bad")
+        }
+        return response.json()
+      }
+    ).then(contents => {
+      const { appName, profiles } = this.state
+      const files = contents.filter(f => f.name.startsWith(`${appName}-`) ||
+        f.name.startsWith('application-'))
+      const profileNames = files.map(f => {
+        let profile = f.name.substring(
+          f.name.indexOf(`-`) + 1,
+          f.name.lastIndexOf('.')
+        )
+        return profile
+      })
+      const profOptions = []
+      profileNames.forEach((p, index) => {
+        if (profileNames.indexOf(p) === index) {
+          profOptions.push({text: p, value: p})
+        }
+      })
+      profOptions.push({text: 'default', value: 'default'})
+      let label = { color:'red', content:'Not found' }
+      profiles.forEach(profile => {
+        if (!profileNames.includes(profile)) {
+          profOptions.push({text:profile, value:profile, label})
+        }
+      })
+
+      this.setState({
+        profOptions
+      })
+    }).catch(err => console.log(err.message))
+  }
+
+  /**
+   * Fetch list of labels from github based on given user and repo.
+   * Update list of branches and tags.
+   *
+   * @param {string} user - current user (i.e. services-config)
+   * @param {string} repo - current repo
+   */
+  loadLabels = (user, repo) => {
+    fetch(
+      `${config.GIT_REPOS_API}/${user}/${repo}/git/refs` +
+      `?access_token=${token}&per_page=100`
+    ).then(response => {
+      if (response.status >= 400) {
+        throw new Error(response.json())
+      }
+      return response.json()
+    }).then(refs => {
+      const tagRefs = refs.filter(r => r.ref.startsWith('refs/tags'))
+      const tags = tagRefs.map(r => ({
+        value: r.ref.split('refs/tags/')[1],
+        text: r.ref.split('refs/tags/')[1],
+        icon: 'tag'
+      }))
+      const branchRefs = refs.filter(r => r.ref.startsWith('refs/heads'))
+      const branches = branchRefs.map(r => ({
+        value: r.ref.split('refs/heads/')[1],
+        text: r.ref.split('refs/heads/')[1],
+        icon: 'fork'
+      }))
+      this.setState({
+        labelOptions: branches.concat(tags)
+      })
+    }).catch(err => console.log(err.message))
+  }
+
+  /**
+   * If new user or repo, load new profiles and labels.
    *
    * @param {object} nextProps
-   * @param {string} nextProps.label - new label from labelmenu
    * @param {string} nextProps.user - current user (i.e. services-config)
    * @param {string} nextProps.repo - current repo
    */
-  componentWillReceiveProps({user, repo}) {
+  componentWillReceiveProps = ({user, repo}) => {
     if (user !== this.props.user || repo !== this.props.repo) {
-      fetch(
-        `${config.GIT_REPOS_API}/${user}/${repo}/contents` +
-        `?access_token=${token}`
-      ).then(
-        response => {
-          if (response.status >= 400) {
-            throw new Error("bad")
-          }
-          return response.json()
-        }
-      ).then(contents => {
-        const { appName } = this.state
-        const files = contents.filter(f => f.name.startsWith(appName))
-        const profOptions = files.map(f => {
-          let profile = f.name.substring(
-            f.name.indexOf(`${appName}-`) + appName.length + 1,
-            f.name.lastIndexOf('.')
-          )
-          profile = profile === '' ? 'default' : profile
-          return {text: profile, value: profile}
-        })
-        this.setState({
-          profOptions
-        })
-      }).catch(err => console.log(err.message))
-      fetch(
-        `${config.GIT_REPOS_API}/${user}/${repo}/git/refs` +
-        `?access_token=${token}&per_page=100`
-      ).then(response => {
-        if (response.status >= 400) {
-          throw new Error(response.json())
-        }
-        return response.json()
-      }).then(refs => {
-        const tagRefs = refs.filter(r => r.ref.startsWith('refs/tags'))
-        const tags = tagRefs.map(r => ({
-          value: r.ref.split('refs/tags/')[1],
-          text: r.ref.split('refs/tags/')[1],
-          icon: 'tag'
-        }))
-        const branchRefs = refs.filter(r => r.ref.startsWith('refs/heads'))
-        const branches = branchRefs.map(r => ({
-          value: r.ref.split('refs/heads/')[1],
-          text: r.ref.split('refs/heads/')[1],
-          icon: 'fork'
-        }))
-        this.setState({
-          labelOptions: branches.concat(tags)
-        })
-      }).catch(err => console.log(err.message))
+      this.loadProfiles(user, repo)
+      this.loadLabels(user, repo)
     }
   }
 
   render() {
     const { button, url, appName, profiles,
       label, profOptions, labelOptions,
-      toggle, headerCount } = this.state
+      toggle, headerCount, headers } = this.state
     const { portal } = this.props
 
     // Hide url and appName field if in portal view
@@ -272,7 +309,7 @@ export default class UserInputs extends React.Component {
               <Form.Field>
                 <label>Headers</label>
                 <Menu color='grey' compact inverted>
-                  <Menu.Item onClick={this.handleClick} active={toggle}>
+                  <Menu.Item onClick={this.handleHeadersClick} active={toggle}>
                     {toggle ? 'Collapse' : 'Expand'}
                     <Label color='red' floating>{headerCount}</Label>
                   </Menu.Item>
@@ -287,7 +324,8 @@ export default class UserInputs extends React.Component {
         {
           portal ?
           null :
-          <Headers show={toggle} updateHeaders={this.updateHeaders} />
+          <Headers show={toggle} updateHeaders={this.updateHeaders}
+            headers={headers} />
         }
         <Form>
           <Form.Group widths='equal'>
