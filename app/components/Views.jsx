@@ -145,7 +145,7 @@ export default class Views extends React.Component {
           return response.text()
         } else {
           return response.json().then(err => {
-              throw new Error(err.message)
+            throw new Error(err.message)
           })
         }
       }
