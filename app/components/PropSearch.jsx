@@ -1,5 +1,4 @@
 import React from 'react'
-import _ from 'lodash'
 import PropTypes from 'prop-types'
 
 import {Dropdown, Input} from 'semantic-ui-react'
@@ -13,6 +12,19 @@ export default class PropSearch extends React.Component {
     filter: PropTypes.arrayOf(PropTypes.string).isRequired
   }
 
+  constructor() {
+    super()
+    this.state = {
+      value: []
+    }
+  }
+
+  componentWillReceiveProps = ({filter, options}) => {
+    const optionsSet = new Set(options)
+    const value = filter.filter(p => optionsSet.has(p))
+    this.setState({value})
+  }
+
   /**
    * When the user adds or removes a property, update the filter used by
    * Views. This in turn will change props.filter which is used as value.
@@ -22,19 +34,21 @@ export default class PropSearch extends React.Component {
    * @param {string} props.value - current input
    */
   handleChange = (e, {value}) => {
+    this.setState({value})
     this.props.updateFilter(value)
   }
 
   render() {
     const { options, filter } = this.props
+    const { value } = this.state
 
     return (
       <Dropdown
         selection search multiple fluid scrolling
         icon={<FaSearch className='searchIcon' />}
         placeholder='properties...'
-        options={options.map(key => ({key:key, text:key, value:key}))}
-        onChange={this.handleChange} value={filter}
+        options={options.map(key => ({text:key, value:key}))}
+        onChange={this.handleChange} value={value}
       />
     )
   }

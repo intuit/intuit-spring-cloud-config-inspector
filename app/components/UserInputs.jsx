@@ -262,6 +262,7 @@ export default class UserInputs extends React.Component {
         )
         return profile
       })
+      profileNames.push('default')
       console.log(`Parsed the profile names from config files ${JSON.stringify(profileNames)}`)
 
       // Build the options for the dropdown.
@@ -271,7 +272,6 @@ export default class UserInputs extends React.Component {
           profOptions.push({text: p, value: p})
         }
       })
-      profOptions.push({text: 'default', value: 'default'})
 
       // Display the profiles on the list.
       let label = { color:'red', content:'Not found' }
@@ -402,6 +402,7 @@ export default class UserInputs extends React.Component {
               options={profOptions} value={profiles}
               allowAdditions additionLabel='Add: '
               onAddItem={this.handleAddition}
+              additionPosition='bottom'
               renderLabel={this.renderLabel}
               onChange={this.handleProfileChange} />
             <Form.Dropdown label='Label' fluid search selection
