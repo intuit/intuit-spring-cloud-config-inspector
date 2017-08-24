@@ -187,6 +187,28 @@ export default class UserInputs extends React.Component {
   }
 
   /**
+   * @return the http headers for calling Github
+   */
+  makeGithubFetchRequest = (additionalHeaders = {}, cors) => {
+    let request = {
+      method: 'GET',
+      headers: {
+        "Authorization": `token ${token}`
+      }
+    };
+
+    // To send cookies to the destination (Intuit authentication)
+    // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters
+    if (cors) {
+      Object.assign(request, {
+        mode: 'cors',
+        credentials: 'include',
+      })
+    }
+    return request;
+  }
+
+  /**
    * Fetch list of profiles from github based on given user, repo, and
    * label. Update options in profiles dropdown. If a profile in state
    * does not exist, add with warning label.
@@ -196,17 +218,17 @@ export default class UserInputs extends React.Component {
    * @param {string} [label] - current label or 'master'
    */
   loadProfiles = (user, repo, label='master') => {
-    fetch(
-      `${config.GIT_REPOS_API}/${user}/${repo}/contents` +
-      `?access_token=${token}&ref=${label}`
-    ).then(
-      response => {
-        if (response.status >= 400) {
-          throw new Error("bad")
-        }
-        return response.json()
+    const githubRequest = this.makeGithubFetchRequest();
+    const githubApiUrl = `${config.GIT_REPOS_API}/${user}/${repo}/contents?ref=${label}`
+    fetch(githubApiUrl, githubRequest).then((response) => {
+
+      if (response.status >= 400) {
+        throw new Error("bad")
       }
-    ).then(contents => {
+      return response.json()
+
+    }).then(contents => {
+
       const { appName, profiles } = this.state
       const files = contents.filter(f => f.name.startsWith(`${appName}-`) ||
         f.name.startsWith('application-'))
@@ -245,14 +267,15 @@ export default class UserInputs extends React.Component {
    * @param {string} repo - current repo
    */
   loadLabels = (user, repo) => {
-    fetch(
-      `${config.GIT_REPOS_API}/${user}/${repo}/git/refs` +
-      `?access_token=${token}&per_page=100`
-    ).then(response => {
+    const githubRequest = this.makeGithubFetchRequest();
+    const githubApiUrl = `${config.GIT_REPOS_API}/${user}/${repo}/git/refs?per_page=100`
+    fetch(githubApiUrl, githubRequest).then((response) => {
+
       if (response.status >= 400) {
         throw new Error(response.json())
       }
       return response.json()
+
     }).then(refs => {
       const tagRefs = refs.filter(r => r.ref.startsWith('refs/tags'))
       const tags = tagRefs.map(r => ({

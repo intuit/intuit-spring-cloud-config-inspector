@@ -119,3 +119,17 @@ export function getAuthorizationHeader() {
     return `Intuit_APIKey intuit_appid=${credentials.appId},intuit_apikey=${credentials.appSecret},intuit_apikey_version=1.0`;
   }
 }
+
+/**
+ * Returns an intuit tid for requests
+ *
+ * @returns {string} the transaction Id for logging purposes
+ */
+export function getTID() {
+  let date = new Date().getTime()
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (date + Math.random() * 16) % 16 | 0
+    date = Math.floor(date / 16)
+    return (c === 'x' ? r : (r & 0x7 | 0x8)).toString(16)
+  })
+}

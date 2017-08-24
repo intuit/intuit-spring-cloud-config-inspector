@@ -60,11 +60,14 @@ export default class App extends React.Component {
    * @param {string} [label] - new or default label
    */
   updateInfo = (url, appName, headers, profiles=['default'], label='master') => {
+    // Get a transactionId for the entire change
+    const transactionId = config.getTID()
     this.setState({
       url,
       appName,
       label,
-      profiles: profiles.toString()
+      profiles: profiles.toString(),
+      transactionId
     })
     if (!this.props.portal) {
       this.setState({
@@ -149,8 +152,9 @@ export default class App extends React.Component {
 
   render() {
     const { urls, headers, user, repo, url,
-      appName, profiles, label } = this.state
+      appName, profiles, label, transactionId } = this.state
 
+    let tid = !transactionId ? config.getTID() : tid
     const { portal } = this.props
 
     return (
@@ -164,12 +168,12 @@ export default class App extends React.Component {
           {portal ? null : <TopMenu />}
           <UserInputs user={user} repo={repo} url={url}
             appName={appName} profiles={profiles}
-            label={label} headers={headers} portal={portal}
+            label={label} headers={headers} portal={portal} transactionId={tid}
             updateInfo={this.updateInfo}
             updateLabel={this.updateLabel}
             updateProfiles={this.updateProfiles} />
           <div className='views'>
-            <Views urls={urls} headers={headers}
+            <Views urls={urls} headers={headers} transactionId={tid}
               updateUserRepo={this.updateUserRepo} />
           </div>
         </ReactCSSTransitionGroup>
