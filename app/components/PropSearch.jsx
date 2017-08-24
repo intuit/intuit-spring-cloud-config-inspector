@@ -19,6 +19,13 @@ export default class PropSearch extends React.Component {
     }
   }
 
+  /**
+   * Filter out properties that do not exist in options
+   *
+   * @param {object} nextProps
+   * @param {string[]} nextProps.filter - search values from app
+   * @param {string[]} nextProps.options - current key values
+   */
   componentWillReceiveProps = ({filter, options}) => {
     const optionsSet = new Set(options)
     const value = filter.filter(p => optionsSet.has(p))
@@ -27,7 +34,7 @@ export default class PropSearch extends React.Component {
 
   /**
    * When the user adds or removes a property, update the filter used by
-   * Views. This in turn will change props.filter which is used as value.
+   * Views. Also update value.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} props
@@ -39,7 +46,7 @@ export default class PropSearch extends React.Component {
   }
 
   render() {
-    const { options, filter } = this.props
+    const { options } = this.props
     const { value } = this.state
 
     return (

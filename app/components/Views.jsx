@@ -41,7 +41,6 @@ export default class Views extends React.Component {
       properties: '',
       requests: [],
       version: '',
-      filter: props.filter,
       secrets: false,
       label: '',
       repoURL: '',
@@ -437,7 +436,7 @@ export default class Views extends React.Component {
               <Grid columns='equal'>
                 <Grid.Column verticalAlign='middle' width={15}>
                   <PropSearch updateFilter={updateFilter}
-                    options={keys} filter={filter} />
+                    options={keys} filter={[...filter]} />
                 </Grid.Column>
                 <Grid.Column verticalAlign='middle'>
                   <Popup inverted content='Display only secret values'

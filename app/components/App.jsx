@@ -112,8 +112,7 @@ export default class App extends React.Component {
    * @param {string} label - branch or tag
    * @param {object} [headers] - headers object
    */
-  updateURLs = (url, appName, profiles, label,
-    headers=this.state.headers) => {
+  updateURLs = (url, appName, profiles, label, headers=this.state.headers) => {
     // For localhost, use the url in the app, or else use the configured ones
     const currentEnv = config.getCurrentHostEnv();
 
