@@ -280,7 +280,9 @@ export default class UserInputs extends React.Component {
       })
 
       this.setState({
-        profOptions
+        // Sort the labels by the names, case insensitive
+        // https://stackoverflow.com/questions/979256/sorting-an-array-of-javascript-objects/979289#979289
+        profOptions: profOptions.sort((a, b) => a.text.localeCompare(b.text))
       })
     }).catch(err => console.log(err.message))
   }
@@ -329,7 +331,9 @@ export default class UserInputs extends React.Component {
       console.log(`Loaded the branches ${JSON.stringify(branches.map(b => b.text))}`)
 
       this.setState({
-        labelOptions: branches.concat(tags)
+        // Sort the labels by the names, case insensitive
+        // https://stackoverflow.com/questions/979256/sorting-an-array-of-javascript-objects/979289#979289
+        labelOptions: branches.concat(tags).sort((a, b) => a.key.localeCompare(b.key))
       })
     }).catch(err => console.log(err.message))
   }
