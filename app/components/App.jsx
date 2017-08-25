@@ -20,7 +20,8 @@ export default class App extends React.Component {
     appName: PropTypes.string,
     profiles: PropTypes.string,
     headers: PropTypes.object,
-    portal: PropTypes.bool
+    portal: PropTypes.bool,
+    transactionId: PropTypes.string
   }
 
   constructor(props) {
@@ -45,8 +46,8 @@ export default class App extends React.Component {
       url: urlParams.get('url') || props.url,
       profiles: urlParams.get('profiles') || props.profiles,
       label: urlParams.get('label') || props.label,
-      filter: urlParams.get('filter') ? urlParams.get('filter').split(',') : []
-      transactionId: props.transactionId || config.getTID()
+      filter: urlParams.get('filter') ? urlParams.get('filter').split(',') : [],
+      transactionId: props.transactionId
     }
   }
 
@@ -126,15 +127,17 @@ export default class App extends React.Component {
     })
 
     const urlParams = new URLSearchParams(location.search)
-    urlParams.set('url', url)
-    urlParams.set('appName', appName)
     urlParams.set('profiles', profiles)
     urlParams.set('label', label)
+    if (!this.props.portal) {
+      urlParams.set('url', url)
+      urlParams.set('appName', appName)
 
-    urlParams.delete('headers[]')
-    Object.keys(headers).forEach(
-      key => urlParams.append('headers[]', `${key}(_)${headers[key]}`)
-    )
+      urlParams.delete('headers[]')
+      Object.keys(headers).forEach(
+        key => urlParams.append('headers[]', `${key}(_)${headers[key]}`)
+      )
+    }
 
     history.pushState(null, null, `?${decodeURIComponent(urlParams)}`)
   }
@@ -184,7 +187,8 @@ export default class App extends React.Component {
           {portal ? null : <TopMenu />}
           <UserInputs user={user} repo={repo} url={url}
             appName={appName} profiles={profiles}
-            label={label} headers={headers} portal={portal} transactionId={transactionId}
+            label={label} headers={headers} portal={portal}
+            transactionId={transactionId}
             updateInfo={this.updateInfo}
             updateLabel={this.updateLabel}
             updateProfiles={this.updateProfiles} />
@@ -206,5 +210,6 @@ App.defaultProps = {
   appName: '',
   profiles: 'default',
   label: 'master',
-  headers: {authorization: config.getAuthorizationHeader()}
+  headers: {authorization: config.getAuthorizationHeader()},
+  transactionId: config.getTID()
 }

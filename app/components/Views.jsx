@@ -25,7 +25,9 @@ export default class Views extends React.Component {
     headers: PropTypes.object.isRequired,
     updateUserRepo: PropTypes.func.isRequired,
     filter: PropTypes.arrayOf(PropTypes.string).isRequired,
-    updateFilter: PropTypes.func.isRequired
+    updateFilter: PropTypes.func.isRequired,
+    portal: PropTypes.bool,
+    transactionId: PropTypes.string.isRequired
   }
 
   constructor(props) {

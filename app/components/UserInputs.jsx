@@ -22,7 +22,9 @@ export default class UserInputs extends React.Component {
     portal: PropTypes.bool,
     updateInfo: PropTypes.func.isRequired,
     updateLabel: PropTypes.func.isRequired,
-    updateProfiles: PropTypes.func.isRequired
+    updateProfiles: PropTypes.func.isRequired,
+    portal: PropTypes.bool,
+    transactionId: PropTypes.string.isRequired
   }
 
   constructor(props) {
