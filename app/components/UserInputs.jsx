@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Headers from './Headers.jsx'
 
 import { Form, Label, Menu } from 'semantic-ui-react';
-import { FaCodeFork, FaTag } from 'react-icons/lib/fa'
+import { FaCodeFork, FaTag, FaCaretDown } from 'react-icons/lib/fa'
 
 const token = '726db489b8e34fa7b78540917245031cde359bbc'
 
@@ -404,10 +404,12 @@ export default class UserInputs extends React.Component {
               onAddItem={this.handleAddition}
               additionPosition='bottom'
               renderLabel={this.renderLabel}
-              onChange={this.handleProfileChange} />
+              onChange={this.handleProfileChange}
+              icon={<FaCaretDown className='searchIcon' />} />
             <Form.Dropdown label='Label' fluid search selection
               scrolling options={labelOptions} value={label}
-              onChange={this.handleLabelChange} />
+              onChange={this.handleLabelChange}
+              icon={<FaCaretDown className='searchIcon' />} />
           </Form.Group>
         </Form>
       </div>

@@ -76,7 +76,8 @@ body {
   margin: -.78571429em;
   padding: .91666667em;
   opacity: .8;
-  -webkit-transition: opacity .1s ease;
+  transition: opacity .1s ease;
+  font-size: .85714286em;
 }
 
 .location {
