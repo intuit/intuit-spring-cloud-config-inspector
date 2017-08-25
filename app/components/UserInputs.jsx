@@ -246,10 +246,13 @@ export default class UserInputs extends React.Component {
       return response.json()
 
     }).then(contents => {
-
       const { appName, profiles } = this.state
-      const files = contents.filter(f => f.name.startsWith(`${appName}-`) ||
-        f.name.startsWith('application-'))
+
+      // The contents include the name of the files from github.
+      const files = contents.filter(c => c.name.startsWith(`${appName}-`) ||
+        c.name.startsWith('application-'))
+      console.log(`Loaded the config files from github for this app ${JSON.stringify(files.map(c => c.name))}`)
+
       const profileNames = files.map(f => {
         let profile = f.name.substring(
           f.name.indexOf(`-`) + 1,
@@ -257,6 +260,9 @@ export default class UserInputs extends React.Component {
         )
         return profile
       })
+      console.log(`Parsed the profile names from config files ${JSON.stringify(profileNames)}`)
+
+      // Build the options for the dropdown.
       const profOptions = []
       profileNames.forEach((p, index) => {
         if (profileNames.indexOf(p) === index) {
@@ -264,6 +270,8 @@ export default class UserInputs extends React.Component {
         }
       })
       profOptions.push({text: 'default', value: 'default'})
+
+      // Display the profiles on the list.
       let label = { color:'red', content:'Not found' }
       profiles.forEach(profile => {
         if (!profileNames.includes(profile)) {
@@ -304,16 +312,22 @@ export default class UserInputs extends React.Component {
     }).then(refs => {
       const tagRefs = refs.filter(r => r.ref.startsWith('refs/tags'))
       const tags = tagRefs.map(r => ({
+        key: r.ref.split('refs/tags/')[1],
         value: r.ref.split('refs/tags/')[1],
         text: r.ref.split('refs/tags/')[1],
-        icon: 'tag'
+        icon: 'tag',
       }))
+      console.log(`Loaded the tags ${JSON.stringify(tags.map(t => t.text))}`)
+
       const branchRefs = refs.filter(r => r.ref.startsWith('refs/heads'))
       const branches = branchRefs.map(r => ({
+        key: r.ref.split('refs/heads/')[1],
         value: r.ref.split('refs/heads/')[1],
         text: r.ref.split('refs/heads/')[1],
         icon: 'fork'
       }))
+      console.log(`Loaded the branches ${JSON.stringify(branches.map(b => b.text))}`)
+
       this.setState({
         labelOptions: branches.concat(tags)
       })
