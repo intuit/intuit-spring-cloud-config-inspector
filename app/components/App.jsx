@@ -116,11 +116,10 @@ export default class App extends React.Component {
                 label, headers=this.state.headers) => {
     // For localhost, use the url in the app, or else use the configured ones
     const currentEnv = config.getCurrentHostEnv();
-    const envUrl = currentEnv === config.Env.LOCAL ? `${url}/` : "";
 
     const urls = {
-      metaURL: `${envUrl}${appName}/${profiles}/${label.replace(/\//g, '(_)')}`,
-      confURL: `${envUrl}${label.replace(/\//g, '(_)')}/${appName}-${profiles}`
+      metaURL: `${url}/${appName}/${profiles}/${label.replace(/\//g, '(_)')}`,
+      confURL: `${url}/${label.replace(/\//g, '(_)')}/${appName}-${profiles}`
     }
 
     this.setState({

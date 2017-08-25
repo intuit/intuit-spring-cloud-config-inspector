@@ -140,7 +140,7 @@ export default class Views extends React.Component {
 
     const configApiRequest = this.makeConfigServiceFetchRequest(headers, this.props.portal);
     const configApiUrl = `${proxy}${url}`
-    console.log(`Requesting config api '/${configApiUrl.replace(proxy, "")}' `)
+    console.log(`Requesting config api '${configApiUrl.replace(proxy, "")}' `)
 
     const intuit_tid = this.props.transactionId
     return fetch(configApiUrl, configApiRequest)
