@@ -193,7 +193,8 @@ export default class UserInputs extends React.Component {
     let request = {
       method: 'GET',
       headers: {
-        "Authorization": `token ${token}`
+        "Authorization": `token ${token}`,
+        "intuit_tid": this.props.transactionId
       }
     };
 
@@ -218,8 +219,13 @@ export default class UserInputs extends React.Component {
    * @param {string} [label] - current label or 'master'
    */
   loadProfiles = (user, repo, label='master') => {
+    const proxy = config.getProxyServerUrl();
+    const currentEnv = config.getCurrentHostEnv().toString();
+    console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
+
     const githubRequest = this.makeGithubFetchRequest();
-    const githubApiUrl = `${config.GIT_REPOS_API}/${user}/${repo}/contents?ref=${label}`
+
+    const githubApiUrl = `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/contents?ref=${label}`
     fetch(githubApiUrl, githubRequest).then((response) => {
 
       if (response.status >= 400) {
@@ -267,8 +273,13 @@ export default class UserInputs extends React.Component {
    * @param {string} repo - current repo
    */
   loadLabels = (user, repo) => {
+    const proxy = config.getProxyServerUrl();
+    const currentEnv = config.getCurrentHostEnv().toString();
+    console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
+
     const githubRequest = this.makeGithubFetchRequest();
-    const githubApiUrl = `${config.GIT_REPOS_API}/${user}/${repo}/git/refs?per_page=100`
+
+    const githubApiUrl = `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/git/refs?per_page=100`
     fetch(githubApiUrl, githubRequest).then((response) => {
 
       if (response.status >= 400) {

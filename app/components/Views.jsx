@@ -11,10 +11,6 @@ import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'
 import * as config from '../conf';
 
-const proxy = config.getProxyServerUrl();
-const currentEnv = config.getCurrentHostEnv().toString();
-console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
-
 const org = 'services-config'
 
 export default class Views extends React.Component {
@@ -137,7 +133,12 @@ export default class Views extends React.Component {
    * @returns {Promise} Either text of response or Error to be caught
    */
   fetchFile(url, requests, headers) {
+    const proxy = config.getProxyServerUrl();
+    const currentEnv = config.getCurrentHostEnv().toString();
+    console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
+
     const configApiRequest = this.makeConfigServiceFetchRequest(headers, this.props.portal);
+
     const configApiUrl = `${proxy}${url}`
     const intuit_tid = this.props.transactionId
     return fetch(configApiUrl, configApiRequest)

@@ -45,7 +45,8 @@ export default class App extends React.Component {
       appName: urlParams.get('appName') || props.appName,
       url: urlParams.get('url') || props.url,
       profiles: urlParams.get('profiles') || props.profiles,
-      label: urlParams.get('label') || props.label
+      label: urlParams.get('label') || props.label,
+      transactionId: props.transactionId || config.getTID()
     }
   }
 
@@ -60,14 +61,11 @@ export default class App extends React.Component {
    * @param {string} [label] - new or default label
    */
   updateInfo = (url, appName, headers, profiles=['default'], label='master') => {
-    // Get a transactionId for the entire change
-    const transactionId = config.getTID()
     this.setState({
       url,
       appName,
       label,
-      profiles: profiles.toString(),
-      transactionId
+      profiles: profiles.toString()
     })
     if (!this.props.portal) {
       this.setState({
@@ -154,7 +152,6 @@ export default class App extends React.Component {
     const { urls, headers, user, repo, url,
       appName, profiles, label, transactionId } = this.state
 
-    let tid = !transactionId ? config.getTID() : tid
     const { portal } = this.props
 
     return (
@@ -168,12 +165,12 @@ export default class App extends React.Component {
           {portal ? null : <TopMenu />}
           <UserInputs user={user} repo={repo} url={url}
             appName={appName} profiles={profiles}
-            label={label} headers={headers} portal={portal} transactionId={tid}
+            label={label} headers={headers} portal={portal} transactionId={transactionId}
             updateInfo={this.updateInfo}
             updateLabel={this.updateLabel}
             updateProfiles={this.updateProfiles} />
           <div className='views'>
-            <Views urls={urls} headers={headers} transactionId={tid}
+            <Views urls={urls} headers={headers} transactionId={transactionId}
               updateUserRepo={this.updateUserRepo} />
           </div>
         </ReactCSSTransitionGroup>
