@@ -13,11 +13,11 @@ app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.json({limit: myLimit}));
 
 app.all('*', function (req, res, next) {
-    
+
     // Set CORS headers: allow all origins, methods, and headers: you may want to lock this down in a production environment
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET, PUT, PATCH, POST, DELETE");
-    res.header("Access-Control-Allow-Headers", req.header('access-control-request-headers') || 'origin, content-type, accept, location, code');
+    res.header("Access-Control-Allow-Headers", req.header('access-control-request-headers') || '*');
 
     if (req.method === 'OPTIONS') {
         // CORS Preflight
@@ -40,10 +40,10 @@ app.all('*', function (req, res, next) {
 
         // url: targetURL, + req.url
         //console.log(targetURL);
-        request({ 
-            url: targetURL, 
-            method: req.method, 
-            json: req.body, 
+        request({
+            url: targetURL,
+            method: req.method,
+            json: req.body,
             headers: headers,
             strictSSL: false },
             function (error, response, body) {

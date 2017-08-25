@@ -1,18 +1,25 @@
 {
-  "name": "config-inspector",
+  "name": "@intuit/spring-cloud-config-inspector",
   "version": "0.7.5",
-  "description": "Config Inspector",
-  "main": "index.js",
+  "description": "The inspection tool for Spring Cloud Config repositories",
+  "main": "./dist/intuit-spring-cloud-config-inspector.js",
   "scripts": {
     "test": "jest",
-    "prebuild": "rm -rf build && mkdir build && cp -R public/* build/",
+    "prebuild": "rm -rf build && rm -rf lib && mkdir build && cp -R public/* build/",
     "build": "NODE_ENV=production webpack --config ./webpack.config.js --progress --colors",
     "predeploy": "npm run build && echo Ready to use $npm_config_env",
     "deploy": "NODE_DEBUG=gh-pages gh-pages -d build --dest $npm_config_env/standalone --message \"Deploying to $npm_config_env environment\"",
-    "prestart": "npm run prebuild && npm test",
+    "prereact-build": "cp app/standalone.js app/index.jsx",
+    "prestart": "npm run prereact-build && npm run prebuild && npm test",
     "start": "concurrently --kill-others --raw \"npm run proxy\" \"npm run dev\"",
     "dev": "webpack-dev-server --host dev.intuit.com --port 3232",
-    "proxy": "node tools/cors-proxy"
+    "proxy": "node tools/cors-proxy",
+    "pretranspile": "rm -rf lib/ && mkdir -p lib",
+    "transpile": "babel app -d lib",
+    "buildportal": "git checkout -- app/index.jsx && npm-run-all -s transpile && webpack --config webpack.dist.config.js",
+    "cleandirs": "rm -rf *.tgz && rm -rf dist",
+    "setupbundle": "cp -R build dist && rm -f dist/index.html && rm -f dist/favicon.ico && mv dist/main.js dist/intuit-spring-cloud-config-inspector.js",
+    "prepublish": "npm-run-all -s cleandirs buildportal setupbundle"
   },
   "repository": {
     "type": "git",
@@ -60,6 +67,7 @@
     "jest": "^20.0.4",
     "jest-fetch-mock": "^1.2.1",
     "node-sass": "^4.5.3",
+    "npm-run-all": "^4.0.2",
     "path": "^0.12.7",
     "properties-loader": "0.0.1",
     "raw-loader": "^0.5.1",
@@ -73,5 +81,25 @@
     "webpack": "^3.5.4",
     "webpack-dev-server": "^2.7.1",
     "yaml-loader": "^0.5.0"
-  }
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.intuit.net"
+  },
+  "tags": [
+    "configuration",
+    "config",
+    "react",
+    "inspection",
+    "debug"
+  ],
+  "keywords": [
+    "react",
+    "react-component",
+    "services-config",
+    "config",
+    "caas",
+    "debug",
+    "inspector",
+    "inspection"
+  ]
 }

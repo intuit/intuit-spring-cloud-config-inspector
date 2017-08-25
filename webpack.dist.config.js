@@ -4,14 +4,30 @@ var path = require('path');
 var BUILD_DIR = path.resolve(__dirname + '/build');
 var APP_DIR = path.resolve(__dirname + '/app');
 
+var reactExternal = {
+  root: 'React',
+  commonjs2: 'react',
+  commonjs: 'react',
+  amd: 'react'
+};
+var reactDOMExternal = {
+  root: 'ReactDOM',
+  commonjs2: 'react-dom',
+  commonjs: 'react-dom',
+  amd: 'react-dom'
+};
+
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
   entry: APP_DIR + '/index.jsx',
   output: {
+    filename: '[name].js',
+    chunkFilename: '[id].chunk.js',
     path: BUILD_DIR,
-    filename: 'bundle.js',
-    publicPath: '/'
+    publicPath: './',
+    libraryTarget: 'umd',
+    library: 'DevPortalAddon'
   },
   devtool: 'source-map',
   devServer: {
@@ -19,13 +35,19 @@ module.exports = {
     contentBase: BUILD_DIR,
     port: 3333
   },
+
+  externals: {
+    'react': reactExternal,
+    'react-dom': reactDOMExternal
+  },
+
   module: {
     loaders: [
       {
-        test: /\.jsx?/,
+        test: /\.jsx?$/,
         include: APP_DIR,
-        exclude: /node_modules/,
         loader: 'babel-loader',
+        exclude: /node_modules/,
         query: {
           babelrc: false,
           presets: ['es2015', 'react', 'stage-2']
