@@ -11,10 +11,6 @@ import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'
 import * as config from '../conf';
 
-const proxy = config.getProxyServerUrl();
-const currentEnv = config.getCurrentHostEnv().toString();
-console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
-
 const org = 'services-config'
 
 export default class Views extends React.Component {
@@ -102,17 +98,30 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Returns an intuit tid for request headers
-   *
-   * @returns {string} Intuit tid
+   * @return the http headers for calling Github
    */
-  getTID() {
-    let date = new Date().getTime()
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = (date + Math.random() * 16) % 16 | 0
-      date = Math.floor(date / 16)
-      return (c === 'x' ? r : (r & 0x7 | 0x8)).toString(16)
-    })
+  makeConfigServiceFetchRequest = (additionalHeaders, cors) => {
+    let request = {
+      method: 'GET',
+      headers: {
+        "intuit_tid": `${this.props.transactionId}`,
+      }
+    };
+
+    if (additionalHeaders) {
+      Object.assign(request.headers, additionalHeaders);
+    }
+
+    // To send cookies to the destination (Intuit authentication)
+    // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters
+    if (cors) {
+      // Update the request object with the CORS and Cookies settings
+      Object.assign(request, {
+        mode: 'cors',
+        credentials: 'include',
+      })
+    }
+    return request;
   }
 
   /**
@@ -125,15 +134,16 @@ export default class Views extends React.Component {
    * @returns {Promise} Either text of response or Error to be caught
    */
   fetchFile(url, requests, headers) {
-    const intuit_tid = this.getTID()
-    const completeURL = `${proxy}${url}`
-    return fetch(completeURL, {
-      headers: {
-        intuit_tid,
-        'X-Application-Name': 'services-config/config-inspector',
-        ...headers
-      }
-    })
+    const proxy = config.getProxyServerUrl();
+    const currentEnv = config.getCurrentHostEnv().toString();
+    console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
+
+    const configApiRequest = this.makeConfigServiceFetchRequest(headers, this.props.portal);
+    const configApiUrl = `${proxy}${url}`
+    console.log(`Requesting config api '/${configApiUrl.replace(proxy, "")}' `)
+
+    const intuit_tid = this.props.transactionId
+    return fetch(configApiUrl, configApiRequest)
     .then(response => {
         let timestamp = new Date().toString()
         requests.push({
@@ -148,8 +158,7 @@ export default class Views extends React.Component {
             throw new Error(err.message)
           })
         }
-      }
-    )
+    })
   }
 
   /**

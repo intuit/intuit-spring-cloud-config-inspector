@@ -45,7 +45,8 @@ export default class App extends React.Component {
       appName: urlParams.get('appName') || props.appName,
       url: urlParams.get('url') || props.url,
       profiles: urlParams.get('profiles') || props.profiles,
-      label: urlParams.get('label') || props.label
+      label: urlParams.get('label') || props.label,
+      transactionId: props.transactionId || config.getTID()
     }
   }
 
@@ -149,7 +150,7 @@ export default class App extends React.Component {
 
   render() {
     const { urls, headers, user, repo, url,
-      appName, profiles, label } = this.state
+      appName, profiles, label, transactionId } = this.state
 
     const { portal } = this.props
 
@@ -164,12 +165,12 @@ export default class App extends React.Component {
           {portal ? null : <TopMenu />}
           <UserInputs user={user} repo={repo} url={url}
             appName={appName} profiles={profiles}
-            label={label} headers={headers} portal={portal}
+            label={label} headers={headers} portal={portal} transactionId={transactionId}
             updateInfo={this.updateInfo}
             updateLabel={this.updateLabel}
             updateProfiles={this.updateProfiles} />
           <div className='views'>
-            <Views urls={urls} headers={headers}
+            <Views urls={urls} headers={headers} portal={portal} transactionId={transactionId}
               updateUserRepo={this.updateUserRepo} />
           </div>
         </ReactCSSTransitionGroup>

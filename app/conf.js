@@ -2,11 +2,6 @@ const packageJson = require("../package.json");
 
 export const GIT_REPOS_API = 'https://github.intuit.com/api/v3/repos'
 
-export const API_KEYS = {
-  prod: 'prdakyresk43bOEZ0adQWBF3hRw8vfAOxq3rWPXg',
-  preProd: 'preprdakyresGHM824zIZ1pQ2jdP7VbRsCWGKSzC'
-};
-
 /**
  * Current Credentials
  */
@@ -123,4 +118,18 @@ export function getAuthorizationHeader() {
   } else {
     return `Intuit_APIKey intuit_appid=${credentials.appId},intuit_apikey=${credentials.appSecret},intuit_apikey_version=1.0`;
   }
+}
+
+/**
+ * Returns an intuit tid for requests
+ *
+ * @returns {string} the transaction Id for logging purposes
+ */
+export function getTID() {
+  let date = new Date().getTime()
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (date + Math.random() * 16) % 16 | 0
+    date = Math.floor(date / 16)
+    return (c === 'x' ? r : (r & 0x7 | 0x8)).toString(16)
+  })
 }
