@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Headers from './Headers.jsx'
 
 import { Form, Label, Menu } from 'semantic-ui-react';
-import { FaCodeFork, FaTag, FaCaretDown } from 'react-icons/lib/fa'
+import { FaCodeFork, FaTag, FaCaretDown, FaClose } from 'react-icons/lib/fa'
 
 const token = '726db489b8e34fa7b78540917245031cde359bbc'
 
@@ -85,9 +85,10 @@ export default class UserInputs extends React.Component {
    */
   renderLabel = (item, index, props) => {
     if (item.label) {
-      return {color:'red', content:`Not found: ${item.text}`}
+      return {color:'red', content:`Not found: ${item.text}`,
+        removeIcon: <FaClose className='closeIcon' />}
     }
-    return {content:item.text}
+    return {content:item.text, removeIcon: <FaClose className='closeIcon' />}
   }
 
   /**

@@ -76,8 +76,24 @@ body {
   margin: -.78571429em;
   padding: .91666667em;
   opacity: .8;
+  -webkit-transition: opacity .1s ease;
   transition: opacity .1s ease;
   font-size: .85714286em;
+}
+
+.closeIcon {
+  cursor: pointer;
+  margin-right: 0;
+  margin-left: .3em;
+  margin-top: -0.2em;
+  font-size: .92857143em;
+  opacity: .5;
+  -webkit-transition: background .1s ease;
+  transition: background .1s ease;
+}
+
+.closeIcon:hover {
+  opacity: 1;
 }
 
 .location {
