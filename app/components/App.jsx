@@ -170,7 +170,7 @@ export default class App extends React.Component {
             updateLabel={this.updateLabel}
             updateProfiles={this.updateProfiles} />
           <div className='views'>
-            <Views urls={urls} headers={headers} transactionId={transactionId}
+            <Views urls={urls} headers={headers} portal={portal} transactionId={transactionId}
               updateUserRepo={this.updateUserRepo} />
           </div>
         </ReactCSSTransitionGroup>

@@ -189,21 +189,31 @@ export default class UserInputs extends React.Component {
   /**
    * @return the http headers for calling Github
    */
-  makeGithubFetchRequest = (additionalHeaders = {}, cors) => {
+  makeGithubFetchRequest = (additionalHeaders, cors) => {
     let request = {
       method: 'GET',
       headers: {
-        "Authorization": `token ${token}`,
         "intuit_tid": this.props.transactionId
       }
     };
 
+    if (additionalHeaders) {
+      Object.assign(request.headers, additionalHeaders);
+    }
+
     // To send cookies to the destination (Intuit authentication)
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters
     if (cors) {
+      // Update the request object with the CORS and Cookies settings
       Object.assign(request, {
         mode: 'cors',
         credentials: 'include',
+      })
+
+    } else {
+      // Add the authorization header for standalone version
+      Object.assign(request.headers, {
+        "authorization": `token ${token}`
       })
     }
     return request;
@@ -223,13 +233,15 @@ export default class UserInputs extends React.Component {
     const currentEnv = config.getCurrentHostEnv().toString();
     console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
 
-    const githubRequest = this.makeGithubFetchRequest();
+    const githubRequest = this.makeGithubFetchRequest(this.props.headers, this.props.portal);
 
     const githubApiUrl = `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/contents?ref=${label}`
+    console.log(`Requesting github content from ${githubApiUrl.replace(proxy, "")} `)
+
     fetch(githubApiUrl, githubRequest).then((response) => {
 
       if (response.status >= 400) {
-        throw new Error("bad")
+        throw new Error(response.json())
       }
       return response.json()
 
@@ -277,9 +289,11 @@ export default class UserInputs extends React.Component {
     const currentEnv = config.getCurrentHostEnv().toString();
     console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
 
-    const githubRequest = this.makeGithubFetchRequest();
+    const githubRequest = this.makeGithubFetchRequest(this.props.headers, this.props.portal);
 
     const githubApiUrl = `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/git/refs?per_page=100`
+    console.log(`Requesting github content from ${githubApiUrl.replace(proxy, "")} `)
+
     fetch(githubApiUrl, githubRequest).then((response) => {
 
       if (response.status >= 400) {

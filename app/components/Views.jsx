@@ -115,6 +115,7 @@ export default class Views extends React.Component {
     // To send cookies to the destination (Intuit authentication)
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters
     if (cors) {
+      // Update the request object with the CORS and Cookies settings
       Object.assign(request, {
         mode: 'cors',
         credentials: 'include',
@@ -138,8 +139,9 @@ export default class Views extends React.Component {
     console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
 
     const configApiRequest = this.makeConfigServiceFetchRequest(headers, this.props.portal);
-
     const configApiUrl = `${proxy}${url}`
+    console.log(`Requesting config api '/${configApiUrl.replace(proxy, "")}' `)
+
     const intuit_tid = this.props.transactionId
     return fetch(configApiUrl, configApiRequest)
     .then(response => {
