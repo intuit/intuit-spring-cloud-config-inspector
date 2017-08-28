@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import Headers from './Headers.jsx'
 
 import { Form, Label, Menu } from 'semantic-ui-react';
+import { FaCodeFork, FaTag, FaCaretDown, FaClose } from 'react-icons/lib/fa'
 
 const token = '726db489b8e34fa7b78540917245031cde359bbc'
 
@@ -21,14 +22,17 @@ export default class UserInputs extends React.Component {
     portal: PropTypes.bool,
     updateInfo: PropTypes.func.isRequired,
     updateLabel: PropTypes.func.isRequired,
-    updateProfiles: PropTypes.func.isRequired
+    updateProfiles: PropTypes.func.isRequired,
+    portal: PropTypes.bool,
+    transactionId: PropTypes.string.isRequired
   }
 
   constructor(props) {
     super(props)
     this.state = {
       profOptions: [{value: 'default', text: 'default'}],
-      labelOptions: [{value: 'master', text: 'master', icon: 'fork'}],
+      labelOptions: [{value: 'master', text: 'master',
+        icon: <FaCodeFork className='enabled' />}],
       index: 0,
       toggle: false,
       url: props.url,
@@ -81,9 +85,10 @@ export default class UserInputs extends React.Component {
    */
   renderLabel = (item, index, props) => {
     if (item.label) {
-      return {color:'red', content:`Not found: ${item.text}`}
+      return {color:'red', content:`Not found: ${item.text}`,
+        removeIcon: <FaClose className='closeIcon' />}
     }
-    return {content:item.text}
+    return {content:item.text, removeIcon: <FaClose className='closeIcon' />}
   }
 
   /**
@@ -260,6 +265,7 @@ export default class UserInputs extends React.Component {
         )
         return profile
       })
+      profileNames.push('default')
       console.log(`Parsed the profile names from config files ${JSON.stringify(profileNames)}`)
 
       // Build the options for the dropdown.
@@ -269,7 +275,6 @@ export default class UserInputs extends React.Component {
           profOptions.push({text: p, value: p})
         }
       })
-      profOptions.push({text: 'default', value: 'default'})
 
       // Display the profiles on the list.
       let label = { color:'red', content:'Not found' }
@@ -317,7 +322,7 @@ export default class UserInputs extends React.Component {
         key: r.ref.split('refs/tags/')[1],
         value: r.ref.split('refs/tags/')[1],
         text: r.ref.split('refs/tags/')[1],
-        icon: 'tag',
+        icon: <FaTag className='enabled' />
       }))
       console.log(`Loaded the tags ${JSON.stringify(tags.map(t => t.text))}`)
 
@@ -326,7 +331,7 @@ export default class UserInputs extends React.Component {
         key: r.ref.split('refs/heads/')[1],
         value: r.ref.split('refs/heads/')[1],
         text: r.ref.split('refs/heads/')[1],
-        icon: 'fork'
+        icon: <FaCodeFork className='enabled' />
       }))
       console.log(`Loaded the branches ${JSON.stringify(branches.map(b => b.text))}`)
 
@@ -400,11 +405,14 @@ export default class UserInputs extends React.Component {
               options={profOptions} value={profiles}
               allowAdditions additionLabel='Add: '
               onAddItem={this.handleAddition}
+              additionPosition='bottom'
               renderLabel={this.renderLabel}
-              onChange={this.handleProfileChange} />
+              onChange={this.handleProfileChange}
+              icon={<FaCaretDown className='searchIcon' />} />
             <Form.Dropdown label='Label' fluid search selection
               scrolling options={labelOptions} value={label}
-              onChange={this.handleLabelChange} />
+              onChange={this.handleLabelChange}
+              icon={<FaCaretDown className='searchIcon' />} />
           </Form.Group>
         </Form>
       </div>
