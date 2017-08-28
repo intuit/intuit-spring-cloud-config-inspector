@@ -1,11 +1,13 @@
 import React from 'react';
 import {Segment, List, Tab, Menu, Label, Grid,
-  Popup, Icon, Accordion, Message, Button} from 'semantic-ui-react';
+  Popup, Accordion, Message, Button} from 'semantic-ui-react';
 import 'prismjs';
 import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
 import {PrismCode} from 'react-prism';
 import PropTypes from 'prop-types'
+import { FaKey, FaGithub, FaCloud } from 'react-icons/lib/fa'
+import { GoMarkGithub } from 'react-icons/lib/go'
 
 import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'
@@ -21,7 +23,11 @@ export default class Views extends React.Component {
       confURL: PropTypes.string
     }).isRequired,
     headers: PropTypes.object.isRequired,
-    updateUserRepo: PropTypes.func.isRequired
+    updateUserRepo: PropTypes.func.isRequired,
+    filter: PropTypes.arrayOf(PropTypes.string).isRequired,
+    updateFilter: PropTypes.func.isRequired,
+    portal: PropTypes.bool,
+    transactionId: PropTypes.string.isRequired
   }
 
   constructor(props) {
@@ -37,7 +43,6 @@ export default class Views extends React.Component {
       properties: '',
       requests: [],
       version: '',
-      filter: [],
       secrets: false,
       label: '',
       repoURL: '',
@@ -274,18 +279,6 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Callback function passed to PropSearch. Called when user selects
-   * new properties. Updates array of properties to view.
-   *
-   * @param {string[]} filter - array of properties to show (keys)
-   */
-  updateFilter = (filter) => {
-    this.setState({
-      filter
-    })
-  }
-
-  /**
    * Toggle secrets boolean.
    */
   handleSecretsClick = () => {
@@ -381,8 +374,9 @@ export default class Views extends React.Component {
 
   render() {
     const { activeTab, activeIndex, json, yaml, properties, requests, values,
-      version, filter, secrets, repoURL, propertyFiles } = this.state
+      version, secrets, repoURL, propertyFiles } = this.state
     const { metaURL, confURL } = this.props.urls
+    const { updateFilter, filter } = this.props
 
     let config = []
     let keys = []
@@ -435,7 +429,7 @@ export default class Views extends React.Component {
           <Menu.Item key='config'>
             Config
             <Popup inverted size='small'
-              trigger={<Label size='tiny' circular content={total} />}
+              trigger={<Label size='small' className='counter' content={total} />}
               content='Property Count' position='top center' />
           </Menu.Item>,
         render: () =>
@@ -443,13 +437,13 @@ export default class Views extends React.Component {
             <Segment attached='top'>
               <Grid columns='equal'>
                 <Grid.Column verticalAlign='middle' width={15}>
-                  <PropSearch updateFilter={this.updateFilter}
-                    options={keys} />
+                  <PropSearch updateFilter={updateFilter}
+                    options={keys} filter={[...filter]} />
                 </Grid.Column>
                 <Grid.Column verticalAlign='middle'>
                   <Popup inverted content='Display only secret values'
                     trigger={
-                      <Button icon='key' toggle active={secrets}
+                      <Button icon={<FaKey />} toggle active={secrets}
                         onClick={this.handleSecretsClick} compact
                         floated='right' circular />
                     } position='top right' size='small' />
@@ -479,11 +473,15 @@ export default class Views extends React.Component {
       },
       {
         menuItem:
-        <Menu.Item key='github'>
-          <Icon disabled={activeTab !== 'github'} size='large' name='github' fitted />
-          GitHub
+        <Menu.Item key='github' >
+          <GoMarkGithub
+            className={activeTab === 'github' ? 'enabled' : 'disabled'} />
+          {'  '}GitHub
           <Popup inverted size='small'
-            trigger={<Label size='tiny' circular content={propertyFiles.length} />}
+            trigger={
+              <Label size='small' content={propertyFiles.length}
+                className='counter'/>
+            }
             content='Property Files' position='top center' />
         </Menu.Item>,
         render: () => <Tab.Pane>{this.createGithubTab()}</Tab.Pane>
@@ -493,7 +491,9 @@ export default class Views extends React.Component {
           <Menu.Item key='api'>
             <Popup size='small'
               inverted
-              trigger={<Icon fitted disabled={activeTab !== 'api'} name='cloud' />}
+              trigger={<FaCloud
+                className={activeTab === 'api' ? 'enabled' : 'disabled'} />
+              }
               content='API Requests'
               position='top center'
             />
