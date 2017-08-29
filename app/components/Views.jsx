@@ -1,10 +1,12 @@
 import React from 'react';
 import {Segment, List, Tab, Menu, Label, Grid,
   Popup, Accordion, Message, Button} from 'semantic-ui-react';
+
 import 'prismjs';
 import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
 import {PrismCode} from 'react-prism';
+
 import PropTypes from 'prop-types'
 import FaKey from 'react-icons/lib/fa/key'
 import FaGithub from 'react-icons/lib/fa/github'
@@ -12,8 +14,11 @@ import FaCloud from 'react-icons/lib/fa/cloud'
 
 import GoMarkGithub from 'react-icons/lib/go/mark-github'
 
-import getMockData from './mock.js';
+import 'lodash'
+import diff from 'diff'
+
 import PropSearch from './PropSearch.jsx'
+import Diff from './Diff.jsx'
 import * as config from '../conf';
 
 const org = 'services-config'
@@ -21,9 +26,11 @@ const org = 'services-config'
 export default class Views extends React.Component {
 
   static propTypes = {
-    urls: PropTypes.shape({
-      metaURL: PropTypes.string,
-      confURL: PropTypes.string
+    info: PropTypes.shape({
+      url: PropTypes.string,
+      appName: PropTypes.string,
+      label: PropTypes.string,
+      profiles: PropTypes.arrayOf(PropTypes.string)
     }).isRequired,
     headers: PropTypes.object.isRequired,
     updateUserRepo: PropTypes.func.isRequired,
@@ -31,6 +38,8 @@ export default class Views extends React.Component {
     updateFilter: PropTypes.func.isRequired,
     portal: PropTypes.bool,
     transactionId: PropTypes.string.isRequired,
+    labelOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
+    profOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
     stateHandler: PropTypes.func
   }
 
@@ -45,10 +54,10 @@ export default class Views extends React.Component {
       json: '',
       yaml: '',
       properties: '',
+      diff: '',
       requests: [],
       version: '',
       secrets: false,
-      label: '',
       repoURL: '',
       propertyFiles: []
     }
@@ -246,12 +255,10 @@ export default class Views extends React.Component {
    */
   handleTabChange = (e, {activeIndex, panes}) => {
     const activeTab = panes[activeIndex].menuItem.key
-    if (activeTab !== 'version') {
-      this.setState({
-        activeTab,
-        activeIndex
-      })
-    }
+    this.setState({
+      activeTab,
+      activeIndex
+    })
   }
 
   /**
@@ -311,12 +318,13 @@ export default class Views extends React.Component {
     * @returns {ReactElement} List of info
     */
   createGithubTab = () => {
-    const { repoURL, propertyFiles, label } = this.state
+    const { repoURL, propertyFiles } = this.state
+    const { label } = this.props.info
     return (
       <List>
         <List.Item>
           <List.Header>Current Label</List.Header>
-          <List.Content>{label}</List.Content>
+          <List.Content>{repoURL ? label : null}</List.Content>
         </List.Item>
         <List.Item>
           <List.Header>Github Repo URL</List.Header>
@@ -345,22 +353,44 @@ export default class Views extends React.Component {
     )
   }
 
+  fetchDiff = () => {
+    const { url, appName } = this.props.info
+    const label = 'develop'
+    const profiles = 'e2e'
+    const diffURL = `${url}/${label.replace(/\//g, '(_)')}/${appName}-${profiles}.json`
+    this.fetchFile(diffURL, [], this.props.headers)
+    .then(response => {
+      const code = JSON.stringify(JSON.parse(response), null, 2)
+      this.setState({
+        diff: code
+      })
+    })
+    .catch(error => {
+      console.log(error)
+    })
+  }
+
   /**
    * Fetches data for all tabs. Updates requests, version, and all data and
    * creates key value pairs by calling updateValues. Handles bad requests.
    *
    * @param {object} nextProps
-   * @param {object} nextProps.urls - metaURL and confURL from new props
+   * @param {object} nextProps.info - url, appName, label, profiles
    * @param {object} nextProps.headers - current headers
    */
-  componentWillReceiveProps({urls, headers}) {
-    if (this.props.urls != urls || this.props.headers != headers) {
+  componentWillReceiveProps({info, headers}) {
+    this.fetchDiff()
+    if (!_.isEqual(info, this.props.info) ||
+        !_.isEqual(headers, this.props.headers)) {
+      const { url, appName, profiles, label } = info
+      const metaURL = `${url}/${appName}/${profiles}/${label.replace(/\//g, '(_)')}`
+      const confURL = `${url}/${label.replace(/\//g, '(_)')}/${appName}-${profiles}`
       let requests = []
-      this.fetchFile(urls.metaURL, requests, headers)
+      this.fetchFile(metaURL, requests, headers)
       .then(response => {
-        this.getRawData(urls.confURL, 'json', requests, headers)
-        this.getRawData(urls.confURL, 'yaml', requests, headers)
-        this.getRawData(urls.confURL, 'properties', requests, headers)
+        this.getRawData(confURL, 'json', requests, headers)
+        this.getRawData(confURL, 'yaml', requests, headers)
+        this.getRawData(confURL, 'properties', requests, headers)
 
         this.setState({requests})
         return JSON.parse(response)
@@ -368,8 +398,7 @@ export default class Views extends React.Component {
       .then(data => {
         this.setState({
           version: data.version,
-          metadata: JSON.stringify(data, null, 2),
-          label: data.label
+          metadata: JSON.stringify(data, null, 2)
         })
         this.updateValues(data.propertySources)
       })
@@ -382,7 +411,6 @@ export default class Views extends React.Component {
           yaml: error.toString(),
           properties: error.toString(),
           metadata: error.toString(),
-          label: null,
           repoURL: null,
           propertyFiles: []
         })
@@ -392,9 +420,9 @@ export default class Views extends React.Component {
 
   render() {
     const { activeTab, activeIndex, json, yaml, properties, requests, values,
-      version, secrets, repoURL, propertyFiles } = this.state
-    const { metaURL, confURL } = this.props.urls
-    const { updateFilter, filter } = this.props
+      version, secrets, repoURL, propertyFiles, diff } = this.state
+    const { updateFilter, filter, profOptions, labelOptions } = this.props
+    const { label, profiles } = this.props.info
 
     let config = []
     let keys = []
@@ -520,6 +548,14 @@ export default class Views extends React.Component {
           <Tab.Pane>
             <Accordion exclusive={false} panels={panels} />
           </Tab.Pane>
+      },
+      {
+        menuItem: {key: 'diff', content: 'Diff'},
+        render: () => <Tab.Pane>
+          <Diff base={json} compare={diff}
+            baseLabel={label} baseProfiles={profiles}
+            profOptions={profOptions} labelOptions={labelOptions} />
+        </Tab.Pane>
       },
       {
         menuItem:

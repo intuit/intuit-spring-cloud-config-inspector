@@ -120,6 +120,23 @@ body {
 
 pre {
   white-space: pre-wrap;
+  margin: 0;
+  padding: 0;
+}
+
+.ins {
+  background: #eaf2c2;
+  color: #406619;
+}
+
+.del {
+  color: #b30000;
+  background: #fadad7;
+}
+
+.dots {
+  display: inline-block;
+  font-size: 16px;
 }
 
 .app-appear {

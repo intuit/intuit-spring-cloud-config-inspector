@@ -28,6 +28,8 @@ export default class UserInputs extends React.Component {
     updateProfiles: PropTypes.func.isRequired,
     portal: PropTypes.bool,
     transactionId: PropTypes.string.isRequired,
+    updateLabelOptions: PropTypes.func.isRequired,
+    updateProfileOptions: PropTypes.func.isRequired,
     stateHandler: PropTypes.func
   }
 
@@ -292,11 +294,14 @@ export default class UserInputs extends React.Component {
         }
       })
 
+      // Sort the labels by the names, case insensitive
+      // https://stackoverflow.com/questions/979256/sorting-an-array-of-javascript-objects/979289#979289
+      const profOptionsSorted = profOptions.sort((a, b) => a.text.localeCompare(b.text))
+
       this.setState({
-        // Sort the labels by the names, case insensitive
-        // https://stackoverflow.com/questions/979256/sorting-an-array-of-javascript-objects/979289#979289
-        profOptions: profOptions.sort((a, b) => a.text.localeCompare(b.text))
+        profOptions: profOptionsSorted
       })
+      this.props.updateProfileOptions(profOptions)
     }).catch(err => {
       this.props.stateHandler({phase: "profiles", url: githubApiUrl, error: err});
       console.log(err.message)
@@ -348,11 +353,16 @@ export default class UserInputs extends React.Component {
       console.log(`Loaded the branches ${JSON.stringify(branches.map(b => b.text))}`)
       this.props.stateHandler({phase: "labels", type: "branches", url: githubApiUrl, value: branches});
 
+      // Sort the labels by the names, case insensitive
+      // https://stackoverflow.com/questions/979256/sorting-an-array-of-javascript-objects/979289#979289
+      const labelOptions = branches.concat(tags).sort(
+        (a, b) => a.key.localeCompare(b.key)
+      )
+
       this.setState({
-        // Sort the labels by the names, case insensitive
-        // https://stackoverflow.com/questions/979256/sorting-an-array-of-javascript-objects/979289#979289
-        labelOptions: branches.concat(tags).sort((a, b) => a.key.localeCompare(b.key))
+        labelOptions
       })
+      this.props.updateLabelOptions(labelOptions)
     }).catch(err => {
       this.props.stateHandler({phase: "labels", url: githubApiUrl, error: err});
       console.log(err.message)
@@ -428,7 +438,8 @@ export default class UserInputs extends React.Component {
             <Form.Dropdown label='Label' fluid search selection
               scrolling options={labelOptions} value={label}
               onChange={this.handleLabelChange}
-              icon={<FaCaretDown className='searchIcon' />} />
+              icon={<FaCaretDown className='searchIcon' />}
+              selectOnBlur={false} />
           </Form.Group>
         </Form>
       </div>
