@@ -2,14 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types'
 
 import Headers from './Headers.jsx'
+import * as api from '../utils/api.js'
 
 import { Form, Label, Menu } from 'semantic-ui-react';
 import FaCodeFork from 'react-icons/lib/fa/code-fork'
 import FaTag from 'react-icons/lib/fa/tag'
 import FaCaretDown from 'react-icons/lib/fa/caret-down'
 import FaClose from 'react-icons/lib/fa/close'
-
-const token = '726db489b8e34fa7b78540917245031cde359bbc'
 
 import * as config from '../conf';
 
@@ -85,11 +84,11 @@ export default class UserInputs extends React.Component {
    * an addition. If true add label to option in Dropdown menu.
    *
    * @param {object} item - A currently active dropdown item.
-   * @param {number} index - The current index.
-   * @param {object} props - The default props for an active item Label.
+   * @param {string} item.text - profile name
+   * @param {object} item.label - Label shorthand if item has one
    * @returns Shorthand for a Label.
    */
-  renderLabel = (item, index, props) => {
+  renderLabel = (item) => {
     if (item.label) {
       return {color:'red', content:`Not found: ${item.text}`,
         removeIcon: <FaClose className='closeIcon' />}
@@ -112,8 +111,8 @@ export default class UserInputs extends React.Component {
   }
 
   /**
-   * Change the label in parent App component using
-   * callback function whenever input field changes
+   * Change the label in parent App component using callback
+   * function whenever input field changes. Reload profiles.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} data - All props and proposed value.
@@ -198,53 +197,20 @@ export default class UserInputs extends React.Component {
   }
 
   /**
-   * @return the http headers for calling Github
-   */
-  makeGithubFetchRequest = (additionalHeaders, cors) => {
-    let request = {
-      method: 'GET',
-      headers: {
-        "intuit_tid": this.props.transactionId
-      }
-    };
-
-    if (additionalHeaders) {
-      Object.assign(request.headers, additionalHeaders);
-    }
-
-    // To send cookies to the destination (Intuit authentication)
-    // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters
-    if (cors) {
-      // Update the request object with the CORS and Cookies settings
-      Object.assign(request, {
-        mode: 'cors',
-        credentials: 'include',
-      })
-
-    } else {
-      // Add the authorization header for standalone version
-      Object.assign(request.headers, {
-        "authorization": `token ${token}`
-      })
-    }
-    return request;
-  }
-
-  /**
    * Fetch list of profiles from github based on given user, repo, and
-   * label. Update options in profiles dropdown. If a profile in state
-   * does not exist, add with warning label.
+   * label. Update options in profiles dropdown.
    *
    * @param {string} user - current user (i.e. services-config)
    * @param {string} repo - current repo
-   * @param {string} [label] - current label or 'master'
+   * @param {string} label - current label or 'master'
    */
-  loadProfiles = (user, repo, label='master') => {
+  loadProfiles = (user, repo, label) => {
     const proxy = config.getProxyServerUrl();
     const currentEnv = config.getCurrentHostEnv().toString();
     console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
 
-    const githubRequest = this.makeGithubFetchRequest(this.props.headers, this.props.portal);
+    const githubRequest = api.makeGithubFetchRequest(this.props.headers,
+      this.props.portal, this.props.transactionId);
 
     const githubApiUrl = `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/contents?ref=${label}`
     console.log(`Requesting github content from ${githubApiUrl.replace(proxy, "")} `)
@@ -258,48 +224,10 @@ export default class UserInputs extends React.Component {
 
     }).then(contents => {
       const { appName, profiles } = this.state
-
-      // The contents include the name of the files from github.
-      const files = contents.filter(c => c.name.startsWith(`${appName}-`) ||
-        c.name.startsWith('application-'))
-      console.log(`Loaded the config files from github for this app ${JSON.stringify(files.map(c => c.name))}`)
-
-      this.props.stateHandler({phase: "profiles", type: "files", url: githubApiUrl, value: files});
-
-      const profileNames = files.map(f => {
-        let profile = f.name.substring(
-          f.name.indexOf(`-`) + 1,
-          f.name.lastIndexOf('.')
-        )
-        return profile
-      })
-      profileNames.push('default')
-      console.log(`Parsed the profile names from config files ${JSON.stringify(profileNames)}`)
-
-      this.props.stateHandler({phase: "profiles", type: "names", url: githubApiUrl, value: profiles});
-
-      // Build the options for the dropdown.
-      const profOptions = []
-      profileNames.forEach((p, index) => {
-        if (profileNames.indexOf(p) === index) {
-          profOptions.push({text: p, value: p})
-        }
-      })
-
-      // Display the profiles on the list.
-      let label = { color:'red', content:'Not found' }
-      profiles.forEach(profile => {
-        if (!profileNames.includes(profile)) {
-          profOptions.push({text:profile, value:profile, label})
-        }
-      })
-
-      // Sort the labels by the names, case insensitive
-      // https://stackoverflow.com/questions/979256/sorting-an-array-of-javascript-objects/979289#979289
-      const profOptionsSorted = profOptions.sort((a, b) => a.text.localeCompare(b.text))
+      const profOptions = api.parseProfiles(contents, appName, profiles)
 
       this.setState({
-        profOptions: profOptionsSorted
+        profOptions
       })
       this.props.updateProfileOptions(profOptions)
     }).catch(err => {
@@ -320,7 +248,8 @@ export default class UserInputs extends React.Component {
     const currentEnv = config.getCurrentHostEnv().toString();
     console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
 
-    const githubRequest = this.makeGithubFetchRequest(this.props.headers, this.props.portal);
+    const githubRequest = api.makeGithubFetchRequest(this.props.headers,
+      this.props.portal, this.props.transactionId);
 
     const githubApiUrl = `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/git/refs?per_page=100`
     console.log(`Requesting github content from ${githubApiUrl.replace(proxy, "")} `)
@@ -378,7 +307,7 @@ export default class UserInputs extends React.Component {
    */
   componentWillReceiveProps = ({user, repo}) => {
     if (user !== this.props.user || repo !== this.props.repo) {
-      this.loadProfiles(user, repo)
+      this.loadProfiles(user, repo, 'master')
       this.loadLabels(user, repo)
     }
   }
@@ -426,20 +355,20 @@ export default class UserInputs extends React.Component {
         }
         <Form>
           <Form.Group widths='equal'>
-            <Form.Dropdown label='Profiles'
-              fluid multiple search selection scrolling
-              options={profOptions} value={profiles}
-              allowAdditions additionLabel='Add: '
-              onAddItem={this.handleAddition}
-              additionPosition='bottom'
-              renderLabel={this.renderLabel}
-              onChange={this.handleProfileChange}
-              icon={<FaCaretDown className='searchIcon' />} />
             <Form.Dropdown label='Label' fluid search selection
               scrolling options={labelOptions} value={label}
               onChange={this.handleLabelChange}
               icon={<FaCaretDown className='searchIcon' />}
               selectOnBlur={false} />
+              <Form.Dropdown label='Profiles'
+                fluid multiple search selection scrolling
+                options={profOptions} value={profiles}
+                allowAdditions additionLabel='Add: '
+                onAddItem={this.handleAddition}
+                additionPosition='bottom'
+                renderLabel={this.renderLabel}
+                onChange={this.handleProfileChange}
+                icon={<FaCaretDown className='searchIcon' />} />
           </Form.Group>
         </Form>
       </div>

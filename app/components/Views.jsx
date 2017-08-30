@@ -15,11 +15,11 @@ import FaCloud from 'react-icons/lib/fa/cloud'
 import GoMarkGithub from 'react-icons/lib/go/mark-github'
 
 import 'lodash'
-import diff from 'diff'
 
 import PropSearch from './PropSearch.jsx'
 import Diff from './Diff.jsx'
 import * as config from '../conf';
+import * as api from '../utils/api.js'
 
 const org = 'services-config'
 
@@ -40,6 +40,8 @@ export default class Views extends React.Component {
     transactionId: PropTypes.string.isRequired,
     labelOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
     profOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
+    user: PropTypes.string.isRequired,
+    repo: PropTypes.string.isRequired,
     stateHandler: PropTypes.func
   }
 
@@ -54,12 +56,16 @@ export default class Views extends React.Component {
       json: '',
       yaml: '',
       properties: '',
-      diff: '',
+      compare: '',
       requests: [],
       version: '',
       secrets: false,
       repoURL: '',
-      propertyFiles: []
+      propertyFiles: [],
+      diff: [],
+      compareLabel: null,
+      compareProfiles: null,
+      profOptions: props.profOptions
     }
   }
 
@@ -156,7 +162,9 @@ export default class Views extends React.Component {
     const currentEnv = config.getCurrentHostEnv().toString();
     console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
 
-    const configApiRequest = this.makeConfigServiceFetchRequest(headers, this.props.portal);
+    const configApiRequest = this.makeConfigServiceFetchRequest(
+      headers, this.props.portal
+    );
     const configApiUrl = `${proxy}${url}`
     console.log(`Requesting config api '${configApiUrl.replace(proxy, "")}' `)
 
@@ -328,7 +336,8 @@ export default class Views extends React.Component {
         </List.Item>
         <List.Item>
           <List.Header>Github Repo URL</List.Header>
-          <List.Content as='a' href={`${repoURL}/tree/${label}`} target='_blank'>
+          <List.Content as='a' href={`${repoURL}/tree/${label}`}
+            target='_blank'>
             {repoURL ? `${repoURL}` : null}
           </List.Content>
         </List.Item>
@@ -345,7 +354,8 @@ export default class Views extends React.Component {
         </List.Item>
         <List.Item>
           <List.Header>Commit History</List.Header>
-          <List.Content as='a' href={`${repoURL}/commits/${label}`} target='_blank'>
+          <List.Content as='a' href={`${repoURL}/commits/${label}`}
+            target='_blank'>
             {repoURL ? `${repoURL}/commits/${label}` : null}
           </List.Content>
         </List.Item>
@@ -353,21 +363,74 @@ export default class Views extends React.Component {
     )
   }
 
-  fetchDiff = () => {
+  /**
+   * Fetch json config for given label and profiles. Called by Diff.
+   *
+   * @param {string} label - compare label
+   * @param {string[]} profiles - compare profiles
+   */
+  fetchCompare = (label, profiles) => {
+    this.setState({
+      compareLabel: label,
+      compareProfiles: profiles
+    })
     const { url, appName } = this.props.info
-    const label = 'develop'
-    const profiles = 'e2e'
-    const diffURL = `${url}/${label.replace(/\//g, '(_)')}/${appName}-${profiles}.json`
-    this.fetchFile(diffURL, [], this.props.headers)
+    const escapedLabel = label.replace(/\//g, '(_)')
+    const compareURL = `${url}/${escapedLabel}/${appName}-${profiles}.json`
+    this.fetchFile(compareURL, [], this.props.headers)
     .then(response => {
       const code = JSON.stringify(JSON.parse(response), null, 2)
       this.setState({
-        diff: code
+        compare: code
       })
     })
     .catch(error => {
       console.log(error)
     })
+  }
+
+  /**
+   * Called by Diff to store formatted diff. Stored in Views because
+   * Diff unmounts when user leaves tab.
+   */
+  updateDiff = (diff) => {
+    this.setState({diff})
+  }
+
+  /**
+   * Fetch list of profiles from github based onuser, repo, and label.
+   * Update options in to pass to Diff.
+   *
+   * @param {string} [label] - current label
+   */
+  updateProfileOptions = (label) => {
+    const proxy = config.getProxyServerUrl();
+    const currentEnv = config.getCurrentHostEnv().toString();
+    console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
+
+    const { user, repo, headers, portal, transactionId} = this.props
+
+    const githubRequest = api.makeGithubFetchRequest(headers,
+      portal, transactionId);
+
+    const githubApiUrl = `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/contents?ref=${label}`
+    console.log(`Requesting github content from ${githubApiUrl.replace(proxy, "")} `)
+
+    fetch(githubApiUrl, githubRequest).then((response) => {
+
+      if (response.status >= 400) {
+        throw new Error(response.json())
+      }
+      return response.json()
+
+    }).then(contents => {
+      const { appName } = this.props.info
+      const profOptions = api.parseProfiles(contents, appName, this.state.compareProfiles)
+
+      this.setState({
+        profOptions
+      })
+    }).catch(err => console.log(err.message))
   }
 
   /**
@@ -379,12 +442,12 @@ export default class Views extends React.Component {
    * @param {object} nextProps.headers - current headers
    */
   componentWillReceiveProps({info, headers}) {
-    this.fetchDiff()
     if (!_.isEqual(info, this.props.info) ||
         !_.isEqual(headers, this.props.headers)) {
       const { url, appName, profiles, label } = info
-      const metaURL = `${url}/${appName}/${profiles}/${label.replace(/\//g, '(_)')}`
-      const confURL = `${url}/${label.replace(/\//g, '(_)')}/${appName}-${profiles}`
+      const escapedLabel = label.replace(/\//g, '(_)')
+      const metaURL = `${url}/${appName}/${profiles}/${escapedLabel}`
+      const confURL = `${url}/${escapedLabel}/${appName}-${profiles}`
       let requests = []
       this.fetchFile(metaURL, requests, headers)
       .then(response => {
@@ -419,9 +482,10 @@ export default class Views extends React.Component {
   }
 
   render() {
-    const { activeTab, activeIndex, json, yaml, properties, requests, values,
-      version, secrets, repoURL, propertyFiles, diff } = this.state
-    const { updateFilter, filter, profOptions, labelOptions } = this.props
+    const { activeTab, activeIndex, json, yaml, properties, requests,
+      values, diff, version, secrets, repoURL, propertyFiles,
+      compare, compareLabel, compareProfiles, profOptions } = this.state
+    const { updateFilter, filter, labelOptions } = this.props
     const { label, profiles } = this.props.info
 
     let config = []
@@ -475,12 +539,13 @@ export default class Views extends React.Component {
           <Menu.Item key='config'>
             Config
             <Popup inverted size='small'
-              trigger={<Label size='small' className='counter' content={total} />}
+              trigger={<Label size='small' className='counter'
+                content={total} />}
               content='Property Count' position='top center' />
           </Menu.Item>,
         render: () =>
           <Tab.Pane>
-            <Segment attached='top'>
+            <Segment attached='top' className='views-segment'>
               <Grid columns='equal'>
                 <Grid.Column verticalAlign='middle' width={15}>
                   <PropSearch updateFilter={updateFilter}
@@ -533,6 +598,17 @@ export default class Views extends React.Component {
         render: () => <Tab.Pane>{this.createGithubTab()}</Tab.Pane>
       },
       {
+        menuItem: {key: 'diff', content: 'Diff'},
+        render: () => <Tab.Pane>
+          <Diff base={json} compare={compare} formattedDiff={diff}
+            baseLabel={label} baseProfiles={profiles}
+            profOptions={profOptions} labelOptions={labelOptions}
+            fetchCompare={this.fetchCompare} updateDiff={this.updateDiff}
+            compareLabel={compareLabel} compareProfiles={compareProfiles}
+            updateProfileOptions={this.updateProfileOptions} />
+        </Tab.Pane>
+      },
+      {
         menuItem:
           <Menu.Item key='api'>
             <Popup size='small'
@@ -550,14 +626,6 @@ export default class Views extends React.Component {
           </Tab.Pane>
       },
       {
-        menuItem: {key: 'diff', content: 'Diff'},
-        render: () => <Tab.Pane>
-          <Diff base={json} compare={diff}
-            baseLabel={label} baseProfiles={profiles}
-            profOptions={profOptions} labelOptions={labelOptions} />
-        </Tab.Pane>
-      },
-      {
         menuItem:
           <Menu.Item as='p' fitted='horizontally' disabled
             key='version' position='right' >
@@ -566,7 +634,9 @@ export default class Views extends React.Component {
               <Popup inverted size='small'
                 trigger={
                   <Label href={`${repoURL}/commit/${version}`}
-                    target='_blank' color='grey'>{version.substring(0, 7)}</Label>
+                    target='_blank' color='grey'>
+                    {version.substring(0, 7)}
+                  </Label>
                 }
                 content='Commit ID' position='top right' /> :
               null
@@ -577,7 +647,9 @@ export default class Views extends React.Component {
     ]
 
     return (
-      <Tab menu={{stackable: true, tabular: true, attached: true}} panes={panes} onTabChange={this.handleTabChange} activeIndex={activeIndex} />
+      <Tab menu={{stackable: true, tabular: true, attached: true}}
+        panes={panes} onTabChange={this.handleTabChange}
+        activeIndex={activeIndex} />
     )
   }
 }

@@ -229,6 +229,7 @@ export default class App extends React.Component {
               updateUserRepo={this.updateUserRepo}
               filter={filter} updateFilter={this.updateFilter}
               labelOptions={labelOptions} profOptions={profOptions}
+              user={user} repo={repo}
               stateHandler={this.props.stateHandler} />
           </div>
         </ReactCSSTransitionGroup>
