@@ -13,6 +13,8 @@ import FaGithub from 'react-icons/lib/fa/github'
 import FaCloud from 'react-icons/lib/fa/cloud'
 
 import GoMarkGithub from 'react-icons/lib/go/mark-github'
+import GoDiff from 'react-icons/lib/go/diff'
+import GoFileCode from 'react-icons/lib/go/file-code'
 
 import 'lodash'
 
@@ -39,7 +41,6 @@ export default class Views extends React.Component {
     portal: PropTypes.bool,
     transactionId: PropTypes.string.isRequired,
     labelOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
-    profOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
     user: PropTypes.string.isRequired,
     repo: PropTypes.string.isRequired,
     stateHandler: PropTypes.func
@@ -51,7 +52,6 @@ export default class Views extends React.Component {
       data: {},
       values: {},
       activeTab: 'config',
-      activeIndex: 0,
       metadata: '',
       json: '',
       yaml: '',
@@ -63,9 +63,9 @@ export default class Views extends React.Component {
       repoURL: '',
       propertyFiles: [],
       diff: [],
-      compareLabel: null,
-      compareProfiles: null,
-      profOptions: props.profOptions
+      compareLabel: '',
+      compareProfiles: [],
+      profOptions: []
     }
   }
 
@@ -264,8 +264,7 @@ export default class Views extends React.Component {
   handleTabChange = (e, {activeIndex, panes}) => {
     const activeTab = panes[activeIndex].menuItem.key
     this.setState({
-      activeTab,
-      activeIndex
+      activeTab
     })
   }
 
@@ -385,7 +384,7 @@ export default class Views extends React.Component {
       })
     })
     .catch(error => {
-      console.log(error)
+      console.log(error.message)
     })
   }
 
@@ -401,14 +400,16 @@ export default class Views extends React.Component {
    * Fetch list of profiles from github based onuser, repo, and label.
    * Update options in to pass to Diff.
    *
-   * @param {string} [label] - current label
+   * @param {string} label - current label
+   * @param {string} [user] - new or current user
+   * @param {string} [repo] - new or current repo
    */
-  updateProfileOptions = (label) => {
+  updateProfileOptions = (label, user=this.props.user, repo=this.props.repo) => {
     const proxy = config.getProxyServerUrl();
     const currentEnv = config.getCurrentHostEnv().toString();
     console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
 
-    const { user, repo, headers, portal, transactionId} = this.props
+    const { headers, portal, transactionId } = this.props
 
     const githubRequest = api.makeGithubFetchRequest(headers,
       portal, transactionId);
@@ -436,12 +437,13 @@ export default class Views extends React.Component {
   /**
    * Fetches data for all tabs. Updates requests, version, and all data and
    * creates key value pairs by calling updateValues. Handles bad requests.
+   * If new user or repo, reset diffs.
    *
    * @param {object} nextProps
    * @param {object} nextProps.info - url, appName, label, profiles
    * @param {object} nextProps.headers - current headers
    */
-  componentWillReceiveProps({info, headers}) {
+  componentWillReceiveProps({info, headers, user, repo}) {
     if (!_.isEqual(info, this.props.info) ||
         !_.isEqual(headers, this.props.headers)) {
       const { url, appName, profiles, label } = info
@@ -475,16 +477,26 @@ export default class Views extends React.Component {
           properties: error.toString(),
           metadata: error.toString(),
           repoURL: null,
-          propertyFiles: []
+          propertyFiles: [],
+          compare: error.toString()
         })
+        this.props.updateUserRepo('', '')
       })
+    }
+    if (user !== this.props.user || repo !== this.props.repo) {
+      this.setState({
+        compareLabel: info.label,
+        compareProfiles: info.profiles
+      })
+      this.fetchCompare(info.label, info.profiles)
+      this.updateProfileOptions(info.label, user, repo)
     }
   }
 
   render() {
-    const { activeTab, activeIndex, json, yaml, properties, requests,
-      values, diff, version, secrets, repoURL, propertyFiles,
-      compare, compareLabel, compareProfiles, profOptions } = this.state
+    const { activeTab, json, yaml, properties, requests, values,
+      diff, version, secrets, repoURL, propertyFiles, compare,
+      compareLabel, compareProfiles, profOptions } = this.state
     const { updateFilter, filter, labelOptions } = this.props
     const { label, profiles } = this.props.info
 
@@ -537,6 +549,9 @@ export default class Views extends React.Component {
       {
         menuItem:
           <Menu.Item key='config'>
+            <GoFileCode
+              className={activeTab === 'config' ? 'enabled' : 'disabled'}
+            />
             Config
             <Popup inverted size='small'
               trigger={<Label size='small' className='counter'
@@ -586,7 +601,8 @@ export default class Views extends React.Component {
         menuItem:
         <Menu.Item key='github' >
           <GoMarkGithub
-            className={activeTab === 'github' ? 'enabled' : 'disabled'} />
+            className={activeTab === 'github' ? 'enabled' : 'disabled'}
+          />
           {'  '}GitHub
           <Popup inverted size='small'
             trigger={
@@ -598,7 +614,11 @@ export default class Views extends React.Component {
         render: () => <Tab.Pane>{this.createGithubTab()}</Tab.Pane>
       },
       {
-        menuItem: {key: 'diff', content: 'Diff'},
+        menuItem: {key: 'diff', content: 'Diff', icon:
+          <GoDiff
+            className={activeTab === 'diff' ? 'enabled' : 'disabled'}
+          />
+        },
         render: () => <Tab.Pane>
           <Diff base={json} compare={compare} formattedDiff={diff}
             baseLabel={label} baseProfiles={profiles}
@@ -648,8 +668,7 @@ export default class Views extends React.Component {
 
     return (
       <Tab menu={{stackable: true, tabular: true, attached: true}}
-        panes={panes} onTabChange={this.handleTabChange}
-        activeIndex={activeIndex} />
+        panes={panes} onTabChange={this.handleTabChange} />
     )
   }
 }

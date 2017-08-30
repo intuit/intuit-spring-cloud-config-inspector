@@ -299,7 +299,8 @@ export default class UserInputs extends React.Component {
   }
 
   /**
-   * If new user or repo, load new profiles and labels.
+   * If new user or repo, load new profiles and labels. If user and repo
+   * are undefined, set label options and profile options back to defaults.
    *
    * @param {object} nextProps
    * @param {string} nextProps.user - current user (i.e. services-config)
@@ -307,8 +308,18 @@ export default class UserInputs extends React.Component {
    */
   componentWillReceiveProps = ({user, repo}) => {
     if (user !== this.props.user || repo !== this.props.repo) {
-      this.loadProfiles(user, repo, 'master')
-      this.loadLabels(user, repo)
+      if (user && repo) {
+        this.loadProfiles(user, repo, 'master')
+        this.loadLabels(user, repo)
+      } else {
+        const labelOptions = [{value: 'master', text: 'master',
+          icon: <FaCodeFork className='enabled' />}]
+        this.setState({
+          profOptions: [{value: 'default', text: 'default'}],
+          labelOptions
+        })
+        this.props.updateLabelOptions(labelOptions)
+      }
     }
   }
 

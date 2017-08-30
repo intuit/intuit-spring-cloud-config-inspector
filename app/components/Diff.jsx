@@ -1,9 +1,11 @@
 import React from 'react';
 import { Breadcrumb, Segment, Dropdown } from 'semantic-ui-react';
-import { FaClose, FaCaretDown } from 'react-icons/lib/fa'
+import FaClose from 'react-icons/lib/fa/close'
+import FaCaretDown from 'react-icons/lib/fa/caret-down'
 
 import PropTypes from 'prop-types'
 
+import 'lodash'
 var jsdiff = require('diff')
 
 import * as config from '../conf';
@@ -15,8 +17,8 @@ export default class Diff extends React.Component {
   static propTypes = {
     base: PropTypes.string.isRequired,
     compare: PropTypes.string.isRequired,
-    baseLabel: PropTypes.string.isRequired,
-    baseProfiles: PropTypes.arrayOf(PropTypes.string).isRequired,
+    baseLabel: PropTypes.string,
+    baseProfiles: PropTypes.arrayOf(PropTypes.string),
     profOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
     labelOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
     fetchCompare: PropTypes.func.isRequired,
@@ -28,13 +30,12 @@ export default class Diff extends React.Component {
   }
 
   /**
-   * First time tab is rendered compareLabel and compareProfiles are null.
-   * Set equal to base label and profiles to start.
+   * First time tab is rendered no diff has been created.
    */
   componentWillMount = () => {
-    const { compareLabel, compareProfiles } = this.props
-    if (!compareLabel || !compareProfiles) {
-      this.props.fetchCompare(this.props.baseLabel, this.props.baseProfiles)
+    const { formattedDiff, base, compare } = this.props
+    if (formattedDiff.length === 0 && base && compare) {
+      this.createDiff(base, compare)
     }
   }
 
@@ -55,8 +56,8 @@ export default class Diff extends React.Component {
   }
 
   /**
-   * Change the label in parent Views component using callback function
-   * whenever input field changes. Triggers reload of profiles.
+   * fetchCompare gets the data to compare base with and updates compare
+   * label to display.
    *
    * @param {SyntheticEvent} e - React's original SyntheticEvent.
    * @param {object} data - All props and proposed value.
@@ -64,7 +65,6 @@ export default class Diff extends React.Component {
    */
   handleLabelChange = (e, {value}) => {
     this.props.fetchCompare(value, this.props.compareProfiles)
-    this.props.updateProfileOptions(value)
   }
 
   /**
@@ -124,38 +124,42 @@ export default class Diff extends React.Component {
   render() {
     const { baseLabel, baseProfiles, labelOptions, profOptions,
       formattedDiff, compareLabel, compareProfiles } = this.props
-    const baseSections = [
-      { key: 'label', content: baseLabel, active: true },
-      { key: 'profiles', content: baseProfiles.toString(), active: true }
-    ]
 
-    return (
-      <div>
-        <Segment attached='top' className='views-segment'>
-          <Breadcrumb style={{color: '#b30000'}} divider='/'
-            sections={baseSections} />
-          <pre className='dots'> ... </pre>
-          <Breadcrumb style={{color: '#406619'}}>
-            <Breadcrumb.Section>
-              <Dropdown scrolling options={labelOptions} inline
-                value={compareLabel}
-                onChange={this.handleLabelChange}
-                icon={<FaCaretDown className='inline-icon' />} />
-            </Breadcrumb.Section>
-            <Breadcrumb.Divider />
-            <Breadcrumb.Section>
-              <Dropdown scrolling options={profOptions} inline multiple
-                value={compareProfiles}
-                onChange={this.handleProfileChange}
-                renderLabel={this.renderLabel}
-                icon={<FaCaretDown className='inline-icon' />} />
-            </Breadcrumb.Section>
-          </Breadcrumb>
-        </Segment>
-        <Segment attached='bottom' className='view'>
-          {formattedDiff}
-        </Segment>
-      </div>
-    )
+    if (baseLabel && baseProfiles !== undefined) {
+      const baseSections = [
+        { key: 'label', content: baseLabel, active: true },
+        { key: 'profiles', content: baseProfiles.toString(), active: true }
+      ]
+
+      return (
+        <div>
+          <Segment attached='top' className='views-segment'>
+            <Breadcrumb style={{color: '#b30000'}} divider='/'
+              sections={baseSections} />
+            <pre className='dots'> ... </pre>
+            <Breadcrumb style={{color: '#406619'}}>
+              <Breadcrumb.Section>
+                <Dropdown scrolling options={labelOptions} inline
+                  value={compareLabel}
+                  onChange={this.handleLabelChange}
+                  icon={<FaCaretDown className='inline-icon' />} />
+              </Breadcrumb.Section>
+              <Breadcrumb.Divider />
+              <Breadcrumb.Section>
+                <Dropdown scrolling options={profOptions} inline multiple
+                  value={compareProfiles}
+                  onChange={this.handleProfileChange}
+                  renderLabel={this.renderLabel}
+                  icon={<FaCaretDown className='inline-icon' />} />
+              </Breadcrumb.Section>
+            </Breadcrumb>
+          </Segment>
+          <Segment attached='bottom' className='view'>
+            {formattedDiff}
+          </Segment>
+        </div>
+      )
+    }
+    return null
   }
 }
