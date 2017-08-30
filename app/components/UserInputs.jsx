@@ -4,7 +4,10 @@ import PropTypes from 'prop-types'
 import Headers from './Headers.jsx'
 
 import { Form, Label, Menu } from 'semantic-ui-react';
-import { FaCodeFork, FaTag, FaCaretDown, FaClose } from 'react-icons/lib/fa'
+import FaCodeFork from 'react-icons/lib/fa/code-fork'
+import FaTag from 'react-icons/lib/fa/tag'
+import FaCaretDown from 'react-icons/lib/fa/caret-down'
+import FaClose from 'react-icons/lib/fa/close'
 
 const token = '726db489b8e34fa7b78540917245031cde359bbc'
 

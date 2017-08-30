@@ -6,8 +6,11 @@ import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
 import {PrismCode} from 'react-prism';
 import PropTypes from 'prop-types'
-import { FaKey, FaGithub, FaCloud } from 'react-icons/lib/fa'
-import { GoMarkGithub } from 'react-icons/lib/go'
+import FaKey from 'react-icons/lib/fa/key'
+import FaGithub from 'react-icons/lib/fa/github'
+import FaCloud from 'react-icons/lib/fa/cloud'
+
+import GoMarkGithub from 'react-icons/lib/go/mark-github'
 
 import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'

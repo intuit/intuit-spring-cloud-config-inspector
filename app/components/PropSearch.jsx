@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import {Dropdown, Input} from 'semantic-ui-react'
-import { FaSearch } from 'react-icons/lib/fa'
+import FaSearch from 'react-icons/lib/fa/search'
 
 export default class PropSearch extends React.Component {
 
