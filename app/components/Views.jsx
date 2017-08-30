@@ -6,8 +6,11 @@ import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
 import {PrismCode} from 'react-prism';
 import PropTypes from 'prop-types'
-import { FaKey, FaGithub, FaCloud } from 'react-icons/lib/fa'
-import { GoMarkGithub } from 'react-icons/lib/go'
+import FaKey from 'react-icons/lib/fa/key'
+import FaGithub from 'react-icons/lib/fa/github'
+import FaCloud from 'react-icons/lib/fa/cloud'
+
+import GoMarkGithub from 'react-icons/lib/go/mark-github'
 
 import getMockData from './mock.js';
 import PropSearch from './PropSearch.jsx'
@@ -27,7 +30,8 @@ export default class Views extends React.Component {
     filter: PropTypes.arrayOf(PropTypes.string).isRequired,
     updateFilter: PropTypes.func.isRequired,
     portal: PropTypes.bool,
-    transactionId: PropTypes.string.isRequired
+    transactionId: PropTypes.string.isRequired,
+    stateHandler: PropTypes.func
   }
 
   constructor(props) {
@@ -158,8 +162,10 @@ export default class Views extends React.Component {
         })
         if (response.ok) {
           return response.text()
+
         } else {
           return response.json().then(err => {
+            this.props.stateHandler({phase: "file", url: url, error: err});
             throw new Error(err.message)
           })
         }
@@ -202,11 +208,22 @@ export default class Views extends React.Component {
         } else {
           code = response
         }
+
+        // don't set the value of files... Not needed.
+        this.props.stateHandler({phase: "properties", type: "raw", url: `${url}.${ext}`, value: code});
+
+        if (ext === "json") {
+          this.props.stateHandler({phase: "loaded"});
+        }
+
         this.setState({
           [ext]: code
         })
       })
       .catch(error => {
+        this.props.stateHandler({phase: "properties", type: "raw", url: `${url}.${ext}`, error: error});
+
+        // don't set the value of files... Not needed.
         this.setState({
           [ext]: error.toString()
         })
@@ -344,6 +361,7 @@ export default class Views extends React.Component {
         this.getRawData(urls.confURL, 'json', requests, headers)
         this.getRawData(urls.confURL, 'yaml', requests, headers)
         this.getRawData(urls.confURL, 'properties', requests, headers)
+
         this.setState({requests})
         return JSON.parse(response)
       })

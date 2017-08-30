@@ -9,6 +9,25 @@ import Views from './Views.jsx'
 import TopMenu from './TopMenu.jsx'
 
 import './app.scss';
+import 'semantic-ui-css/components/accordion.min.css';
+import 'semantic-ui-css/components/button.min.css';
+import 'semantic-ui-css/components/form.min.css';
+import 'semantic-ui-css/components/grid.min.css';
+import 'semantic-ui-css/components/header.min.css';
+import 'semantic-ui-css/components/label.min.css';
+import 'semantic-ui-css/components/message.min.css';
+import 'semantic-ui-css/components/menu.min.css';
+import 'semantic-ui-css/components/segment.min.css';
+import 'semantic-ui-css/components/image.min.css';
+import 'semantic-ui-css/components/list.min.css';
+import 'semantic-ui-css/components/dropdown.min.css';
+import 'semantic-ui-css/components/tab.min.css';
+import 'semantic-ui-css/components/message.min.css';
+import 'semantic-ui-css/components/popup.min.css';
+import 'semantic-ui-css/components/input.min.css';
+import 'semantic-ui-css/components/reset.min.css';
+import 'semantic-ui-css/components/transition.min.css';
+import 'semantic-ui-css/components/table.min.css';
 
 import * as config from '../conf'
 
@@ -21,7 +40,8 @@ export default class App extends React.Component {
     profiles: PropTypes.string,
     headers: PropTypes.object,
     portal: PropTypes.bool,
-    transactionId: PropTypes.string
+    transactionId: PropTypes.string,
+    stateHandler: PropTypes.func
   }
 
   constructor(props) {
@@ -37,6 +57,7 @@ export default class App extends React.Component {
         headers[key] = value
       }
     }
+
     this.state = {
       headers: headers || props.headers,
       urls: {},
@@ -191,12 +212,14 @@ export default class App extends React.Component {
             transactionId={transactionId}
             updateInfo={this.updateInfo}
             updateLabel={this.updateLabel}
-            updateProfiles={this.updateProfiles} />
+            updateProfiles={this.updateProfiles}
+            stateHandler={this.props.stateHandler} />
           <div className='views'>
             <Views urls={urls} headers={headers} portal={portal}
               transactionId={transactionId}
               updateUserRepo={this.updateUserRepo}
-              filter={filter} updateFilter={this.updateFilter} />
+              filter={filter} updateFilter={this.updateFilter}
+              stateHandler={this.props.stateHandler} />
           </div>
         </ReactCSSTransitionGroup>
       </div>
@@ -211,5 +234,18 @@ App.defaultProps = {
   profiles: 'default',
   label: 'master',
   headers: {authorization: config.getAuthorizationHeader()},
-  transactionId: config.getTID()
+  transactionId: config.getTID(),
+  // Provides an implementation for the state handler and can be overridden when integrated
+  stateHandler: ({phase, url, type, error, value}) => {
+    if (phase && phase === "loaded") {
+      console.log("Default State Handler: Loaded inspector successfully!");
+      return;
+    }
+    if (type && type === "raw") {
+      console.log(`Default State Handler: phase=${phase}, url=${url}, type=${type}, value="${value.length} characters", error=${error}`);
+
+    } else {
+      console.log(`Default State Handler: phase=${phase}, url=${url}, type=${type}, value=${value}, error=${error}`);
+    }
+  }
 }

@@ -4,7 +4,10 @@ import PropTypes from 'prop-types'
 import Headers from './Headers.jsx'
 
 import { Form, Label, Menu } from 'semantic-ui-react';
-import { FaCodeFork, FaTag, FaCaretDown, FaClose } from 'react-icons/lib/fa'
+import FaCodeFork from 'react-icons/lib/fa/code-fork'
+import FaTag from 'react-icons/lib/fa/tag'
+import FaCaretDown from 'react-icons/lib/fa/caret-down'
+import FaClose from 'react-icons/lib/fa/close'
 
 const token = '726db489b8e34fa7b78540917245031cde359bbc'
 
@@ -24,7 +27,8 @@ export default class UserInputs extends React.Component {
     updateLabel: PropTypes.func.isRequired,
     updateProfiles: PropTypes.func.isRequired,
     portal: PropTypes.bool,
-    transactionId: PropTypes.string.isRequired
+    transactionId: PropTypes.string.isRequired,
+    stateHandler: PropTypes.func
   }
 
   constructor(props) {
@@ -258,6 +262,8 @@ export default class UserInputs extends React.Component {
         c.name.startsWith('application-'))
       console.log(`Loaded the config files from github for this app ${JSON.stringify(files.map(c => c.name))}`)
 
+      this.props.stateHandler({phase: "profiles", type: "files", url: githubApiUrl, value: files});
+
       const profileNames = files.map(f => {
         let profile = f.name.substring(
           f.name.indexOf(`-`) + 1,
@@ -267,6 +273,8 @@ export default class UserInputs extends React.Component {
       })
       profileNames.push('default')
       console.log(`Parsed the profile names from config files ${JSON.stringify(profileNames)}`)
+
+      this.props.stateHandler({phase: "profiles", type: "names", url: githubApiUrl, value: profiles});
 
       // Build the options for the dropdown.
       const profOptions = []
@@ -289,7 +297,10 @@ export default class UserInputs extends React.Component {
         // https://stackoverflow.com/questions/979256/sorting-an-array-of-javascript-objects/979289#979289
         profOptions: profOptions.sort((a, b) => a.text.localeCompare(b.text))
       })
-    }).catch(err => console.log(err.message))
+    }).catch(err => {
+      this.props.stateHandler({phase: "profiles", url: githubApiUrl, error: err});
+      console.log(err.message)
+    })
   }
 
   /**
@@ -325,6 +336,7 @@ export default class UserInputs extends React.Component {
         icon: <FaTag className='enabled' />
       }))
       console.log(`Loaded the tags ${JSON.stringify(tags.map(t => t.text))}`)
+      this.props.stateHandler({phase: "labels", type: "tags", url: githubApiUrl, value: tags});
 
       const branchRefs = refs.filter(r => r.ref.startsWith('refs/heads'))
       const branches = branchRefs.map(r => ({
@@ -334,13 +346,17 @@ export default class UserInputs extends React.Component {
         icon: <FaCodeFork className='enabled' />
       }))
       console.log(`Loaded the branches ${JSON.stringify(branches.map(b => b.text))}`)
+      this.props.stateHandler({phase: "labels", type: "branches", url: githubApiUrl, value: branches});
 
       this.setState({
         // Sort the labels by the names, case insensitive
         // https://stackoverflow.com/questions/979256/sorting-an-array-of-javascript-objects/979289#979289
         labelOptions: branches.concat(tags).sort((a, b) => a.key.localeCompare(b.key))
       })
-    }).catch(err => console.log(err.message))
+    }).catch(err => {
+      this.props.stateHandler({phase: "labels", url: githubApiUrl, error: err});
+      console.log(err.message)
+    })
   }
 
   /**
