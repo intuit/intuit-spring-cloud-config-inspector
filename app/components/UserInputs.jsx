@@ -212,7 +212,8 @@ export default class UserInputs extends React.Component {
     const githubRequest = api.makeGithubFetchRequest(this.props.headers,
       this.props.portal, this.props.transactionId);
 
-    const githubApiUrl = `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/contents?ref=${label}`
+    const githubApiUrl =
+      `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/contents?ref=${label}`
     console.log(`Requesting github content from ${githubApiUrl.replace(proxy, "")} `)
 
     fetch(githubApiUrl, githubRequest).then((response) => {
@@ -224,14 +225,16 @@ export default class UserInputs extends React.Component {
 
     }).then(contents => {
       const { appName, profiles } = this.state
-      const profOptions = api.parseProfiles(contents, appName, profiles)
+      const profOptions = api.parseProfiles(contents, appName, profiles,
+        this.props.stateHandler, githubApiUrl)
 
       this.setState({
         profOptions
       })
       this.props.updateProfileOptions(profOptions)
     }).catch(err => {
-      this.props.stateHandler({phase: "profiles", url: githubApiUrl, error: err});
+      this.props.stateHandler({phase: "profiles", url: githubApiUrl,
+        error: err});
       console.log(err.message)
     })
   }
@@ -251,7 +254,8 @@ export default class UserInputs extends React.Component {
     const githubRequest = api.makeGithubFetchRequest(this.props.headers,
       this.props.portal, this.props.transactionId);
 
-    const githubApiUrl = `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/git/refs?per_page=100`
+    const githubApiUrl =
+      `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/git/refs?per_page=100`
     console.log(`Requesting github content from ${githubApiUrl.replace(proxy, "")} `)
 
     fetch(githubApiUrl, githubRequest).then((response) => {
@@ -270,7 +274,8 @@ export default class UserInputs extends React.Component {
         icon: <FaTag className='enabled' />
       }))
       console.log(`Loaded the tags ${JSON.stringify(tags.map(t => t.text))}`)
-      this.props.stateHandler({phase: "labels", type: "tags", url: githubApiUrl, value: tags});
+      this.props.stateHandler({phase: "labels", type: "tags",
+        url: githubApiUrl, value: tags});
 
       const branchRefs = refs.filter(r => r.ref.startsWith('refs/heads'))
       const branches = branchRefs.map(r => ({
@@ -280,7 +285,8 @@ export default class UserInputs extends React.Component {
         icon: <FaCodeFork className='enabled' />
       }))
       console.log(`Loaded the branches ${JSON.stringify(branches.map(b => b.text))}`)
-      this.props.stateHandler({phase: "labels", type: "branches", url: githubApiUrl, value: branches});
+      this.props.stateHandler({phase: "labels", type: "branches",
+        url: githubApiUrl, value: branches});
 
       // Sort the labels by the names, case insensitive
       // https://stackoverflow.com/questions/979256/sorting-an-array-of-javascript-objects/979289#979289

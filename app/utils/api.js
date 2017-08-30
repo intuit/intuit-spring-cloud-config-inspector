@@ -45,13 +45,15 @@ export const makeGithubFetchRequest = (additionalHeaders, cors, transactionId) =
  * @param {string[]} profiles - list of profiles to check against result
  * @returns {object[]} options for a profiles dropdown
  */
-export const parseProfiles = (contents, appName, profiles) => {
+export const parseProfiles = (contents, appName, profiles,
+  stateHandler, githubApiUrl) => {
   // The contents include the name of the files from github.
   const files = contents.filter(c => c.name.startsWith(`${appName}-`) ||
     c.name.startsWith('application-'))
   console.log(`Loaded the config files from github for this app ${JSON.stringify(files.map(c => c.name))}`)
 
-  this.props.stateHandler({phase: "profiles", type: "files", url: githubApiUrl, value: files});
+  stateHandler({phase: "profiles", type: "files", url: githubApiUrl,
+    value: files});
 
   const profileNames = files.map(f => {
     let profile = f.name.substring(
@@ -63,7 +65,8 @@ export const parseProfiles = (contents, appName, profiles) => {
   profileNames.push('default')
   console.log(`Parsed the profile names from config files ${JSON.stringify(profileNames)}`)
 
-  this.props.stateHandler({phase: "profiles", type: "names", url: githubApiUrl, value: profiles});
+  stateHandler({phase: "profiles", type: "names", url: githubApiUrl,
+    value: profiles});
 
   // Build the options for the dropdown.
   const profOptions = []

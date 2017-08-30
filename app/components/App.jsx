@@ -26,6 +26,8 @@ import 'semantic-ui-css/components/message.min.css';
 import 'semantic-ui-css/components/popup.min.css';
 import 'semantic-ui-css/components/input.min.css';
 import 'semantic-ui-css/components/reset.min.css';
+import 'semantic-ui-css/components/transition.min.css';
+import 'semantic-ui-css/components/table.min.css';
 import 'semantic-ui-css/components/breadcrumb.min.css';
 
 import * as config from '../conf'

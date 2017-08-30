@@ -227,7 +227,8 @@ export default class Views extends React.Component {
         }
 
         // don't set the value of files... Not needed.
-        this.props.stateHandler({phase: "properties", type: "raw", url: `${url}.${ext}`, value: code});
+        this.props.stateHandler({phase: "properties", type: "raw",
+          url: `${url}.${ext}`, value: code});
 
         if (ext === "json") {
           this.props.stateHandler({phase: "loaded"});
@@ -238,7 +239,8 @@ export default class Views extends React.Component {
         })
       })
       .catch(error => {
-        this.props.stateHandler({phase: "properties", type: "raw", url: `${url}.${ext}`, error: error});
+        this.props.stateHandler({phase: "properties", type: "raw",
+          url: `${url}.${ext}`, error: error});
 
         // don't set the value of files... Not needed.
         this.setState({
@@ -414,7 +416,8 @@ export default class Views extends React.Component {
     const githubRequest = api.makeGithubFetchRequest(headers,
       portal, transactionId);
 
-    const githubApiUrl = `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/contents?ref=${label}`
+    const githubApiUrl =
+      `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/contents?ref=${label}`
     console.log(`Requesting github content from ${githubApiUrl.replace(proxy, "")} `)
 
     fetch(githubApiUrl, githubRequest).then((response) => {
@@ -426,7 +429,8 @@ export default class Views extends React.Component {
 
     }).then(contents => {
       const { appName } = this.props.info
-      const profOptions = api.parseProfiles(contents, appName, this.state.compareProfiles)
+      const profOptions = api.parseProfiles(contents, appName,
+        this.state.compareProfiles, this.props.stateHandler, githubApiUrl)
 
       this.setState({
         profOptions

@@ -101,10 +101,12 @@ export default class Diff extends React.Component {
    */
   renderLabel = ({text, label}) => {
     if (label) {
-      return {basic: true, className: 'mini-profiles', color:'red', content:`Not found: ${text}`,
+      return {basic: true, className: 'mini-profiles', color:'red',
+        content:`Not found: ${text}`,
         removeIcon: <FaClose className='closeIcon' />}
     }
-    return {basic: true, className: 'mini-profiles', content:text, removeIcon: <FaClose className='closeIcon' />}
+    return {basic: true, className: 'mini-profiles', content:text,
+      removeIcon: <FaClose className='closeIcon' />}
   }
 
   /**
