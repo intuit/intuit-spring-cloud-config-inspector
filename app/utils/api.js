@@ -43,6 +43,8 @@ export const makeGithubFetchRequest = (additionalHeaders, cors, transactionId) =
  * @param {object[]} contents - GitHub v3 contents response
  * @param {string} appName - current app
  * @param {string[]} profiles - list of profiles to check against result
+ * @param {function} stateHandler - stateHandler function
+ * @param {string} githubApiUrl - url used in request, passed to stateHandler
  * @returns {object[]} options for a profiles dropdown
  */
 export const parseProfiles = (contents, appName, profiles,
