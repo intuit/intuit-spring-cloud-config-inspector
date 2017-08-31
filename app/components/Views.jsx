@@ -15,6 +15,7 @@ import FaCloud from 'react-icons/lib/fa/cloud'
 import GoMarkGithub from 'react-icons/lib/go/mark-github'
 import GoDiff from 'react-icons/lib/go/diff'
 import GoFileCode from 'react-icons/lib/go/file-code'
+import GoGistSecret from 'react-icons/lib/go/gist-secret'
 
 import 'lodash'
 
@@ -570,7 +571,7 @@ export default class Views extends React.Component {
         render: () => this.createTab('properties')
       },
       {
-        menuItem: {key: 'metadata', content: 'Metadata'},
+        menuItem: {key: 'metadata', content: 'metadata'},
         render: () => this.createTab('metadata')
       }
     ]
@@ -580,7 +581,7 @@ export default class Views extends React.Component {
       {
         menuItem:
           <Menu.Item key='config'>
-            <GoFileCode
+            <GoGistSecret
               className={activeTab === 'config' ? 'enabled' : 'disabled'}
             />
             Config
@@ -613,7 +614,11 @@ export default class Views extends React.Component {
           </Tab.Pane>
       },
       {
-        menuItem: {key: 'raw', content: 'Raw'},
+        menuItem: {key: 'raw', content: 'Raw', icon:
+          <GoFileCode
+            className={activeTab === 'raw' ? 'enabled' : 'disabled'}
+          />
+        },
         render: () =>
           <Tab.Pane>
             <Tab menu={{stackable: true, secondary: true,
