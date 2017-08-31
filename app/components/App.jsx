@@ -47,6 +47,11 @@ export default class App extends React.Component {
 
   constructor(props) {
     super(props)
+
+    const { PACKAGE_JSON } = config;
+    console.log(`Bootstrapping Configuration Inspector on environment '${String(config.getCurrentHostEnv())}'`);
+    console.log(`Bootstrapping '${PACKAGE_JSON.name}@${PACKAGE_JSON.version}' built from '${PACKAGE_JSON.sourceUrl}'`);
+
     const urlParams = new URLSearchParams(location.search)
     let headers
     // Construct headers object
