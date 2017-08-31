@@ -28,6 +28,7 @@ import 'semantic-ui-css/components/input.min.css';
 import 'semantic-ui-css/components/reset.min.css';
 import 'semantic-ui-css/components/transition.min.css';
 import 'semantic-ui-css/components/table.min.css';
+import 'semantic-ui-css/components/breadcrumb.min.css';
 
 import * as config from '../conf'
 
@@ -60,7 +61,7 @@ export default class App extends React.Component {
 
     this.state = {
       headers: headers || props.headers,
-      urls: {},
+      info: {},
       user: '',
       repo: '',
       appName: urlParams.get('appName') || props.appName,
@@ -68,7 +69,9 @@ export default class App extends React.Component {
       profiles: urlParams.get('profiles') || props.profiles,
       label: urlParams.get('label') || props.label,
       filter: urlParams.get('filter') ? urlParams.get('filter').split(',') : [],
-      transactionId: props.transactionId
+      transactionId: props.transactionId,
+      labelOptions: [],
+      profOptions: []
     }
   }
 
@@ -120,7 +123,19 @@ export default class App extends React.Component {
       label
     })
     this.updateURLs(this.state.url, this.state.appName,
-      this.state.profiles, label)
+      this.state.profiles.split(','), label)
+  }
+
+  updateLabelOptions = (labelOptions) => {
+    this.setState({
+      labelOptions
+    })
+  }
+
+  updateProfileOptions = (profOptions) => {
+    this.setState({
+      profOptions
+    })
   }
 
   /**
@@ -135,16 +150,10 @@ export default class App extends React.Component {
    * @param {object} [headers] - headers object
    */
   updateURLs = (url, appName, profiles, label, headers=this.state.headers) => {
-    // For localhost, use the url in the app, or else use the configured ones
-    const currentEnv = config.getCurrentHostEnv();
-
-    const urls = {
-      metaURL: `${url}/${appName}/${profiles}/${label.replace(/\//g, '(_)')}`,
-      confURL: `${url}/${label.replace(/\//g, '(_)')}/${appName}-${profiles}`
-    }
+    const info = {url, appName, profiles, label}
 
     this.setState({
-      urls
+      info
     })
 
     const urlParams = new URLSearchParams(location.search)
@@ -192,7 +201,7 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { urls, headers, user, repo, url,
+    const { info, headers, user, repo, url, labelOptions, profOptions,
       appName, profiles, label, filter, transactionId } = this.state
 
     const { portal } = this.props
@@ -213,12 +222,16 @@ export default class App extends React.Component {
             updateInfo={this.updateInfo}
             updateLabel={this.updateLabel}
             updateProfiles={this.updateProfiles}
+            updateLabelOptions={this.updateLabelOptions}
+            updateProfileOptions={this.updateProfileOptions}
             stateHandler={this.props.stateHandler} />
           <div className='views'>
-            <Views urls={urls} headers={headers} portal={portal}
-              transactionId={transactionId}
+            <Views headers={headers} portal={portal}
+              transactionId={transactionId} info={info}
               updateUserRepo={this.updateUserRepo}
               filter={filter} updateFilter={this.updateFilter}
+              labelOptions={labelOptions} profOptions={profOptions}
+              user={user} repo={repo}
               stateHandler={this.props.stateHandler} />
           </div>
         </ReactCSSTransitionGroup>
