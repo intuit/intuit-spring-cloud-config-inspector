@@ -65,7 +65,8 @@ export default class Views extends React.Component {
       diff: [],
       compareLabel: '',
       compareProfiles: [],
-      profOptions: []
+      profOptions: [],
+      raw: 'json'
     }
   }
 
@@ -198,6 +199,7 @@ export default class Views extends React.Component {
    */
   createTab(ext) {
     let className = ext === 'metadata' ? `language-json` : `language-${ext}`
+    className += ' raw-code'
     return (
       <Tab.Pane className='raw'>
         <PrismCode component='pre' className={className}>
@@ -438,6 +440,12 @@ export default class Views extends React.Component {
     }).catch(err => console.log(err.message))
   }
 
+  handleRawChange = (e, {name}) => {
+    this.setState({
+      raw: name
+    })
+  }
+
   /**
    * Fetches data for all tabs. Updates requests, version, and all data and
    * creates key value pairs by calling updateValues. Handles bad requests.
@@ -500,7 +508,7 @@ export default class Views extends React.Component {
   render() {
     const { activeTab, json, yaml, properties, requests, values,
       diff, version, secrets, repoURL, propertyFiles, compare,
-      compareLabel, compareProfiles, profOptions } = this.state
+      compareLabel, compareProfiles, profOptions, raw } = this.state
     const { updateFilter, filter, labelOptions } = this.props
     const { label, profiles } = this.props.info
 
@@ -548,8 +556,27 @@ export default class Views extends React.Component {
         </List>
     }))
 
+    const rawPanes = [
+      {
+        menuItem: {key: '.json', content: '.json'},
+        render: () => this.createTab('json')
+      },
+      {
+        menuItem: {key: '.yml', content: '.yml'},
+        render: () => this.createTab('yaml')
+      },
+      {
+        menuItem: {key: '.properties', content: '.properties'},
+        render: () => this.createTab('properties')
+      },
+      {
+        menuItem: {key: 'metadata', content: 'Metadata'},
+        render: () => this.createTab('metadata')
+      }
+    ]
+
     // tab content
-    const panes = [
+    const viewPanes = [
       {
         menuItem:
           <Menu.Item key='config'>
@@ -586,42 +613,17 @@ export default class Views extends React.Component {
           </Tab.Pane>
       },
       {
-        menuItem: {key: '.json', content: '.json'},
-        render: () => this.createTab('json')
-      },
-      {
-        menuItem: {key: '.yml', content: '.yml'},
-        render: () => this.createTab('yaml')
-      },
-      {
-        menuItem: {key: '.properties', content: '.properties'},
-        render: () => this.createTab('properties')
-      },
-      {
-        menuItem: {key: 'metadata', content: 'Metadata'},
-        render: () => this.createTab('metadata')
-      },
-      {
-        menuItem:
-        <Menu.Item key='github' >
-          <GoMarkGithub
-            className={activeTab === 'github' ? 'enabled' : 'disabled'}
-          />
-          {'  '}GitHub
-          <Popup inverted size='small'
-            trigger={
-              <Label size='small' content={propertyFiles.length}
-                className='counter'/>
-            }
-            content='Property Files' position='top center' />
-        </Menu.Item>,
-        render: () => <Tab.Pane>{this.createGithubTab()}</Tab.Pane>
+        menuItem: {key: 'raw', content: 'Raw'},
+        render: () =>
+          <Tab.Pane>
+            <Tab menu={{stackable: true, secondary: true,
+                pointing: true, className: 'raw-menu'}}
+              panes={rawPanes} onTabChange={this.handleRawChange} />
+          </Tab.Pane>
       },
       {
         menuItem: {key: 'diff', content: 'Diff', icon:
-          <GoDiff
-            className={activeTab === 'diff' ? 'enabled' : 'disabled'}
-          />
+          <GoDiff className={activeTab === 'diff' ? 'enabled' : 'disabled'} />
         },
         render: () => <Tab.Pane>
           <Diff base={json} compare={compare} formattedDiff={diff}
@@ -634,16 +636,24 @@ export default class Views extends React.Component {
       },
       {
         menuItem:
-          <Menu.Item key='api'>
-            <Popup size='small'
-              inverted
-              trigger={<FaCloud
-                className={activeTab === 'api' ? 'enabled' : 'disabled'} />
-              }
-              content='API Requests'
-              position='top center'
-            />
-          </Menu.Item>,
+        <Menu.Item key='github' >
+          <GoMarkGithub
+            className={activeTab === 'github' ? 'enabled' : 'disabled'}
+          />
+          GitHub
+          <Popup inverted size='small'
+            trigger={
+              <Label size='small' content={propertyFiles.length}
+                className='counter'/>
+            }
+            content='Property Files' position='top center' />
+        </Menu.Item>,
+        render: () => <Tab.Pane>{this.createGithubTab()}</Tab.Pane>
+      },
+      {
+        menuItem: {key: 'api', content: 'API Logs', icon:
+          <FaCloud className={activeTab === 'api' ? 'enabled' : 'disabled'} />
+        },
         render: () =>
           <Tab.Pane>
             <Accordion exclusive={false} panels={panels} />
@@ -672,7 +682,7 @@ export default class Views extends React.Component {
 
     return (
       <Tab menu={{stackable: true, tabular: true, attached: true}}
-        panes={panes} onTabChange={this.handleTabChange} />
+        panes={viewPanes} onTabChange={this.handleTabChange} />
     )
   }
 }
