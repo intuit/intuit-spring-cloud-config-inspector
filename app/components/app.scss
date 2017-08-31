@@ -9,6 +9,9 @@ body {
 .top {
   padding: 10px 30px;
   background-color: rgb(42, 44, 46);
+  box-shadow: 0px 3px 5px rgb(2, 78, 92);
+  z-index: 10;
+  position: relative;
 }
 
 .inputs {
