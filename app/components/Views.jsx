@@ -1,29 +1,39 @@
 import React from 'react';
 import {Segment, List, Tab, Menu, Label, Grid,
   Popup, Accordion, Message, Button} from 'semantic-ui-react';
+
 import 'prismjs';
 import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
 import {PrismCode} from 'react-prism';
+
 import PropTypes from 'prop-types'
 import FaKey from 'react-icons/lib/fa/key'
 import FaGithub from 'react-icons/lib/fa/github'
 import FaCloud from 'react-icons/lib/fa/cloud'
 
 import GoMarkGithub from 'react-icons/lib/go/mark-github'
+import GoDiff from 'react-icons/lib/go/diff'
+import GoFileCode from 'react-icons/lib/go/file-code'
+import GoGistSecret from 'react-icons/lib/go/gist-secret'
 
-import getMockData from './mock.js';
+import 'lodash'
+
 import PropSearch from './PropSearch.jsx'
+import Diff from './Diff.jsx'
 import * as config from '../conf';
+import * as api from '../utils/api.js'
 
 const org = 'services-config'
 
 export default class Views extends React.Component {
 
   static propTypes = {
-    urls: PropTypes.shape({
-      metaURL: PropTypes.string,
-      confURL: PropTypes.string
+    info: PropTypes.shape({
+      url: PropTypes.string,
+      appName: PropTypes.string,
+      label: PropTypes.string,
+      profiles: PropTypes.arrayOf(PropTypes.string)
     }).isRequired,
     headers: PropTypes.object.isRequired,
     updateUserRepo: PropTypes.func.isRequired,
@@ -31,6 +41,9 @@ export default class Views extends React.Component {
     updateFilter: PropTypes.func.isRequired,
     portal: PropTypes.bool,
     transactionId: PropTypes.string.isRequired,
+    labelOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
+    user: PropTypes.string.isRequired,
+    repo: PropTypes.string.isRequired,
     stateHandler: PropTypes.func
   }
 
@@ -40,17 +53,21 @@ export default class Views extends React.Component {
       data: {},
       values: {},
       activeTab: 'config',
-      activeIndex: 0,
       metadata: '',
       json: '',
       yaml: '',
       properties: '',
+      compare: '',
       requests: [],
       version: '',
       secrets: false,
-      label: '',
       repoURL: '',
-      propertyFiles: []
+      propertyFiles: [],
+      diff: [],
+      compareLabel: '',
+      compareProfiles: [],
+      profOptions: [],
+      raw: 'json'
     }
   }
 
@@ -147,7 +164,9 @@ export default class Views extends React.Component {
     const currentEnv = config.getCurrentHostEnv().toString();
     console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
 
-    const configApiRequest = this.makeConfigServiceFetchRequest(headers, this.props.portal);
+    const configApiRequest = this.makeConfigServiceFetchRequest(
+      headers, this.props.portal
+    );
     const configApiUrl = `${proxy}${url}`
     console.log(`Requesting config api '${configApiUrl.replace(proxy, "")}' `)
 
@@ -181,6 +200,7 @@ export default class Views extends React.Component {
    */
   createTab(ext) {
     let className = ext === 'metadata' ? `language-json` : `language-${ext}`
+    className += ' raw-code'
     return (
       <Tab.Pane className='raw'>
         <PrismCode component='pre' className={className}>
@@ -210,7 +230,8 @@ export default class Views extends React.Component {
         }
 
         // don't set the value of files... Not needed.
-        this.props.stateHandler({phase: "properties", type: "raw", url: `${url}.${ext}`, value: code});
+        this.props.stateHandler({phase: "properties", type: "raw",
+          url: `${url}.${ext}`, value: code});
 
         if (ext === "json") {
           this.props.stateHandler({phase: "loaded"});
@@ -221,7 +242,8 @@ export default class Views extends React.Component {
         })
       })
       .catch(error => {
-        this.props.stateHandler({phase: "properties", type: "raw", url: `${url}.${ext}`, error: error});
+        this.props.stateHandler({phase: "properties", type: "raw",
+          url: `${url}.${ext}`, error: error});
 
         // don't set the value of files... Not needed.
         this.setState({
@@ -246,12 +268,9 @@ export default class Views extends React.Component {
    */
   handleTabChange = (e, {activeIndex, panes}) => {
     const activeTab = panes[activeIndex].menuItem.key
-    if (activeTab !== 'version') {
-      this.setState({
-        activeTab,
-        activeIndex
-      })
-    }
+    this.setState({
+      activeTab
+    })
   }
 
   /**
@@ -311,16 +330,18 @@ export default class Views extends React.Component {
     * @returns {ReactElement} List of info
     */
   createGithubTab = () => {
-    const { repoURL, propertyFiles, label } = this.state
+    const { repoURL, propertyFiles } = this.state
+    const { label } = this.props.info
     return (
       <List>
         <List.Item>
           <List.Header>Current Label</List.Header>
-          <List.Content>{label}</List.Content>
+          <List.Content>{repoURL ? label : null}</List.Content>
         </List.Item>
         <List.Item>
           <List.Header>Github Repo URL</List.Header>
-          <List.Content as='a' href={`${repoURL}/tree/${label}`} target='_blank'>
+          <List.Content as='a' href={`${repoURL}/tree/${label}`}
+            target='_blank'>
             {repoURL ? `${repoURL}` : null}
           </List.Content>
         </List.Item>
@@ -337,7 +358,8 @@ export default class Views extends React.Component {
         </List.Item>
         <List.Item>
           <List.Header>Commit History</List.Header>
-          <List.Content as='a' href={`${repoURL}/commits/${label}`} target='_blank'>
+          <List.Content as='a' href={`${repoURL}/commits/${label}`}
+            target='_blank'>
             {repoURL ? `${repoURL}/commits/${label}` : null}
           </List.Content>
         </List.Item>
@@ -346,21 +368,107 @@ export default class Views extends React.Component {
   }
 
   /**
+   * Fetch json config for given label and profiles. Called by Diff.
+   *
+   * @param {string} label - compare label
+   * @param {string[]} profiles - compare profiles
+   */
+  fetchCompare = (label, profiles) => {
+    this.setState({
+      compareLabel: label,
+      compareProfiles: profiles
+    })
+    const { url, appName } = this.props.info
+    const escapedLabel = label.replace(/\//g, '(_)')
+    const compareURL = `${url}/${escapedLabel}/${appName}-${profiles}.json`
+    this.fetchFile(compareURL, [], this.props.headers)
+    .then(response => {
+      const code = JSON.stringify(JSON.parse(response), null, 2)
+      this.setState({
+        compare: code
+      })
+    })
+    .catch(error => {
+      console.log(error.message)
+    })
+  }
+
+  /**
+   * Called by Diff to store formatted diff. Stored in Views because
+   * Diff unmounts when user leaves tab.
+   */
+  updateDiff = (diff) => {
+    this.setState({diff})
+  }
+
+  /**
+   * Fetch list of profiles from github based onuser, repo, and label.
+   * Update options in to pass to Diff.
+   *
+   * @param {string} label - current label
+   * @param {string} [user] - new or current user
+   * @param {string} [repo] - new or current repo
+   */
+  updateProfileOptions = (label, user=this.props.user, repo=this.props.repo) => {
+    const proxy = config.getProxyServerUrl();
+    const currentEnv = config.getCurrentHostEnv().toString();
+    console.log(`Setting up the proxy url '${proxy}' to be used for env ${currentEnv}`);
+
+    const { headers, portal, transactionId } = this.props
+
+    const githubRequest = api.makeGithubFetchRequest(headers,
+      portal, transactionId);
+
+    const githubApiUrl =
+      `${proxy}${config.GIT_REPOS_API}/${user}/${repo}/contents?ref=${label}`
+    console.log(`Requesting github content from ${githubApiUrl.replace(proxy, "")} `)
+
+    fetch(githubApiUrl, githubRequest).then((response) => {
+
+      if (response.status >= 400) {
+        throw new Error(response.json())
+      }
+      return response.json()
+
+    }).then(contents => {
+      const { appName } = this.props.info
+      const profOptions = api.parseProfiles(contents, appName,
+        this.state.compareProfiles, this.props.stateHandler, githubApiUrl)
+
+      this.setState({
+        profOptions
+      })
+    }).catch(err => console.log(err.message))
+  }
+
+  handleRawChange = (e, {name}) => {
+    this.setState({
+      raw: name
+    })
+  }
+
+  /**
    * Fetches data for all tabs. Updates requests, version, and all data and
    * creates key value pairs by calling updateValues. Handles bad requests.
+   * If new user or repo, reset diffs.
    *
    * @param {object} nextProps
-   * @param {object} nextProps.urls - metaURL and confURL from new props
+   * @param {object} nextProps.info - url, appName, label, profiles
    * @param {object} nextProps.headers - current headers
    */
-  componentWillReceiveProps({urls, headers}) {
-    if (this.props.urls != urls || this.props.headers != headers) {
+  componentWillReceiveProps({info, headers, user, repo}) {
+    if (!_.isEqual(info, this.props.info) ||
+        !_.isEqual(headers, this.props.headers)) {
+      const { url, appName, profiles, label } = info
+      const escapedLabel = label.replace(/\//g, '(_)')
+      const metaURL = `${url}/${appName}/${profiles}/${escapedLabel}`
+      const confURL = `${url}/${escapedLabel}/${appName}-${profiles}`
       let requests = []
-      this.fetchFile(urls.metaURL, requests, headers)
+      this.fetchFile(metaURL, requests, headers)
       .then(response => {
-        this.getRawData(urls.confURL, 'json', requests, headers)
-        this.getRawData(urls.confURL, 'yaml', requests, headers)
-        this.getRawData(urls.confURL, 'properties', requests, headers)
+        this.getRawData(confURL, 'json', requests, headers)
+        this.getRawData(confURL, 'yaml', requests, headers)
+        this.getRawData(confURL, 'properties', requests, headers)
 
         this.setState({requests})
         return JSON.parse(response)
@@ -368,8 +476,7 @@ export default class Views extends React.Component {
       .then(data => {
         this.setState({
           version: data.version,
-          metadata: JSON.stringify(data, null, 2),
-          label: data.label
+          metadata: JSON.stringify(data, null, 2)
         })
         this.updateValues(data.propertySources)
       })
@@ -382,19 +489,29 @@ export default class Views extends React.Component {
           yaml: error.toString(),
           properties: error.toString(),
           metadata: error.toString(),
-          label: null,
           repoURL: null,
-          propertyFiles: []
+          propertyFiles: [],
+          compare: error.toString()
         })
+        this.props.updateUserRepo('', '')
       })
+    }
+    if (user !== this.props.user || repo !== this.props.repo) {
+      this.setState({
+        compareLabel: info.label,
+        compareProfiles: info.profiles
+      })
+      this.fetchCompare(info.label, info.profiles)
+      this.updateProfileOptions(info.label, user, repo)
     }
   }
 
   render() {
-    const { activeTab, activeIndex, json, yaml, properties, requests, values,
-      version, secrets, repoURL, propertyFiles } = this.state
-    const { metaURL, confURL } = this.props.urls
-    const { updateFilter, filter } = this.props
+    const { activeTab, json, yaml, properties, requests, values,
+      diff, version, secrets, repoURL, propertyFiles, compare,
+      compareLabel, compareProfiles, profOptions, raw } = this.state
+    const { updateFilter, filter, labelOptions } = this.props
+    const { label, profiles } = this.props.info
 
     let config = []
     let keys = []
@@ -440,19 +557,42 @@ export default class Views extends React.Component {
         </List>
     }))
 
+    const rawPanes = [
+      {
+        menuItem: {key: '.json', content: '.json'},
+        render: () => this.createTab('json')
+      },
+      {
+        menuItem: {key: '.yml', content: '.yml'},
+        render: () => this.createTab('yaml')
+      },
+      {
+        menuItem: {key: '.properties', content: '.properties'},
+        render: () => this.createTab('properties')
+      },
+      {
+        menuItem: {key: 'metadata', content: 'metadata'},
+        render: () => this.createTab('metadata')
+      }
+    ]
+
     // tab content
-    const panes = [
+    const viewPanes = [
       {
         menuItem:
           <Menu.Item key='config'>
+            <GoGistSecret
+              className={activeTab === 'config' ? 'enabled' : 'disabled'}
+            />
             Config
             <Popup inverted size='small'
-              trigger={<Label size='small' className='counter' content={total} />}
+              trigger={<Label size='small' className='counter'
+                content={total} />}
               content='Property Count' position='top center' />
           </Menu.Item>,
         render: () =>
           <Tab.Pane>
-            <Segment attached='top'>
+            <Segment attached='top' className='views-segment'>
               <Grid columns='equal'>
                 <Grid.Column verticalAlign='middle' width={15}>
                   <PropSearch updateFilter={updateFilter}
@@ -474,27 +614,38 @@ export default class Views extends React.Component {
           </Tab.Pane>
       },
       {
-        menuItem: {key: '.json', content: '.json'},
-        render: () => this.createTab('json')
+        menuItem: {key: 'raw', content: 'Raw', icon:
+          <GoFileCode
+            className={activeTab === 'raw' ? 'enabled' : 'disabled'}
+          />
+        },
+        render: () =>
+          <Tab.Pane>
+            <Tab menu={{stackable: true, secondary: true,
+                pointing: true, className: 'raw-menu'}}
+              panes={rawPanes} onTabChange={this.handleRawChange} />
+          </Tab.Pane>
       },
       {
-        menuItem: {key: '.yml', content: '.yml'},
-        render: () => this.createTab('yaml')
-      },
-      {
-        menuItem: {key: '.properties', content: '.properties'},
-        render: () => this.createTab('properties')
-      },
-      {
-        menuItem: {key: 'metadata', content: 'Metadata'},
-        render: () => this.createTab('metadata')
+        menuItem: {key: 'diff', content: 'Diff', icon:
+          <GoDiff className={activeTab === 'diff' ? 'enabled' : 'disabled'} />
+        },
+        render: () => <Tab.Pane>
+          <Diff base={json} compare={compare} formattedDiff={diff}
+            baseLabel={label} baseProfiles={profiles}
+            profOptions={profOptions} labelOptions={labelOptions}
+            fetchCompare={this.fetchCompare} updateDiff={this.updateDiff}
+            compareLabel={compareLabel} compareProfiles={compareProfiles}
+            updateProfileOptions={this.updateProfileOptions} />
+        </Tab.Pane>
       },
       {
         menuItem:
         <Menu.Item key='github' >
           <GoMarkGithub
-            className={activeTab === 'github' ? 'enabled' : 'disabled'} />
-          {'  '}GitHub
+            className={activeTab === 'github' ? 'enabled' : 'disabled'}
+          />
+          GitHub
           <Popup inverted size='small'
             trigger={
               <Label size='small' content={propertyFiles.length}
@@ -505,17 +656,9 @@ export default class Views extends React.Component {
         render: () => <Tab.Pane>{this.createGithubTab()}</Tab.Pane>
       },
       {
-        menuItem:
-          <Menu.Item key='api'>
-            <Popup size='small'
-              inverted
-              trigger={<FaCloud
-                className={activeTab === 'api' ? 'enabled' : 'disabled'} />
-              }
-              content='API Requests'
-              position='top center'
-            />
-          </Menu.Item>,
+        menuItem: {key: 'api', content: 'API Logs', icon:
+          <FaCloud className={activeTab === 'api' ? 'enabled' : 'disabled'} />
+        },
         render: () =>
           <Tab.Pane>
             <Accordion exclusive={false} panels={panels} />
@@ -530,7 +673,9 @@ export default class Views extends React.Component {
               <Popup inverted size='small'
                 trigger={
                   <Label href={`${repoURL}/commit/${version}`}
-                    target='_blank' color='grey'>{version.substring(0, 7)}</Label>
+                    target='_blank' color='grey'>
+                    {version.substring(0, 7)}
+                  </Label>
                 }
                 content='Commit ID' position='top right' /> :
               null
@@ -541,7 +686,8 @@ export default class Views extends React.Component {
     ]
 
     return (
-      <Tab menu={{stackable: true, tabular: true, attached: true}} panes={panes} onTabChange={this.handleTabChange} activeIndex={activeIndex} />
+      <Tab menu={{stackable: true, tabular: true, attached: true}}
+        panes={viewPanes} onTabChange={this.handleTabChange} />
     )
   }
 }

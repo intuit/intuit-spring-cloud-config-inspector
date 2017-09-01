@@ -8,5 +8,5 @@ it('renders without crashing', () => {
   );
   window.history.pushState = jest.fn().mockImplementation(() => {})
   const div = document.createElement('div');
-  ReactDOM.render(<App url='https://config-e2e.api.intuit.com/v2' appName='publisher' profiles='default' label='master' />, div);
+  ReactDOM.render(<App />, div);
 });
