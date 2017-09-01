@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 import {Dropdown, Input} from 'semantic-ui-react'
 import FaSearch from 'react-icons/lib/fa/search'
+import FaClose from 'react-icons/lib/fa/close'
 
 export default class PropSearch extends React.Component {
 
@@ -45,6 +46,10 @@ export default class PropSearch extends React.Component {
     this.props.updateFilter(value)
   }
 
+  renderLabel = (item) => {
+    return {content:item.text, removeIcon: <FaClose className='closeIcon' />}
+  }
+
   render() {
     const { options } = this.props
     const { value } = this.state
@@ -56,6 +61,7 @@ export default class PropSearch extends React.Component {
         placeholder='properties...'
         options={options.map(key => ({text:key, value:key}))}
         onChange={this.handleChange} value={value}
+        renderLabel={this.renderLabel}
       />
     )
   }
