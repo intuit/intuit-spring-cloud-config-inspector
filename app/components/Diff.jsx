@@ -138,10 +138,10 @@ export default class Diff extends React.Component {
       return (
         <div>
           <Segment attached='top' className='views-segment'>
-            <Breadcrumb style={{color: '#b30000'}} divider='/'
+            <Breadcrumb className='base' divider='/'
               sections={baseSections} />
             <span className='dots'> ... </span>
-            <Breadcrumb style={{color: '#406619'}}>
+            <Breadcrumb className='compare'>
               <Breadcrumb.Section>
                 <Dropdown scrolling options={labelOptions} inline
                   value={compareLabel}
