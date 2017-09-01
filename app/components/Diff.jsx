@@ -131,14 +131,15 @@ export default class Diff extends React.Component {
 
     if (baseLabel && baseProfiles !== undefined) {
       const baseSections = [
-        { key: 'label', content: baseLabel, active: true },
-        { key: 'profiles', content: baseProfiles.toString(), active: true }
+        { key: 'label', content: baseLabel, active: true, className: 'base' },
+        { key: 'profiles', content: baseProfiles.toString(),
+          active: true , className: 'base'}
       ]
 
       return (
         <div>
           <Segment attached='top' className='views-segment'>
-            <Breadcrumb className='base' divider='/'
+            <Breadcrumb divider='/'
               sections={baseSections} />
             <span className='dots'> ... </span>
             <Breadcrumb className='compare'>
