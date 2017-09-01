@@ -52,7 +52,7 @@ export default class Diff extends React.Component {
       const className = part.added ? 'ins code' :
         part.removed ? 'del code' :
         'code'
-      return <pre key={index} className={className}>{part.value}</pre>
+      return <span key={index} className={className}>{part.value}</span>
     })
     this.props.updateDiff(formatted)
   }
@@ -140,7 +140,7 @@ export default class Diff extends React.Component {
           <Segment attached='top' className='views-segment'>
             <Breadcrumb style={{color: '#b30000'}} divider='/'
               sections={baseSections} />
-            <pre className='dots'> ... </pre>
+            <span className='dots'> ... </span>
             <Breadcrumb style={{color: '#406619'}}>
               <Breadcrumb.Section>
                 <Dropdown scrolling options={labelOptions} inline

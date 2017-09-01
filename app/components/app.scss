@@ -140,6 +140,8 @@ body {
   white-space: pre-wrap;
   margin: 0!important;
   overflow-wrap: break-word;
+  font-family: monospace;
+  display: block;
 }
 
 .ins {
@@ -156,6 +158,8 @@ body {
   display: inline-block;
   font-size: 16px;
   margin: 0!important;
+  white-space: pre;
+  font-family: monospace;
 }
 
 .mini-profiles {
