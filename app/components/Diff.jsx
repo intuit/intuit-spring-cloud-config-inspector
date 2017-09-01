@@ -49,8 +49,10 @@ export default class Diff extends React.Component {
   createDiff = (base, compare) => {
     let diff = jsdiff.diffLines(base, compare)
     const formatted = diff.map((part, index) => {
-      const className = part.added ? 'ins' : part.removed ? 'del' : null
-      return <pre key={index} className={className}>{part.value}</pre>
+      const className = part.added ? 'ins code' :
+        part.removed ? 'del code' :
+        'code'
+      return <span key={index} className={className}>{part.value}</span>
     })
     this.props.updateDiff(formatted)
   }
@@ -138,7 +140,7 @@ export default class Diff extends React.Component {
           <Segment attached='top' className='views-segment'>
             <Breadcrumb style={{color: '#b30000'}} divider='/'
               sections={baseSections} />
-            <pre className='dots'> ... </pre>
+            <span className='dots'> ... </span>
             <Breadcrumb style={{color: '#406619'}}>
               <Breadcrumb.Section>
                 <Dropdown scrolling options={labelOptions} inline
