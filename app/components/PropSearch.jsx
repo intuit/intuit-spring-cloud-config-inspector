@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 import {Dropdown, Input} from 'semantic-ui-react'
 import FaSearch from 'react-icons/lib/fa/search'
+import FaClose from 'react-icons/lib/fa/close'
 
 export default class PropSearch extends React.Component {
 
@@ -45,6 +46,17 @@ export default class PropSearch extends React.Component {
     this.props.updateFilter(value)
   }
 
+  /**
+   * Add the close React Icon to multiselect labels in prop search.
+   *
+   * @param {object} item - A currently active dropdown item.
+   * @param {string} item.text - profile name
+   * @returns Shorthand for a Label.
+   */
+  renderLabel = ({text}) => {
+    return {content: text, removeIcon: <FaClose className='closeIcon' />}
+  }
+
   render() {
     const { options } = this.props
     const { value } = this.state
@@ -56,6 +68,7 @@ export default class PropSearch extends React.Component {
         placeholder='properties...'
         options={options.map(key => ({text:key, value:key}))}
         onChange={this.handleChange} value={value}
+        renderLabel={this.renderLabel}
       />
     )
   }
