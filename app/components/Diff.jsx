@@ -49,7 +49,9 @@ export default class Diff extends React.Component {
   createDiff = (base, compare) => {
     let diff = jsdiff.diffLines(base, compare)
     const formatted = diff.map((part, index) => {
-      const className = part.added ? 'ins' : part.removed ? 'del' : null
+      const className = part.added ? 'ins code' :
+        part.removed ? 'del code' :
+        'code'
       return <pre key={index} className={className}>{part.value}</pre>
     })
     this.props.updateDiff(formatted)

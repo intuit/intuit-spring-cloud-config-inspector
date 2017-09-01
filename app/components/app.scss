@@ -30,10 +30,12 @@ body {
 
 .json-key {
   color: #cc4f22;
+  overflow-wrap: break-word;
 }
 
 .json-string {
   color: #4286f4;
+  overflow-wrap: break-word;
 }
 
 .json-bool {
@@ -42,6 +44,7 @@ body {
 
 .json-val {
   color: #eb42f4;
+  overflow-wrap: break-word;
 }
 
 .counter {
@@ -133,10 +136,9 @@ body {
   padding: 0!important;
 }
 
-pre {
+.code {
   white-space: pre-wrap;
   margin: 0!important;
-  padding: 0;
   overflow-wrap: break-word;
 }
 
@@ -153,6 +155,7 @@ pre {
 .dots {
   display: inline-block;
   font-size: 16px;
+  margin: 0!important;
 }
 
 .mini-profiles {
