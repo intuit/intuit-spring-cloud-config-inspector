@@ -8,7 +8,6 @@ import UserInputs from './UserInputs.jsx';
 import Views from './Views.jsx'
 import TopMenu from './TopMenu.jsx'
 
-import './app.scss';
 import 'semantic-ui-css/components/accordion.min.css';
 import 'semantic-ui-css/components/button.min.css';
 import 'semantic-ui-css/components/form.min.css';
@@ -29,6 +28,7 @@ import 'semantic-ui-css/components/reset.min.css';
 import 'semantic-ui-css/components/transition.min.css';
 import 'semantic-ui-css/components/table.min.css';
 import 'semantic-ui-css/components/breadcrumb.min.css';
+import './app.scss';
 
 import * as config from '../conf'
 
