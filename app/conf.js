@@ -58,25 +58,25 @@ export const PACKAGE_JSON = {
  */
 export function getCurrentHostEnv() {
   const currentHost = window.location.href;
-  if (currentHost.includes("github.intuit.com") && currentHost.includes("-inspector/prd")) {
+  if (currentHost.includes("devportal.intuit.com")) {
     return Env.PRD;
 
-  } else if (currentHost.includes("github.intuit.com") && currentHost.includes("-inspector/e2e")) {
+  } else if (currentHost.includes("devportal-e2e.intuit.com")) {
     return Env.E2E;
 
-  } else if (currentHost.includes("github.intuit.com") && currentHost.includes("-inspector/qal")) {
+  } else if (currentHost.includes("devportal-qal.intuit.com")) {
     return Env.QAL;
 
-  } else if (currentHost.includes("github.intuit.com") && currentHost.includes("-inspector/dev")) {
+  } else if (currentHost.includes("devportal-dev.intuit.com")) {
     return Env.DEV;
+
+  } else if (currentHost.includes("github.intuit.com")) {
+    return Env.GHPAGE;
 
   } else if (currentHost.includes("dev.intuit.com")) {
     return Env.MOCK;
 
   } else if (currentHost.includes("localhost")) {
-    return Env.LOCAL;
-
-  } else {
     return Env.LOCAL;
   }
 }
