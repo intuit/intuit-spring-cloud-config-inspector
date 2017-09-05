@@ -15,7 +15,7 @@ body {
 
 .inputs {
   padding: 10px 30px;
-  background-color: rgb(53, 129, 143);
+  background-color: rgba(53, 129, 143, 0.9);
 }
 
 .views {
@@ -179,6 +179,7 @@ body {
 
 .raw-menu {
   display: inline-flex!important;
+  margin-top: 0!important;
 }
 
 .raw-code {
