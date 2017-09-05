@@ -47,7 +47,12 @@ export default class Diff extends React.Component {
    * @param {string} base - JSON string of compare config file
    */
   createDiff = (base, compare) => {
-    let diff = jsdiff.diffLines(base, compare)
+    let diff
+    if (base.startsWith('{') && compare.startsWith('{')) {
+      diff = jsdiff.diffJson(JSON.parse(base), JSON.parse(compare))
+    } else {
+      diff = jsdiff.diffLines(base, compare)
+    }
     const formatted = diff.map((part, index) => {
       const className = part.added ? 'ins code' :
         part.removed ? 'del code' :
