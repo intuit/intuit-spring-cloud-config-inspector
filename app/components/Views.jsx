@@ -654,14 +654,17 @@ export default class Views extends React.Component {
             }
             content='Property Files' position='top center' />
         </Menu.Item>,
-        pane: <Tab.Pane key='github'>{this.createGithubTab()}</Tab.Pane>
+        pane:
+        <Tab.Pane key='github' className='full-pane'>
+          {this.createGithubTab()}
+        </Tab.Pane>
       },
       {
         menuItem: {key: 'api', content: 'API Logs', icon:
           <FaCloud className={activeTab === 'api' ? 'enabled' : 'disabled'} />
         },
         pane:
-          <Tab.Pane key='api'>
+          <Tab.Pane key='api' className='full-pane'>
             <Accordion exclusive={false} panels={panels} />
           </Tab.Pane>
       },
