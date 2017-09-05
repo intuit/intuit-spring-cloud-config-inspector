@@ -1,6 +1,6 @@
 {
   "name": "@intuit/spring-cloud-config-inspector",
-  "version": "0.9.5",
+  "version": "1.0.0",
   "description": "The inspection tool for Spring Cloud Config repositories",
   "main": "./dist/intuit-spring-cloud-config-inspector.js",
   "scripts": {
