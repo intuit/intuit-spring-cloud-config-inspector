@@ -67,7 +67,8 @@ export default class Views extends React.Component {
       compareLabel: '',
       compareProfiles: [],
       profOptions: [],
-      raw: 'json'
+      raw: 'json',
+      diffView: 'properties'
     }
   }
 
@@ -368,22 +369,25 @@ export default class Views extends React.Component {
   }
 
   /**
-   * Fetch json config for given label and profiles. Called by Diff.
+   * Fetch json or properties config for given label and profiles.
+   * Called by Diff and in updateDiffView.
    *
    * @param {string} label - compare label
    * @param {string[]} profiles - compare profiles
    */
-  fetchCompare = (label, profiles) => {
+  fetchCompare = (label, profiles, ext) => {
     this.setState({
       compareLabel: label,
       compareProfiles: profiles
     })
     const { url, appName } = this.props.info
     const escapedLabel = label.replace(/\//g, '(_)')
-    const compareURL = `${url}/${escapedLabel}/${appName}-${profiles}.json`
+    const compareURL = `${url}/${escapedLabel}/${appName}-${profiles}.${ext}`
     this.fetchFile(compareURL, [], this.props.headers)
     .then(response => {
-      const code = JSON.stringify(JSON.parse(response), null, 2)
+      const code = ext === 'json'
+        ? JSON.stringify(JSON.parse(response), null, 2)
+        : response
       this.setState({
         compare: code
       })
@@ -399,6 +403,15 @@ export default class Views extends React.Component {
    */
   updateDiff = (diff) => {
     this.setState({diff})
+  }
+
+  /**
+   * Called by Diff to store json or properties selection. Fetch new compare.
+   */
+  updateDiffView = (diffView) => {
+    this.setState({diffView})
+    this.fetchCompare(this.state.compareLabel, this.state.compareProfiles,
+      diffView)
   }
 
   /**
@@ -501,14 +514,14 @@ export default class Views extends React.Component {
         compareLabel: info.label,
         compareProfiles: info.profiles
       })
-      this.fetchCompare(info.label, info.profiles)
+      this.fetchCompare(info.label, info.profiles, this.state.diffView)
       this.updateProfileOptions(info.label, user, repo)
     }
   }
 
   render() {
-    const { activeTab, json, yaml, properties, requests, values,
-      diff, version, secrets, repoURL, propertyFiles, compare,
+    const { activeTab, json, yaml, properties, requests, values, diff,
+      diffView, version, secrets, repoURL, propertyFiles, compare,
       compareLabel, compareProfiles, profOptions, raw } = this.state
     const { updateFilter, filter, labelOptions } = this.props
     const { label, profiles } = this.props.info
@@ -631,12 +644,14 @@ export default class Views extends React.Component {
           <GoDiff className={activeTab === 'diff' ? 'enabled' : 'disabled'} />
         },
         render: () => <Tab.Pane>
-          <Diff base={json} compare={compare} formattedDiff={diff}
-            baseLabel={label} baseProfiles={profiles}
+          <Diff base={diffView === 'json' ? json : properties}
+            compare={compare} formattedDiff={diff} baseLabel={label}
+            baseProfiles={profiles} diffView={diffView}
             profOptions={profOptions} labelOptions={labelOptions}
             fetchCompare={this.fetchCompare} updateDiff={this.updateDiff}
             compareLabel={compareLabel} compareProfiles={compareProfiles}
-            updateProfileOptions={this.updateProfileOptions} />
+            updateProfileOptions={this.updateProfileOptions}
+            updateDiffView={this.updateDiffView} />
         </Tab.Pane>
       },
       {
