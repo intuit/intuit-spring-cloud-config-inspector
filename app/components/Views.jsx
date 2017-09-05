@@ -63,7 +63,6 @@ export default class Views extends React.Component {
       secrets: false,
       repoURL: '',
       propertyFiles: [],
-      diff: [],
       compareLabel: '',
       compareProfiles: [],
       profOptions: [],
@@ -374,11 +373,14 @@ export default class Views extends React.Component {
    *
    * @param {string} label - compare label
    * @param {string[]} profiles - compare profiles
+   * @param {string} [diffView] - new diff view selection if applicable
    */
-  fetchCompare = (label, profiles, ext) => {
+  fetchCompare = (label, profiles, diffView) => {
+    const ext = diffView === undefined ? this.state.diffView : diffView
     this.setState({
       compareLabel: label,
-      compareProfiles: profiles
+      compareProfiles: profiles,
+      diffView: ext
     })
     const { url, appName } = this.props.info
     const escapedLabel = label.replace(/\//g, '(_)')
@@ -395,23 +397,6 @@ export default class Views extends React.Component {
     .catch(error => {
       console.log(error.message)
     })
-  }
-
-  /**
-   * Called by Diff to store formatted diff. Stored in Views because
-   * Diff unmounts when user leaves tab.
-   */
-  updateDiff = (diff) => {
-    this.setState({diff})
-  }
-
-  /**
-   * Called by Diff to store json or properties selection. Fetch new compare.
-   */
-  updateDiffView = (diffView) => {
-    this.setState({diffView})
-    this.fetchCompare(this.state.compareLabel, this.state.compareProfiles,
-      diffView)
   }
 
   /**
@@ -468,6 +453,8 @@ export default class Views extends React.Component {
    * @param {object} nextProps
    * @param {object} nextProps.info - url, appName, label, profiles
    * @param {object} nextProps.headers - current headers
+   * @param {string} nextProps.user - current user
+   * @param {string} nextProps.repo - current repo
    */
   componentWillReceiveProps({info, headers, user, repo}) {
     if (!_.isEqual(info, this.props.info) ||
@@ -514,13 +501,13 @@ export default class Views extends React.Component {
         compareLabel: info.label,
         compareProfiles: info.profiles
       })
-      this.fetchCompare(info.label, info.profiles, this.state.diffView)
+      this.fetchCompare(info.label, info.profiles)
       this.updateProfileOptions(info.label, user, repo)
     }
   }
 
   render() {
-    const { activeTab, json, yaml, properties, requests, values, diff,
+    const { activeTab, json, yaml, properties, requests, values,
       diffView, version, secrets, repoURL, propertyFiles, compare,
       compareLabel, compareProfiles, profOptions, raw } = this.state
     const { updateFilter, filter, labelOptions } = this.props
@@ -603,8 +590,8 @@ export default class Views extends React.Component {
                 content={total} />}
               content='Property Count' position='top center' />
           </Menu.Item>,
-        render: () =>
-          <Tab.Pane>
+        pane:
+          <Tab.Pane key='config'>
             <Segment attached='top' className='views-segment'>
               <Grid columns='equal'>
                 <Grid.Column verticalAlign='middle' width={15}>
@@ -632,8 +619,8 @@ export default class Views extends React.Component {
             className={activeTab === 'raw' ? 'enabled' : 'disabled'}
           />
         },
-        render: () =>
-          <Tab.Pane>
+        pane:
+          <Tab.Pane key='raw'>
             <Tab menu={{stackable: true, secondary: true,
                 pointing: true, className: 'raw-menu'}}
               panes={rawPanes} onTabChange={this.handleRawChange} />
@@ -643,16 +630,15 @@ export default class Views extends React.Component {
         menuItem: {key: 'diff', content: 'Diff', icon:
           <GoDiff className={activeTab === 'diff' ? 'enabled' : 'disabled'} />
         },
-        render: () => <Tab.Pane>
-          <Diff base={diffView === 'json' ? json : properties}
-            compare={compare} formattedDiff={diff} baseLabel={label}
-            baseProfiles={profiles} diffView={diffView}
-            profOptions={profOptions} labelOptions={labelOptions}
-            fetchCompare={this.fetchCompare} updateDiff={this.updateDiff}
-            compareLabel={compareLabel} compareProfiles={compareProfiles}
-            updateProfileOptions={this.updateProfileOptions}
-            updateDiffView={this.updateDiffView} />
-        </Tab.Pane>
+        pane:
+          <Tab.Pane key='diff'>
+            <Diff base={diffView === 'json' ? json : properties}
+              compare={compare} baseLabel={label}
+              baseProfiles={profiles} profOptions={profOptions}
+              labelOptions={labelOptions} fetchCompare={this.fetchCompare}
+              compareLabel={compareLabel} compareProfiles={compareProfiles}
+              updateProfileOptions={this.updateProfileOptions} />
+          </Tab.Pane>
       },
       {
         menuItem:
@@ -668,14 +654,14 @@ export default class Views extends React.Component {
             }
             content='Property Files' position='top center' />
         </Menu.Item>,
-        render: () => <Tab.Pane>{this.createGithubTab()}</Tab.Pane>
+        pane: <Tab.Pane key='github'>{this.createGithubTab()}</Tab.Pane>
       },
       {
         menuItem: {key: 'api', content: 'API Logs', icon:
           <FaCloud className={activeTab === 'api' ? 'enabled' : 'disabled'} />
         },
-        render: () =>
-          <Tab.Pane>
+        pane:
+          <Tab.Pane key='api'>
             <Accordion exclusive={false} panels={panels} />
           </Tab.Pane>
       },
@@ -695,14 +681,14 @@ export default class Views extends React.Component {
                 content='Commit ID' position='top right' /> :
               null
             }
-          </Menu.Item>,
-        render: () => {}
+          </Menu.Item>
       }
     ]
 
     return (
       <Tab menu={{stackable: true, tabular: true, attached: true}}
-        panes={viewPanes} onTabChange={this.handleTabChange} />
+        panes={viewPanes} onTabChange={this.handleTabChange}
+        renderActiveOnly={false} />
     )
   }
 }
