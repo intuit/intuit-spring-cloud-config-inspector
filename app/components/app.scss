@@ -66,11 +66,6 @@ body {
   margin-right: 3px;
 }
 
-.ellipsis {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .searchIcon {
   position: absolute;
   cursor: pointer;
@@ -117,23 +112,21 @@ body {
   float: right;
 }
 
-.labelmenu {
-  overflow-y: auto;
-  overflow-x: visible;
-  overflow-wrap: break-word;
-  max-height: $table-height;
-}
-
 .view {
   overflow-y: auto;
-  max-height: $config-height;
+  height: $config-height;
 }
 
 .raw {
   overflow-y: auto;
-  max-height: $config-height;
+  height: $config-height;
   border: none!important;
   padding: 0!important;
+}
+
+.full-pane {
+  overflow-y: auto;
+  height: $raw-height;
 }
 
 .code {
