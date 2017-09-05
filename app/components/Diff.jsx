@@ -22,20 +22,15 @@ export default class Diff extends React.Component {
     profOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
     labelOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
     fetchCompare: PropTypes.func.isRequired,
-    updateDiff: PropTypes.func.isRequired,
-    formattedDiff: PropTypes.array.isRequired,
     compareLabel: PropTypes.string,
     compareProfiles: PropTypes.arrayOf(PropTypes.string),
     updateProfileOptions: PropTypes.func.isRequired
   }
 
-  /**
-   * First time tab is rendered no diff has been created.
-   */
-  componentWillMount = () => {
-    const { formattedDiff, base, compare } = this.props
-    if (formattedDiff.length === 0 && base && compare) {
-      this.createDiff(base, compare)
+  constructor(props) {
+    super(props)
+    this.state = {
+      formatted: []
     }
   }
 
@@ -61,7 +56,7 @@ export default class Diff extends React.Component {
         'code'
       return <span key={index} className={className}>{part.value}</span>
     })
-    this.props.updateDiff(formatted)
+    this.setState({formatted})
   }
 
   /**
@@ -73,8 +68,7 @@ export default class Diff extends React.Component {
    * @param {string} data.value - current input
    */
   handleLabelChange = (e, {value}) => {
-    this.props.fetchCompare(value, this.props.compareProfiles,
-      this.props.diffView)
+    this.props.fetchCompare(value, this.props.compareProfiles)
   }
 
   /**
@@ -96,8 +90,7 @@ export default class Diff extends React.Component {
         compareProfiles.splice(index, 1)
       }
     }
-    this.props.fetchCompare(this.props.compareLabel, compareProfiles,
-      this.props.diffView)
+    this.props.fetchCompare(this.props.compareLabel, compareProfiles)
   }
 
   /**
@@ -128,7 +121,8 @@ export default class Diff extends React.Component {
    * @param {string} data.name - json or properties
    */
   handleClick = (e, {name}) => {
-    this.props.updateDiffView(name)
+    this.props.fetchCompare(this.props.compareLabel,
+      this.props.compareProfiles, name)
   }
 
   /**
@@ -147,7 +141,9 @@ export default class Diff extends React.Component {
 
   render() {
     const { baseLabel, baseProfiles, labelOptions, profOptions,
-      formattedDiff, compareLabel, compareProfiles, diffView } = this.props
+      compareLabel, compareProfiles } = this.props
+
+    const { formatted } = this.state
 
     if (baseLabel && baseProfiles !== undefined) {
       const baseSections = [
@@ -157,10 +153,8 @@ export default class Diff extends React.Component {
       ]
 
       const items = [
-        {key: '.properties', content: '.properties', name: 'properties',
-          active: diffView === 'properties'},
-        {key: '.json', content: '.json', name: 'json',
-          active: diffView === 'json'}
+        {key: '.properties', content: '.properties', name: 'properties'},
+        {key: '.json', content: '.json', name: 'json'}
       ]
 
       return (
@@ -186,10 +180,11 @@ export default class Diff extends React.Component {
               </Breadcrumb.Section>
             </Breadcrumb>
             <Menu className='raw-menu' secondary pointing
-              items={items} onItemClick={this.handleClick} />
+              items={items} onItemClick={this.handleClick}
+              defaultActiveIndex='0' />
           </Segment>
           <Segment attached='bottom' className='view'>
-            {formattedDiff}
+            {formatted}
           </Segment>
         </div>
       )
