@@ -1,5 +1,5 @@
 import React from 'react';
-import { Breadcrumb, Segment, Dropdown } from 'semantic-ui-react';
+import { Breadcrumb, Segment, Dropdown, Menu } from 'semantic-ui-react';
 import FaClose from 'react-icons/lib/fa/close'
 import FaCaretDown from 'react-icons/lib/fa/caret-down'
 
@@ -42,12 +42,19 @@ export default class Diff extends React.Component {
   /**
    * Calculate diff and format result. formatted is an array of chunks of
    * text, red if only in base config and green if only in compare config.
+   * User diffJson if in json view and diffLines otherwise. Leave blank if
+   * comparing json with properties (intermediate stage).
    *
    * @param {string} base - JSON string of base config file
    * @param {string} base - JSON string of compare config file
    */
   createDiff = (base, compare) => {
-    let diff = jsdiff.diffLines(base, compare)
+    let diff = []
+    if (base.startsWith('{') && compare.startsWith('{')) {
+      diff = jsdiff.diffJson(JSON.parse(base), JSON.parse(compare))
+    } else if (!base.startsWith('{') && !compare.startsWith('{')) {
+      diff = jsdiff.diffLines(base, compare)
+    }
     const formatted = diff.map((part, index) => {
       const className = part.added ? 'ins code' :
         part.removed ? 'del code' :
@@ -66,7 +73,8 @@ export default class Diff extends React.Component {
    * @param {string} data.value - current input
    */
   handleLabelChange = (e, {value}) => {
-    this.props.fetchCompare(value, this.props.compareProfiles)
+    this.props.fetchCompare(value, this.props.compareProfiles,
+      this.props.diffView)
   }
 
   /**
@@ -88,7 +96,8 @@ export default class Diff extends React.Component {
         compareProfiles.splice(index, 1)
       }
     }
-    this.props.fetchCompare(this.props.compareLabel, compareProfiles)
+    this.props.fetchCompare(this.props.compareLabel, compareProfiles,
+      this.props.diffView)
   }
 
   /**
@@ -112,6 +121,17 @@ export default class Diff extends React.Component {
   }
 
   /**
+   * Changes view between properties and json. Views calls fetchCompare.
+   *
+   * @param {SyntheticEvent} e - React's original SyntheticEvent.
+   * @param {object} data - All props and proposed value.
+   * @param {string} data.name - json or properties
+   */
+  handleClick = (e, {name}) => {
+    this.props.updateDiffView(name)
+  }
+
+  /**
    * Fetches data for all tabs. Updates requests, version, and all data and
    * creates key value pairs by calling updateValues. Handles bad requests.
    *
@@ -127,13 +147,20 @@ export default class Diff extends React.Component {
 
   render() {
     const { baseLabel, baseProfiles, labelOptions, profOptions,
-      formattedDiff, compareLabel, compareProfiles } = this.props
+      formattedDiff, compareLabel, compareProfiles, diffView } = this.props
 
     if (baseLabel && baseProfiles !== undefined) {
       const baseSections = [
         { key: 'label', content: baseLabel, active: true, className: 'base' },
         { key: 'profiles', content: baseProfiles.toString(),
           active: true , className: 'base'}
+      ]
+
+      const items = [
+        {key: '.properties', content: '.properties', name: 'properties',
+          active: diffView === 'properties'},
+        {key: '.json', content: '.json', name: 'json',
+          active: diffView === 'json'}
       ]
 
       return (
@@ -158,6 +185,8 @@ export default class Diff extends React.Component {
                   icon={<FaCaretDown className='inline-icon' />} />
               </Breadcrumb.Section>
             </Breadcrumb>
+            <Menu className='raw-menu' secondary pointing
+              items={items} onItemClick={this.handleClick} />
           </Segment>
           <Segment attached='bottom' className='view'>
             {formattedDiff}
