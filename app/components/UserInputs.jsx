@@ -30,7 +30,8 @@ export default class UserInputs extends React.Component {
     transactionId: PropTypes.string.isRequired,
     updateLabelOptions: PropTypes.func.isRequired,
     stateHandler: PropTypes.func.isRequired,
-    updateSimple: PropTypes.func.isRequired
+    updateSimple: PropTypes.func.isRequired,
+    simple: PropTypes.bool.isRequired
   }
 
   constructor(props) {
@@ -46,8 +47,7 @@ export default class UserInputs extends React.Component {
       profiles: props.profiles.split(','),
       label: props.label,
       headerCount: 1,
-      headers: props.headers,
-      simple: props.portal || false
+      headers: props.headers
     }
   }
 
@@ -202,11 +202,7 @@ export default class UserInputs extends React.Component {
    * Called when user switches between simple and advanced view.
    */
   handleViewToggle = () => {
-    const simple = !this.state.simple
-    this.setState({
-      simple
-    })
-    this.props.updateSimple(simple)
+    this.props.updateSimple(!this.props.simple)
   }
 
   /**
@@ -344,8 +340,8 @@ export default class UserInputs extends React.Component {
   render() {
     const { button, url, appName, profiles,
       label, profOptions, labelOptions,
-      toggle, headerCount, headers, simple } = this.state
-    const { portal } = this.props
+      toggle, headerCount, headers } = this.state
+    const { portal, simple } = this.props
 
     // Hide url and appName field if in portal view
     return (
