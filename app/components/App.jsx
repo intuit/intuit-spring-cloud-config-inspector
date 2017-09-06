@@ -42,7 +42,8 @@ export default class App extends React.Component {
     headers: PropTypes.object,
     portal: PropTypes.bool,
     transactionId: PropTypes.string,
-    stateHandler: PropTypes.func
+    stateHandler: PropTypes.func,
+    env: PropTypes.string
   }
 
   constructor(props) {
@@ -172,6 +173,9 @@ export default class App extends React.Component {
     })
 
     const urlParams = new URLSearchParams(location.search)
+    if (this.props.env) {
+      urlParams.set('env', this.props.env)
+    }
     urlParams.set('profiles', profiles)
     urlParams.set('label', label)
     if (!this.props.portal) {
