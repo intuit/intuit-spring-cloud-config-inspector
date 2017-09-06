@@ -395,7 +395,7 @@ export default class UserInputs extends React.Component {
               <Form.Dropdown label={
                   <label>
                     Label
-                    <Popup inverted size='small' flowing
+                    <Popup inverted size='small'
                       trigger={
                         <FaQuestionCircle className='helpIcon' />
                       }
