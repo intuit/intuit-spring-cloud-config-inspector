@@ -4,11 +4,12 @@ import PropTypes from 'prop-types'
 import Headers from './Headers.jsx'
 import * as api from '../utils/api.js'
 
-import { Form, Label, Menu } from 'semantic-ui-react';
+import { Form, Label, Menu, Popup } from 'semantic-ui-react';
 import FaCodeFork from 'react-icons/lib/fa/code-fork'
 import FaTag from 'react-icons/lib/fa/tag'
 import FaCaretDown from 'react-icons/lib/fa/caret-down'
 import FaClose from 'react-icons/lib/fa/close'
+import FaQuestionCircle from 'react-icons/lib/fa/question-circle'
 
 import * as config from '../conf';
 
@@ -28,8 +29,8 @@ export default class UserInputs extends React.Component {
     portal: PropTypes.bool,
     transactionId: PropTypes.string.isRequired,
     updateLabelOptions: PropTypes.func.isRequired,
-    updateProfileOptions: PropTypes.func.isRequired,
-    stateHandler: PropTypes.func
+    stateHandler: PropTypes.func.isRequired,
+    updateSimple: PropTypes.func.isRequired
   }
 
   constructor(props) {
@@ -45,7 +46,8 @@ export default class UserInputs extends React.Component {
       profiles: props.profiles.split(','),
       label: props.label,
       headerCount: 1,
-      headers: props.headers
+      headers: props.headers,
+      simple: props.portal || false
     }
   }
 
@@ -197,6 +199,17 @@ export default class UserInputs extends React.Component {
   }
 
   /**
+   * Called when user switches between simple and advanced view.
+   */
+  handleViewToggle = () => {
+    const simple = !this.state.simple
+    this.setState({
+      simple
+    })
+    this.props.updateSimple(simple)
+  }
+
+  /**
    * Fetch list of profiles from github based on given user, repo, and
    * label. Update options in profiles dropdown.
    *
@@ -231,7 +244,6 @@ export default class UserInputs extends React.Component {
       this.setState({
         profOptions
       })
-      this.props.updateProfileOptions(profOptions)
     }).catch(err => {
       this.props.stateHandler({phase: "profiles", url: githubApiUrl,
         error: err});
@@ -332,7 +344,7 @@ export default class UserInputs extends React.Component {
   render() {
     const { button, url, appName, profiles,
       label, profOptions, labelOptions,
-      toggle, headerCount, headers } = this.state
+      toggle, headerCount, headers, simple } = this.state
     const { portal } = this.props
 
     // Hide url and appName field if in portal view
@@ -372,20 +384,51 @@ export default class UserInputs extends React.Component {
         }
         <Form>
           <Form.Group widths='equal'>
-            <Form.Dropdown label='Label' fluid search selection
-              scrolling options={labelOptions} value={label}
-              onChange={this.handleLabelChange}
-              icon={<FaCaretDown className='searchIcon' />}
-              selectOnBlur={false} />
-              <Form.Dropdown label='Profiles'
-                fluid multiple search selection scrolling
-                options={profOptions} value={profiles}
-                allowAdditions additionLabel='Add: '
-                onAddItem={this.handleAddition}
-                additionPosition='bottom'
-                renderLabel={this.renderLabel}
-                onChange={this.handleProfileChange}
-                icon={<FaCaretDown className='searchIcon' />} />
+            <Popup inverted size='small' trigger={
+              <Form.Button width={2} content={simple ? 'Advanced' : 'Simple'}
+                label={<label style={{visibility: 'hidden'}}>Toggle</label>}
+                onClick={this.handleViewToggle} />
+              }
+              content={simple ? 'Show Spring Cloud Config Settings' : 'Show Intuit Settings'}
+              position='top right' />
+            {simple ? null :
+              <Form.Dropdown label={
+                  <label>
+                    Label
+                    <Popup inverted size='small' flowing
+                      trigger={
+                        <FaQuestionCircle className='helpIcon' />
+                      }
+                      content='Branches and Tags loaded from your Github Repo'
+                      position='top center' />
+                  </label>
+                }
+                fluid search selection scrolling options={labelOptions}
+                value={label} onChange={this.handleLabelChange}
+                icon={<FaCaretDown className='searchIcon' />}
+                selectOnBlur={false}>
+              </Form.Dropdown>
+            }
+            <Form.Dropdown label={
+              simple ? <label>Environments</label> :
+                <label>
+                  Profiles
+                  <Popup inverted size='small'
+                    trigger={
+                      <FaQuestionCircle className='helpIcon' />
+                    }
+                    content='Your environments, versions, etc.'
+                    position='top center' />
+                </label>
+              }
+              fluid multiple search selection scrolling
+              options={profOptions} value={profiles}
+              allowAdditions additionLabel='Add: '
+              onAddItem={this.handleAddition}
+              additionPosition='bottom'
+              renderLabel={this.renderLabel}
+              onChange={this.handleProfileChange}
+              icon={<FaCaretDown className='searchIcon' />} />
           </Form.Group>
         </Form>
       </div>

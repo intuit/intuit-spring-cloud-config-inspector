@@ -44,7 +44,8 @@ export default class Views extends React.Component {
     labelOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
     user: PropTypes.string.isRequired,
     repo: PropTypes.string.isRequired,
-    stateHandler: PropTypes.func
+    stateHandler: PropTypes.func,
+    simple: PropTypes.bool.isRequired
   }
 
   constructor(props) {
@@ -510,7 +511,7 @@ export default class Views extends React.Component {
     const { activeTab, json, yaml, properties, requests, values,
       diffView, version, secrets, repoURL, propertyFiles, compare,
       compareLabel, compareProfiles, profOptions, raw } = this.state
-    const { updateFilter, filter, labelOptions } = this.props
+    const { updateFilter, filter, labelOptions, simple } = this.props
     const { label, profiles } = this.props.info
 
     let config = []
@@ -557,26 +558,7 @@ export default class Views extends React.Component {
         </List>
     }))
 
-    const rawPanes = [
-      {
-        menuItem: {key: '.json', content: '.json'},
-        render: () => this.createTab('json')
-      },
-      {
-        menuItem: {key: '.yml', content: '.yml'},
-        render: () => this.createTab('yaml')
-      },
-      {
-        menuItem: {key: '.properties', content: '.properties'},
-        render: () => this.createTab('properties')
-      },
-      {
-        menuItem: {key: 'metadata', content: 'metadata'},
-        render: () => this.createTab('metadata')
-      }
-    ]
-
-    // tab content
+    // config tab
     const viewPanes = [
       {
         menuItem:
@@ -612,34 +594,63 @@ export default class Views extends React.Component {
               {config}
             </Segment>
           </Tab.Pane>
-      },
-      {
-        menuItem: {key: 'raw', content: 'Raw', icon:
-          <GoFileCode
-            className={activeTab === 'raw' ? 'enabled' : 'disabled'}
-          />
+      }
+    ]
+
+    // Add Raw and Diff tabs if in simple view
+    if (!simple) {
+      const rawPanes = [
+        {
+          menuItem: {key: '.json', content: '.json'},
+          render: () => this.createTab('json')
         },
-        pane:
-          <Tab.Pane key='raw'>
-            <Tab menu={{stackable: true, secondary: true,
-                pointing: true, className: 'raw-menu'}}
-              panes={rawPanes} onTabChange={this.handleRawChange} />
-          </Tab.Pane>
-      },
-      {
-        menuItem: {key: 'diff', content: 'Diff', icon:
-          <GoDiff className={activeTab === 'diff' ? 'enabled' : 'disabled'} />
+        {
+          menuItem: {key: '.yml', content: '.yml'},
+          render: () => this.createTab('yaml')
         },
-        pane:
-          <Tab.Pane key='diff'>
-            <Diff base={diffView === 'json' ? json : properties}
-              compare={compare} baseLabel={label}
-              baseProfiles={profiles} profOptions={profOptions}
-              labelOptions={labelOptions} fetchCompare={this.fetchCompare}
-              compareLabel={compareLabel} compareProfiles={compareProfiles}
-              updateProfileOptions={this.updateProfileOptions} />
-          </Tab.Pane>
-      },
+        {
+          menuItem: {key: '.properties', content: '.properties'},
+          render: () => this.createTab('properties')
+        },
+        {
+          menuItem: {key: 'metadata', content: 'metadata'},
+          render: () => this.createTab('metadata')
+        }
+      ]
+
+      viewPanes.push(...[
+        {
+          menuItem: {key: 'raw', content: 'Raw', icon:
+            <GoFileCode
+              className={activeTab === 'raw' ? 'enabled' : 'disabled'}
+            />
+          },
+          pane:
+            <Tab.Pane key='raw'>
+              <Tab menu={{stackable: true, secondary: true,
+                  pointing: true, className: 'raw-menu'}}
+                panes={rawPanes} onTabChange={this.handleRawChange} />
+            </Tab.Pane>
+        },
+        {
+          menuItem: {key: 'diff', content: 'Diff', icon:
+            <GoDiff className={activeTab === 'diff' ? 'enabled' : 'disabled'} />
+          },
+          pane:
+            <Tab.Pane key='diff'>
+              <Diff base={diffView === 'json' ? json : properties}
+                compare={compare} baseLabel={label}
+                baseProfiles={profiles} profOptions={profOptions}
+                labelOptions={labelOptions} fetchCompare={this.fetchCompare}
+                compareLabel={compareLabel} compareProfiles={compareProfiles}
+                updateProfileOptions={this.updateProfileOptions} />
+            </Tab.Pane>
+        }
+      ])
+    }
+
+    // Add github, api logs, and version number
+    viewPanes.push(...[
       {
         menuItem:
         <Menu.Item key='github' >
@@ -686,7 +697,7 @@ export default class Views extends React.Component {
             }
           </Menu.Item>
       }
-    ]
+    ])
 
     return (
       <Tab menu={{stackable: true, tabular: true, attached: true}}

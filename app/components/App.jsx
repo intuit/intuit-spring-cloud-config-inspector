@@ -76,7 +76,7 @@ export default class App extends React.Component {
       filter: urlParams.get('filter') ? urlParams.get('filter').split(',') : [],
       transactionId: props.transactionId,
       labelOptions: [],
-      profOptions: []
+      simple: props.portal || false
     }
   }
 
@@ -131,15 +131,25 @@ export default class App extends React.Component {
       this.state.profiles.split(','), label)
   }
 
+  /**
+   * UserInputs updates label options for Diff dropdown.
+   *
+   * @param {object[]} labelOptions - branches/tags as Dropdown options
+   */
   updateLabelOptions = (labelOptions) => {
     this.setState({
       labelOptions
     })
   }
 
-  updateProfileOptions = (profOptions) => {
+  /**
+   * UserInputs calls updateSimple when user toggles simple/advanced view.
+   *
+   * @param {boolean} simple - true if in simple view
+   */
+  updateSimple = (simple) => {
     this.setState({
-      profOptions
+      simple
     })
   }
 
@@ -206,8 +216,8 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { info, headers, user, repo, url, labelOptions, profOptions,
-      appName, profiles, label, filter, transactionId } = this.state
+    const { info, headers, user, repo, url, labelOptions,
+      appName, profiles, label, filter, transactionId , simple} = this.state
 
     const { portal } = this.props
 
@@ -228,15 +238,15 @@ export default class App extends React.Component {
             updateLabel={this.updateLabel}
             updateProfiles={this.updateProfiles}
             updateLabelOptions={this.updateLabelOptions}
-            updateProfileOptions={this.updateProfileOptions}
-            stateHandler={this.props.stateHandler} />
+            stateHandler={this.props.stateHandler}
+            updateSimple={this.updateSimple} />
           <div className='views'>
             <Views headers={headers} portal={portal}
               transactionId={transactionId} info={info}
               updateUserRepo={this.updateUserRepo}
               filter={filter} updateFilter={this.updateFilter}
-              labelOptions={labelOptions} profOptions={profOptions}
-              user={user} repo={repo}
+              labelOptions={labelOptions}
+              user={user} repo={repo} simple={simple}
               stateHandler={this.props.stateHandler} />
           </div>
         </ReactCSSTransitionGroup>
