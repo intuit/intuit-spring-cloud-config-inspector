@@ -8,5 +8,5 @@ it('renders without crashing', () => {
   ReactDOM.render(<UserInputs user='' repo='' url='' appName=''
     profiles='default' label='' portal={false} updateInfo={test}
     updateLabel={test} updateProfiles={test} transactionId=''
-    updateLabelOptions={test} updateProfileOptions={test} />, div);
+    updateLabelOptions={test} stateHandler={test} updateSimple={test} />, div);
 });

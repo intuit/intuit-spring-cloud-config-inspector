@@ -44,7 +44,7 @@ export default class Views extends React.Component {
     labelOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
     user: PropTypes.string.isRequired,
     repo: PropTypes.string.isRequired,
-    stateHandler: PropTypes.func,
+    stateHandler: PropTypes.func.isRequired,
     simple: PropTypes.bool.isRequired
   }
 
