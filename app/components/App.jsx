@@ -77,7 +77,13 @@ export default class App extends React.Component {
       filter: urlParams.get('filter') ? urlParams.get('filter').split(',') : [],
       transactionId: props.transactionId,
       labelOptions: [],
-      simple: props.portal || false
+      simple: urlParams.has('mode') ? urlParams.get('mode') === 'simple' :
+        props.portal
+    }
+
+    if (props.env) {
+      urlParams.set('env', props.env)
+      history.pushState(null, null, `?${decodeURIComponent(urlParams)}`)
     }
   }
 
@@ -152,6 +158,9 @@ export default class App extends React.Component {
     this.setState({
       simple
     })
+    const urlParams = new URLSearchParams(location.search)
+    urlParams.set('mode', simple ? 'simple' : 'advanced')
+    history.pushState(null, null, `?${decodeURIComponent(urlParams)}`)
   }
 
   /**
@@ -173,9 +182,6 @@ export default class App extends React.Component {
     })
 
     const urlParams = new URLSearchParams(location.search)
-    if (this.props.env) {
-      urlParams.set('env', this.props.env)
-    }
     urlParams.set('profiles', profiles)
     urlParams.set('label', label)
     if (!this.props.portal) {
@@ -237,7 +243,7 @@ export default class App extends React.Component {
           <UserInputs user={user} repo={repo} url={url}
             appName={appName} profiles={profiles}
             label={label} headers={headers} portal={portal}
-            transactionId={transactionId}
+            transactionId={transactionId} simple={simple}
             updateInfo={this.updateInfo}
             updateLabel={this.updateLabel}
             updateProfiles={this.updateProfiles}
@@ -267,6 +273,7 @@ App.defaultProps = {
   label: 'master',
   headers: {authorization: config.getAuthorizationHeader()},
   transactionId: config.getTID(),
+  portal: false,
   // Provides an implementation for the state handler and can be overridden when integrated
   stateHandler: ({phase, url, type, error, value}) => {
     if (phase && phase === "loaded") {
