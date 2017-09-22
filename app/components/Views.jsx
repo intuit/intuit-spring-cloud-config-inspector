@@ -284,7 +284,13 @@ export default class Views extends React.Component {
    * @param {object[]} files - Array of propertyfiles from metadata
    */
   updateValues = (files) => {
+    const { appName } = this.props.info;
     let values = {}
+    if (files.length === 0 && !repoURL) {
+      const error = `There are no valid config files in the github repo for app "${appName}". Expecting "application.ext" or "${appName}.ext" in the master branch. (ext = yaml or properties)`;
+      console.log(error);
+      throw Error(error);
+    }
     const repoURL = files[0].name.substring(0, files[0].name.lastIndexOf('/'))
     const params = repoURL.replace(/^https:\/\/github\.intuit\.com\//, "")
     let split = params.split('/', 2)
