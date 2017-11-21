@@ -6,7 +6,6 @@ var express = require('express'),
     app = express();
 
 var myLimit = typeof(process.argv[2]) != 'undefined' ? process.argv[2] : '100kb';
-console.log('Using limit: ', myLimit);
 
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
@@ -22,6 +21,7 @@ app.all('*', function (req, res, next) {
     if (req.method === 'OPTIONS') {
         // CORS Preflight
         res.send();
+
     } else {
         //console.log(req.originalUrl);
         var targetURL = req.originalUrl.substr(1);
@@ -33,39 +33,40 @@ app.all('*', function (req, res, next) {
            return;
         }
         // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-        var headers = {};
-        if ( req.header('Authorization')) {
-            headers = {'Authorization': req.header('Authorization')};
-        }
+        var headers = {
+          'User-Agent': "Spring Cloud Config Inspector Proxy",
+          'Accept': '*/*'
+        };
 
-        // url: targetURL, + req.url
-        //console.log(targetURL);
+        // Github.com headers that can't be submitted
+        ['referer', 'accept-encoding', 'accept-language',
+         'connection', 'origin', 'host'].forEach(function(headerKey) {
+          delete req.headers[headerKey];
+        })
+
         request({
             url: targetURL,
             method: req.method,
             json: req.body,
-            headers: headers,
+            headers: req.headers,
             strictSSL: false },
             function (error, response, body) {
-                //console.log(error);
-                //console.log(response.statusCode);
-                //res.send(500, { error: error });
-                // if (error) {
-                //      console.log(error);
-                // }
-                // if (response) {
-                //      console.log(response);
-                // }
-                // if (body) {
-                //      console.log(body);
-                // }
-                //                console.log(body);
+              // no need to handle
             }).pipe(res);
     }
 });
 
 app.set('port', process.env.PORT || 3001);
 
-app.listen(app.get('port'), "dev.intuit.com", function () {
-    console.log('CORS Proxy server listening on port ' + app.get('port'));
-});
+var host = null;
+
+if (host) {
+  app.listen(app.get('port'), host, function () {
+      console.log('CORS Proxy server listening on port ' + app.get('port'));
+  });
+
+} else {
+  app.listen(app.get('port'), function () {
+      console.log('CORS Proxy server listening on port ' + app.get('port'));
+  });
+}
