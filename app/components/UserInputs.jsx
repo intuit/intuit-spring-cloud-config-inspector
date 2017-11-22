@@ -321,6 +321,7 @@ export default class UserInputs extends React.Component {
    * @param {string} nextProps.repo - current repo
    */
   componentWillReceiveProps = ({user, repo}) => {
+    console.log(`UserInputs received properties: ${user}/${repo}`);
     if (user !== this.props.user || repo !== this.props.repo) {
       if (user && repo) {
         this.loadProfiles(user, repo, 'master')

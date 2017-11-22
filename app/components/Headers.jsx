@@ -16,7 +16,6 @@ export default class Header extends React.Component {
    */
   constructor(props) {
     super();
-    const authorizationHeader = config.getAuthorizationHeader();
     let data = {}
     let index = 0
     for (let header in props.headers) {

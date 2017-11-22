@@ -131,7 +131,7 @@ export default class Views extends React.Component {
     let request = {
       method: 'GET',
       headers: {
-        "intuit_tid": `${this.props.transactionId}`,
+        "tid": `${this.props.transactionId}`,
       }
     };
 
@@ -171,14 +171,14 @@ export default class Views extends React.Component {
     const configApiUrl = `${proxy}${url}`
     console.log(`Requesting config api '${configApiUrl.replace(proxy, "")}' `)
 
-    const intuit_tid = this.props.transactionId
+    const tid = this.props.transactionId
     return fetch(configApiUrl, configApiRequest)
     .then(response => {
         let timestamp = new Date().toString()
         requests.push({
           response,
           timestamp,
-          intuit_tid
+          tid
         })
         if (response.ok) {
           return response.text()
@@ -560,7 +560,7 @@ export default class Views extends React.Component {
             status: {item.response.status} {item.response.statusText}
           </List.Item>
           <List.Item>timestamp: {item.timestamp}</List.Item>
-          <List.Item>Intuit TID: {item.intuit_tid}</List.Item>
+          <List.Item>transaction ID: {item.tid}</List.Item>
         </List>
     }))
 

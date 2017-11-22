@@ -267,11 +267,11 @@ export default class App extends React.Component {
 
 // @TODO remove inital headers when open source
 App.defaultProps = {
-  url: 'https://config-e2e.api.intuit.com/v2',
+  url: 'http://localhost:8888',
   appName: '',
   profiles: 'default',
   label: 'master',
-  headers: {authorization: config.getAuthorizationHeader()},
+  headers: {},
   transactionId: config.getTID(),
   portal: false,
   // Provides an implementation for the state handler and can be overridden when integrated
