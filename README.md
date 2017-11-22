@@ -12,9 +12,11 @@ configuration files in the backend in order to serve to applications.
 * [x] API Logs: See how to call the Config Server directly using cURL.
 * [ ] Static Content: Shows the resolved static content after resolving the tokens. (*FUTURE*)
 
+For the Config Repo https://github.com/marcellodesales/config-repo, appName `foo`, the inspection is as follows:
+
 ![resolution](https://intuit.github.io/spring-cloud-config-inspector/images/spring-cloud-config-inspector-resolution.png "Spring Cloud Config Inspector")
 
-Go to the <a href="wiki/">Wiki</a> pages for details on the features set.
+Go to the [[Wiki]] pages for details on the features set.
 
 ## Running with Docker/Docker-Compose
 
