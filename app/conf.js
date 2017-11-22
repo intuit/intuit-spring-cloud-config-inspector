@@ -1,6 +1,7 @@
 const packageJson = require("../package.json");
 
-export const GIT_REPOS_API = 'https://github.intuit.com/api/v3/repos'
+export const GIT_REPOS_API = 'https://api.github.com/repos'
+export const GIT_REPOS_API_TOKEN = null;
 
 /**
  * Current Credentials
@@ -104,20 +105,6 @@ export function getProxyCredentials() {
   }
 
   return PROXY_CREDENTIALS.manager.preProd;
-}
-
-/**
- * @return the Authorization header value.
- */
-export function getAuthorizationHeader() {
-  const currentEnv = getCurrentHostEnv();
-  const credentials = getProxyCredentials();
-  if (Env.LOCAL === currentEnv) {
-    return `Intuit_IAM_Authentication intuit_appid=${credentials.appId},intuit_app_secret=${credentials.appSecret}`;
-
-  } else {
-    return `Intuit_APIKey intuit_appid=${credentials.appId},intuit_apikey=${credentials.appSecret},intuit_apikey_version=1.0`;
-  }
 }
 
 /**

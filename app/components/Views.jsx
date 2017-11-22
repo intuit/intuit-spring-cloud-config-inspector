@@ -275,6 +275,16 @@ export default class Views extends React.Component {
   }
 
   /**
+   * Parses a URL.
+   *
+   */
+  getLocation = (href) => {
+    var l = document.createElement("a");
+    l.href = href;
+    return l;
+  };
+
+  /**
    * Traverses properties in each file and updates values object. values
    * stores an array of values and file locations for each key found in
    * the property files in metadata. Updates state. Finds user and repo
@@ -292,11 +302,13 @@ export default class Views extends React.Component {
       throw Error(error);
     }
     const repoURL = files[0].name.substring(0, files[0].name.lastIndexOf('/'))
-    const params = repoURL.replace(/^https:\/\/github\.intuit\.com\//, "")
-    let split = params.split('/', 2)
-    const user = split[0]
-    const repo = split[1]
+    let urlParts = new URL(repoURL).pathname.split("/")
+    const user = urlParts[1]
+    const repo = urlParts[2]
+    console.log(`Views: Loading config files from ${repoURL}: ${user}/${repo} will be used for API calls`)
+
     this.props.updateUserRepo(user, repo)
+
     let propertyFiles = []
     for (let file of files) {
       const name = file.name.substring(file.name.lastIndexOf('/') + 1)
