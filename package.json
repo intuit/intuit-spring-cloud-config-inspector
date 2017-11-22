@@ -4,7 +4,7 @@
   "description": "The inspection tool for Spring Cloud Config repositories",
   "main": "./dist/intuit-spring-cloud-config-inspector.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
     "prebuild": "rm -rf build && rm -rf lib && mkdir build && cp -R public/* build/",
     "build": "NODE_ENV=production webpack --config ./webpack.config.js --progress --colors",
     "predeploy": "npm run build && echo Ready to use $npm_config_env",
