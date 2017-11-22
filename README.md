@@ -14,9 +14,9 @@ configuration files in the backend in order to serve to applications.
 
 For the Config Repo https://github.com/marcellodesales/config-repo, appName `foo`, the inspection is as follows:
 
-![resolution](https://intuit.github.io/spring-cloud-config-inspector/images/spring-cloud-config-inspector-resolution.png "Spring Cloud Config Inspector")
+[![resolution](https://intuit.github.io/spring-cloud-config-inspector/images/spring-cloud-config-inspector-resolution.png "Spring Cloud Config Inspector")](https://github.com/intuit/spring-cloud-config-inspector/wiki)
 
-Go to the [[Wiki]] pages for details on the features set.
+Go to the [Wiki](https://github.com/intuit/spring-cloud-config-inspector/wiki) pages for details on the features set.
 
 ## Running with Docker/Docker-Compose
 
