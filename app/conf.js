@@ -41,11 +41,11 @@ export const SERVICES = {
   proxyServer: {}
 }
 
-SERVICES.proxyServer[Env.PRD] = "https://configmanager.api.intuit.com/v1/config";
-SERVICES.proxyServer[Env.E2E] = "https://configmanager-e2e.api.intuit.com/v1/config";
-SERVICES.proxyServer[Env.QAL] = "https://configmanager-qal.api.intuit.com/v1/config";
-SERVICES.proxyServer[Env.DEV] = "https://dev.intuit.com:8443/v1/config";
-SERVICES.proxyServer[Env.MOCK] = "https://dev.intuit.com:8443/v1/config";
+// SERVICES.proxyServer[Env.PRD] = "https://configmanager.api.a.com/v1/config";
+// SERVICES.proxyServer[Env.E2E] = "https://configmanager-e2e.api.a.com/v1/config";
+// SERVICES.proxyServer[Env.QAL] = "https://configmanager-qal.api.a.com/v1/config";
+// SERVICES.proxyServer[Env.DEV] = "https://dev.example.com:8443/v1/config";
+// SERVICES.proxyServer[Env.MOCK] = "https://dev.example.com:8443/v1/config";
 SERVICES.proxyServer[Env.LOCAL] = "http://localhost:3001";
 
 export const PACKAGE_JSON = {

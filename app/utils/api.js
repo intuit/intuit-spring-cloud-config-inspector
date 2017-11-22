@@ -1,8 +1,6 @@
 import React from 'react';
 import * as config from '../conf';
 
-const token = '726db489b8e34fa7b78540917245031cde359bbc'
-
 /**
  * @return the http headers for calling Github
  */
@@ -10,7 +8,8 @@ export const makeGithubFetchRequest = (additionalHeaders, cors, transactionId) =
   let request = {
     method: 'GET',
     headers: {
-      "intuit_tid": transactionId
+      "User-Agent": "Spring Cloud Config Inspector Proxy",
+      "tid": transactionId
     }
   };
 
@@ -27,10 +26,10 @@ export const makeGithubFetchRequest = (additionalHeaders, cors, transactionId) =
       credentials: 'include',
     })
 
-  } else {
+  } else if (config.GIT_REPOS_API_TOKEN) {
     // Add the authorization header for standalone version
     Object.assign(request.headers, {
-      "authorization": `token ${token}`
+      "authorization": `token ${config.GIT_REPOS_API_TOKEN}`
     })
   }
   return request;
