@@ -19,9 +19,11 @@ $ npm run dev
 
 ## Config service Proxy server
 
-* In order to call the config server from the browser, we have to proxy the calls with CORS.
+* In order to call the config and github servers from the browser, we have to proxy the calls with CORS.
 * The proxy server will handle the `pre-flight` calls properly (HTTP OPTIONS)
-* Calls must provide authorization header to the server.
+
+> NOTE: If your Config Server or Github appliances require credentials, you can add them through the 
+> UI using the "Headers" section. 
 
 ```
 $ npm run proxy
