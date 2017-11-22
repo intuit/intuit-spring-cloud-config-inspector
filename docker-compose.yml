@@ -1,0 +1,33 @@
+version: '3.4'
+
+services:
+  config-inspector:
+    build: .
+    image: hub.docker.com/intuit/spring-cloud-config-inspector
+    command: "npm run start-container-app"
+    links:
+      - config-server
+    depends_on:
+      - config-server
+    ports:
+      - 3232:3232
+
+  config-inspector-proxy:
+    build: .
+    image: hub.docker.com/intuit/spring-cloud-config-inspector-proxy
+    command: "npm run start-container-proxy"
+    links:
+      - config-server
+    depends_on:
+      - config-server
+    ports:
+      - 3001:3001
+
+  config-server:
+    image: hyness/spring-cloud-config-server
+    environment:
+      SPRING_CLOUD_CONFIG_SERVER_GIT_URI: "${SPRING_CLOUD_CONFIG_SERVER_GIT_URI:-https://github.com/marcellodesales/config-repo}"
+      SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD: ""
+      SPRING_CLOUD_CONFIG_SERVER_GIT_CLONE_ON_START: "true"
+    ports:
+      - 8888:8888

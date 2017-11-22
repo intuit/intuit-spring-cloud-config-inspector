@@ -1,10 +1,32 @@
 # Config Inspector
 
-A UI for the config service entered from the developer portal. Inspect config files with config file url or metadata file url. Facilitate understanding of urls and properties in files.
+Inspect config files with config file url or metadata file url. Facilitate understanding how the Spring Cloud Config Server processes
+configuration files in the backend in order to serve to applications.
 
-## Full start with tests and config server proxy server
+## Running with Docker/Docker-Compose
+
+You can quickly have an idea about the power of the Inspector by quickly running with default config repo setup.
+
+* Install Docker-Compose: https://docs.docker.com/compose/install/
+* Docker the following:
 
 ```
+$ docker-compose up
+```
+
+* Then, go to the browser at "http://localhost:3232"
+* Specify the "Config Server" as "http://config-server:8888"
+* Specify the "App name" as "foo"
+
+You *MUST* have connection to "github.com" in order to run this server.
+
+If you want to point to your own Configuration file, make sure to change
+the environment variable value in Docker-Compose.
+
+## Running with NPM/Node
+
+```
+$ npm install
 $ npm start
 ```
 
@@ -37,11 +59,11 @@ CORS Proxy server listening on port 3001
 
 * Calls to the config server are in the following format: **http://localhost:3001/`CONFIG_SERVER_API_URL`**
 
+The example below is to verify that calls to the config-server, dockerized version, works propertly.
+
 ```
 $ curl -X OPTIONS -i  \
-       -H 'authorization: Intuit_IAM_Authentication \
-          intuit_appid=Intuit.platform.....config-manager,intuit_app_secret=preprd******8RCTTV9lVk'
-        localhost:3001/https://config-e2e.api.intuit.net/v2/config_onboarding-e2e,lvdc.yml
+        localhost:3001/http://config-server:8888/v2/foo-development.yml
 
 HTTP/1.1 200 OK
 X-Powered-By: Express
