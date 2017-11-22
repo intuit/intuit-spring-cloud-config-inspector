@@ -9,9 +9,9 @@ $ npm start
 ```
 
 ## Run without Tests
- 
+
 * Clone this repository
-* Run the app 
+* Run the app
 
 ```
 $ npm run dev
@@ -26,7 +26,7 @@ $ npm run dev
 ```
 $ npm run proxy
 
-> config-inspector@1.0.0 proxy /Users/mdesales/dev/github/intuit/services-configuration/config-inspector
+> config-inspector@1.0.0 proxy /Users/marcellodesales/dev/github/intuit/services-configuration/config-inspector
 > node tools/cors-proxy
 
 Using limit:  100kb
@@ -58,7 +58,7 @@ Content-Length: 0
 ```
 $ npm test
 
-> config-inspector@1.0.0 test /Users/mdesales/dev/github/intuit/services-configuration/config-inspector
+> config-inspector@1.0.0 test /Users/marcellodesales/dev/github/intuit/services-configuration/config-inspector
 > jest
 
  PASS  app/components/TopMenu.test.js
