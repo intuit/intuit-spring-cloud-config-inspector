@@ -14,11 +14,12 @@ You can quickly have an idea about the power of the Inspector by quickly running
 $ docker-compose up
 ```
 
-* Then, go to the browser at "http://localhost:3232"
-* Specify the "Config Server" as "http://config-server:8888"
-* Specify the "App name" as "foo"
+Go to http://localhost:3232 and then specify the following:
 
-You *MUST* have connection to "github.com" in order to run this server.
+* `Config Url`: http://config-server:8888
+* `App name`: foo
+
+You *MUST* have connectivity to "github.com" in order to run this server.
 
 If you want to point to your own Configuration file, make sure to change
 the environment variable value in Docker-Compose.
