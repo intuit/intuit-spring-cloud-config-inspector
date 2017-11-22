@@ -3,6 +3,19 @@
 Inspect config files with config file url or metadata file url. Facilitate understanding how the Spring Cloud Config Server processes
 configuration files in the backend in order to serve to applications.
 
+[![Build Status](https://travis-ci.com/intuit/spring-cloud-config-inspector.svg?token=Mbrq2rt4FjhhGgJEpsaV&branch=feature/CFG-1090/clean-up-code)](https://travis-ci.com/intuit/spring-cloud-config-inspector)
+
+* [x] Config Resolution: Shows the resolution tree of where the current value of all properties came from based on the `label` and `profiles`.
+* [x] Raw Configs: Shows the output of the resolved configs in `.yml`, `.properties`, `.json` and the `.json` of the config server metadata.
+* [x] Diff-Across: Debug which values are different between two combination of `label` and `profiles`.
+* [x] Github Info: Shows where the configuration files came from.
+* [x] API Logs: See how to call the Config Server directly using cURL.
+* [ ] Static Content: Shows the resolved static content after resolving the tokens. (*FUTURE*)
+
+![resolution](https://intuit.github.io/spring-cloud-config-inspector/images/logo.png "Spring Cloud Config Inspector")
+
+Go to the <a href="wiki/">Wiki</a> pages for details on the features set.
+
 ## Running with Docker/Docker-Compose
 
 You can quickly have an idea about the power of the Inspector by quickly running with default config repo setup.

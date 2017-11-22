@@ -4,7 +4,7 @@
   "description": "The inspection tool for Spring Cloud Config repositories",
   "main": "./dist/intuit-spring-cloud-config-inspector.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
     "prebuild": "rm -rf build && rm -rf lib && mkdir build && cp -R public/* build/",
     "build": "NODE_ENV=production webpack --config ./webpack.config.js --progress --colors",
     "predeploy": "npm run build && echo Ready to use $npm_config_env",
@@ -35,6 +35,7 @@
   ],
   "license": "Apache-2.0",
   "jest": {
+    "modulePathIgnorePatterns": ["<rootDir>/app/__mocks__", "<rootDir>/lib"],
     "moduleNameMapper": {
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|txt)$": "<rootDir>/app/__mocks__/fileMock.js",
       "\\.(css|scss)$": "<rootDir>/app/__mocks__/styleMock.js"

@@ -34,7 +34,8 @@ export const Env = {
   QAL: Symbol('QAL'),
   DEV: Symbol('DEV'),
   MOCK: Symbol('MOCK'), // mock server
-  LOCAL: Symbol('LOCAL') // local react-app
+  LOCAL: Symbol('LOCAL'), // local react-app
+  TEST: Symbol('TEST') // test cases
 }
 
 export const SERVICES = {
@@ -67,6 +68,9 @@ export function getCurrentHostEnv() {
 
   } else if (currentHost.includes("localhost")) {
     return Env.LOCAL;
+
+  } else {
+    return Env.TEST;
   }
 }
 

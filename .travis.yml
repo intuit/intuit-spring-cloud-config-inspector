@@ -1,9 +1,9 @@
 sudo: false
 language: node_js
 node_js:
+- '9.0'
 - '8.0'
 - '6.0'
-- '4.2'
 - '5.2'
 deploy:
   provider: npm
