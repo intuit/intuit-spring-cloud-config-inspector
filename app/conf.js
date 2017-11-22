@@ -59,22 +59,10 @@ export const PACKAGE_JSON = {
  */
 export function getCurrentHostEnv() {
   const currentHost = window.location.href;
-  if (currentHost.includes("devportal.intuit.com")) {
-    return Env.PRD;
-
-  } else if (currentHost.includes("devportal-e2e.intuit.com")) {
-    return Env.E2E;
-
-  } else if (currentHost.includes("devportal-qal.intuit.com")) {
-    return Env.QAL;
-
-  } else if (currentHost.includes("devportal-dev.intuit.com")) {
-    return Env.DEV;
-
-  } else if (currentHost.includes("github.intuit.com")) {
+  if (currentHost.includes("github.com")) {
     return Env.GHPAGE;
 
-  } else if (currentHost.includes("dev.intuit.com")) {
+  } else if (currentHost.includes("local.dev.com")) {
     return Env.MOCK;
 
   } else if (currentHost.includes("localhost")) {
@@ -108,7 +96,7 @@ export function getProxyCredentials() {
 }
 
 /**
- * Returns an intuit tid for requests
+ * Returns a tid for requests
  *
  * @returns {string} the transaction Id for logging purposes
  */

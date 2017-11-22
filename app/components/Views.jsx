@@ -82,13 +82,11 @@ export default class Views extends React.Component {
    */
   formatValue(value, first=false) {
     if (typeof value == 'string') {
-      if (!first && value.startsWith('{secret}')) {
-        return <a href='https://github.intuit.com/pages/idps/key-viewer'
-          target='_blank' className='json-string'>"&#8288;{value}"</a>
-      }
       return (<span className='json-string'>"&#8288;{value}"</span>)
+
     } else if (typeof value == 'boolean') {
       return (<span className='json-bool'>{value.toString()}</span>)
+
     } else {
       return (<span className='json-val'>{value.toString()}</span>)
     }
