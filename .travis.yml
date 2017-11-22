@@ -1,0 +1,15 @@
+sudo: false
+language: node_js
+node_js:
+- '8.0'
+- '6.0'
+- '4.2'
+- '5.2'
+deploy:
+  provider: npm
+  email: marcello.desales@gmail.com
+  api_key:
+    secure: pgjFr5fV3/x92GM/SWS5Hqsu6zyuoGks4sdpuIykz1HpbxSMddv/iVAwHVnkDY04cmkVU90ENPdLDDO42sOwTxIOaDoVPpZZSyKIvm6EmFA/kLA+DYh1IyPfbuHSsXreIQXHhqCRQDo98e55UGyOpyCKfW+HLUXeiULMzPLQNN0=
+  on:
+    tags: true
+    branch: master
