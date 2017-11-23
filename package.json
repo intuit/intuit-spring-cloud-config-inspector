@@ -1,0 +1,116 @@
+{
+  "name": "@intuit/spring-cloud-config-inspector",
+  "version": "1.0.7",
+  "description": "The inspection tool for Spring Cloud Config repositories",
+  "main": "./dist/intuit-spring-cloud-config-inspector.js",
+  "scripts": {
+    "test": "jest --coverage",
+    "prebuild": "rm -rf build && rm -rf lib && mkdir build && cp -R public/* build/",
+    "build": "NODE_ENV=production webpack --config ./webpack.config.js --progress --colors",
+    "predeploy": "npm run build && echo Ready to use $npm_config_env",
+    "deploy": "NODE_DEBUG=gh-pages gh-pages -d build --dest $npm_config_env/standalone --message \"Deploying to $npm_config_env environment\"",
+    "prereact-build": "cp app/standalone.js app/index.jsx",
+    "prestart": "npm run prereact-build && npm run prebuild && npm test",
+    "start": "concurrently --kill-others --raw \"npm run proxy\" \"npm run dev\"",
+    "start-container-app": "npm run prestart && npm run dev",
+    "start-container-proxy": "npm run proxy",
+    "dev": "webpack-dev-server --host 0.0.0.0 --port 3232",
+    "proxy": "node tools/cors-proxy",
+    "pretranspile": "rm -rf lib/ && mkdir -p lib",
+    "transpile": "babel app -d lib",
+    "buildportal": "git checkout -- app/index.jsx && npm-run-all -s transpile && webpack --config webpack.dist.config.js",
+    "cleandirs": "rm -rf *.tgz && rm -rf dist",
+    "setupbundle": "cp -R build dist && rm -f dist/index.html && rm -f dist/favicon.ico && mv dist/main.js dist/intuit-spring-cloud-config-inspector.js",
+    "prepublish": "npm-run-all -s cleandirs buildportal setupbundle"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:intuit/spring-cloud-config-inspector.git"
+  },
+  "author": {
+    "name": "Marcello de Sales", "email": "Marcello_deSales@intuit.com", "url": "https://github.com/marcellodesales"
+  },
+  "contributors": [
+    { "name" : "Alexi Stein", "email": "alexistein@gmail.com" }
+  ],
+  "license": "Apache-2.0",
+  "jest": {
+    "modulePathIgnorePatterns": ["<rootDir>/app/__mocks__", "<rootDir>/lib"],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|txt)$": "<rootDir>/app/__mocks__/fileMock.js",
+      "\\.(css|scss)$": "<rootDir>/app/__mocks__/styleMock.js"
+    }
+  },
+  "dependencies": {
+    "babel-preset-stage-2": "^6.24.1",
+    "diff": "~3.3.0",
+    "json-loader": "^0.5.7",
+    "lodash": "~4.17.4",
+    "prismjs": "^1.6.0",
+    "prop-types": "^15.5.10",
+    "react": "^15.6.1",
+    "react-addons-css-transition-group": "^15.6.0",
+    "react-icons": "^2.2.5",
+    "react-prism": "^4.3.0",
+    "semantic-ui-css": "^2.2.12",
+    "semantic-ui-react": "~0.72.0",
+    "url-search-params": "^0.10.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-jest": "^20.0.3",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2016": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "body-parser": "^1.17.2",
+    "bootstrap": "^3.3.7",
+    "concurrently": "^3.5.0",
+    "css-loader": "^0.28.5",
+    "express": "^4.15.4",
+    "extract-text-webpack-plugin": "^3.0.0",
+    "file-loader": "^0.11.2",
+    "gh-pages": "^1.0.0",
+    "jest": "^20.0.4",
+    "jest-fetch-mock": "^1.2.1",
+    "node-sass": "^4.5.3",
+    "npm-run-all": "~4.1.1",
+    "path": "^0.12.7",
+    "properties-loader": "0.0.1",
+    "raw-loader": "^0.5.1",
+    "react-dom": "^15.6.1",
+    "regenerator-runtime": "~0.11.0",
+    "request": "^2.81.0",
+    "sass-loader": "^6.0.6",
+    "serve-favicon": "^2.4.3",
+    "style-loader": "^0.18.2",
+    "url-loader": "^0.5.9",
+    "webpack": "^3.5.5",
+    "webpack-dev-server": "^2.7.1",
+    "yaml-loader": "^0.5.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "tags": [
+    "configuration",
+    "config",
+    "react",
+    "inspection",
+    "debug"
+  ],
+  "keywords": [
+    "react",
+    "react-component",
+    "services-config",
+    "config",
+    "caas",
+    "debug",
+    "inspector",
+    "inspection"
+  ]
+}

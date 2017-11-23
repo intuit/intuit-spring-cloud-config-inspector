@@ -1,0 +1,218 @@
+$table-height: 150px;
+$config-height: $table-height * 2 + 22;
+$raw-height: $table-height * 2 + 119;
+
+body {
+  background: rgb(245, 245, 245) !important;
+}
+
+.top {
+  padding: 10px 30px;
+  background-color: rgb(42, 44, 46);
+  box-shadow: 0px 3px 5px rgb(2, 78, 92);
+  position: relative;
+}
+
+.inputs {
+  padding: 10px 30px;
+  background-color: rgba(53, 129, 143, 0.9);
+}
+
+.views {
+  padding: 10px 30px;
+  background: rgb(245, 245, 245);
+}
+
+.submit {
+  position: absolute;
+  bottom: 30px;
+}
+
+.json-key {
+  color: #cc4f22;
+  overflow-wrap: break-word;
+}
+
+.json-string {
+  color: #4286f4;
+  overflow-wrap: break-word;
+}
+
+.json-bool {
+  color: rgba(0,155,0,1);
+}
+
+.json-val {
+  color: #eb42f4;
+  overflow-wrap: break-word;
+}
+
+.counter {
+  margin-left: 3px!important;
+  padding: 0.2em 0.5em!important;
+  border-radius: 500rem!important;
+  background-color: #dcdcdc!important;
+  color: rgba(0,0,0,.6)!important;
+  text-align: center;
+}
+
+.disabled {
+  color: rgb(149, 149, 149);
+  margin-right: 3px;
+}
+
+.enabled {
+  color: rgb(13, 13, 13);
+  margin-right: 3px;
+}
+
+.searchIcon {
+  position: absolute;
+  cursor: pointer;
+  width: auto;
+  height: auto;
+  top: .78571429em;
+  right: 1em;
+  z-index: 3;
+  margin: -.78571429em;
+  padding: .91666667em;
+  opacity: .8;
+  -webkit-transition: opacity .1s ease;
+  transition: opacity .1s ease;
+  font-size: .85714286em;
+}
+
+.inline-icon {
+  font-size: .85714286em;
+  text-align: center;
+  margin-top: -.1em;
+  height: auto;
+  width: auto;
+  line-height: 1;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.closeIcon {
+  cursor: pointer;
+  margin-right: 0;
+  margin-left: .3em;
+  margin-top: -0.2em;
+  font-size: .92857143em;
+  opacity: .5;
+  -webkit-transition: background .1s ease;
+  transition: background .1s ease;
+}
+
+.closeIcon:hover {
+  opacity: 1;
+}
+
+.helpIcon {
+  cursor: pointer;
+  margin-left: .3em;
+  margin-top: -3.6px;
+  transition: background .1s ease;
+}
+
+.location {
+  float: right;
+}
+
+.view {
+  overflow-y: auto;
+  height: $config-height;
+}
+
+.raw {
+  overflow-y: auto;
+  height: $config-height;
+  border: none!important;
+  padding: 0!important;
+}
+
+.full-pane {
+  overflow-y: auto;
+  height: $raw-height;
+}
+
+.code {
+  white-space: pre-wrap;
+  margin: 0!important;
+  overflow-wrap: break-word;
+  font-family: monospace;
+  display: block;
+}
+
+.ins {
+  background: #eaf2c2;
+  color: #406619;
+}
+
+.del {
+  background: #fadad7;
+  color: #b30000;
+}
+
+.base {
+  color: #b30000!important;
+}
+
+.compare {
+  color: #406619!important;
+}
+
+.dots {
+  display: inline-block;
+  font-size: 16px;
+  margin: 0!important;
+  white-space: pre;
+  font-family: monospace;
+}
+
+.mini-profiles {
+  vertical-align: baseline!important;
+  padding: .15em .4em!important;
+  color: #406619!important;
+  box-shadow: none!important;
+}
+
+.raw-menu {
+  display: inline-flex!important;
+  margin-top: 0!important;
+}
+
+.raw-code {
+  margin: 0;
+}
+
+.views-segment {
+  background: rgb(250, 250, 250)!important;
+}
+
+.app-appear {
+  opacity: 0.01;
+
+  &-active {
+    opacity: 1;
+    transition: opacity .5s ease-in;
+  }
+}
+
+.app-enter {
+  opacity: 0.01;
+
+  &-active {
+    opacity: 1;
+    transition: opacity 1s ease-in;
+  }
+}
+
+.app-leave {
+  opacity: 1;
+
+  &-active {
+    opacity: 0;
+    transition: opacity 500ms ease-out;
+  }
+}
