@@ -3,8 +3,7 @@
 Inspect config files with config file url or metadata file url. Facilitate understanding how the Spring Cloud Config Server processes
 configuration files in the backend in order to serve to applications.
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/2445078b4d3941558dbc2359112fa5a1)](https://www.codacy.com/app/marcellodesales/spring-cloud-config-inspector?utm_source=github.com&utm_medium=referral&utm_content=intuit/spring-cloud-config-inspector&utm_campaign=badger)
-[![Build Status](https://travis-ci.com/intuit/spring-cloud-config-inspector.svg?token=Mbrq2rt4FjhhGgJEpsaV&branch=feature/CFG-1090/clean-up-code)](https://travis-ci.com/intuit/spring-cloud-config-inspector)
+[![Build Status](https://travis-ci.org/intuit/spring-cloud-config-inspector.svg?branch=master)](https://travis-ci.org/intuit/spring-cloud-config-inspector) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/2445078b4d3941558dbc2359112fa5a1)](https://www.codacy.com/app/marcellodesales/spring-cloud-config-inspector?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=intuit/spring-cloud-config-inspector&amp;utm_campaign=Badge_Grade) 
 
 * [x] Config Resolution: Shows the resolution tree of where the current value of all properties came from based on the `label` and `profiles`.
 * [x] Raw Configs: Shows the output of the resolved configs in `.yml`, `.properties`, `.json` and the `.json` of the config server metadata.
