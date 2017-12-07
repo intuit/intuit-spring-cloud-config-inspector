@@ -31,7 +31,7 @@
     "name": "Marcello de Sales", "email": "Marcello_deSales@intuit.com", "url": "https://github.com/marcellodesales"
   },
   "contributors": [
-    { "name" : "Alexi Stein", "email": "alexistein@gmail.com" }
+    { "name" : "Alexi Stein", "email": "lexi@cs.stanford.edu" }
   ],
   "license": "Apache-2.0",
   "jest": {
