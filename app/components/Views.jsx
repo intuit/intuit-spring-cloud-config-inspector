@@ -82,6 +82,9 @@ export default class Views extends React.Component {
    */
   formatValue(value, first=false) {
     if (typeof value == 'string') {
+      // Just remove the leading " because the span below gets the "
+      const isSecret = value.startsWith("\"") && value.endsWith("\"")
+      value = isSecret ? value.substring(1, value.length - 1) : value
       return (<span className='json-string'>"&#8288;{value}"</span>)
 
     } else if (typeof value == 'boolean') {
@@ -544,7 +547,7 @@ export default class Views extends React.Component {
         keys = keys.filter(key => {
           const value = values[key][0].value
           if (typeof value === 'string') {
-            return value.startsWith('{secret}') || value.startsWith('{cipher}')
+            return value.includes('{secret}') || value.includes('{cipher}')
           } else {
             return false
           }
