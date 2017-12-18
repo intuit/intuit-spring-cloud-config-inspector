@@ -9,18 +9,18 @@ export const GIT_REPOS_API_TOKEN = null;
 export const PROXY_CREDENTIALS = {
   manager: {
     preProd: {
-      appId: "Intuit.platform.servicesplatform.config-manager",
-      appSecret: "preprdnsajTffUKBvEEqPVo6x12EhEyRCTTV9lVk"
+      appId: "config-manager",
+      appSecret: "PVo6x12EhEyRCTTV9lVk"
     }
   },
   inspector: {
     preProd: {
-      appId: "Intuit.platform.servicesplatform.config.inspector",
-      appSecret: "preprdakyresGHM824zIZ1pQ2jdP7VbRsCWGKSzC"
+      appId: "config.inspector",
+      appSecret: "4zIZ1pQ2jdP7VbRsCWGKSzC"
     },
     prod: {
-      appId: "Intuit.platform.servicesplatform.config.inspector",
-      appSecret: "prdakyresk43bOEZ0adQWBF3hRw8vfAOxq3rWPXg"
+      appId: "inspector",
+      appSecret: "QWBF3hRw8vfAOxq3rWPXg"
     }
   }
 }
