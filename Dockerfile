@@ -6,8 +6,9 @@ ARG appname
 
 WORKDIR /app
 
-ADD . /app/
+ADD package.json /app/
+RUN npm install
 
 EXPOSE 3232
 
-RUN npm install
+ADD . /app/
