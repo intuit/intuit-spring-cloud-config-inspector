@@ -9,7 +9,7 @@ export default class App extends React.Component {
 
   render() {
     const location = window.location
-    const logoImgPath = 'https://intuit.github.io/spring-cloud-config-inspector/images/logo.png';
+    const logoImgPath = 'https://intuit.github.io/intuit-spring-cloud-config-inspector/images/logo.png';
     return (
       <div className='top'>
         <h2 style={{color: 'white'}}>
